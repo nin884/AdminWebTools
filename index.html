@@ -1,20 +1,18 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>NBA 2K25 Attribute Extractor</title>
+  <title>NBA 2K Attribute Extractor</title>
   <style>
     :root {
       --bg: #ffffff;
       --text: #000000;
       --table-bg: #f0f0f0;
     }
-
     body.dark {
       --bg: #121212;
       --text: #f0f0f0;
       --table-bg: #1e1e1e;
     }
-
     body {
       background: var(--bg);
       color: var(--text);
@@ -22,97 +20,46 @@
       padding: 20px;
       transition: background 0.3s, color 0.3s;
     }
-
     textarea {
-      width: 100%;
-      height: 200px;
-      background: var(--bg);
-      color: var(--text);
-      border: 1px solid #ccc;
-      padding: 10px;
+      width: 100%; height: 200px; background: var(--bg); color: var(--text);
+      border: 1px solid #ccc; padding: 10px;
     }
-
     table {
-      margin-top: 20px;
-      border-collapse: collapse;
-      width: 100%;
-      background: var(--bg);
+      margin-top: 20px; border-collapse: collapse; width: 100%; background: var(--bg);
     }
-
     th, td {
-      border: 1px solid #ccc;
-      padding: 8px;
+      border: 1px solid #ccc; padding: 8px;
     }
-
-    .category-row {
-      background: var(--table-bg);
-      font-weight: bold;
-    }
-
-    .player-info {
-      margin-top: 20px;
-    }
-
-    .buttons {
-      margin-top: 10px;
-    }
-
-    button {
-      margin-right: 10px;
-      padding: 8px 12px;
-      background-color: #007BFF;
-      color: white;
-      border: none;
-      cursor: pointer;
-    }
-
-    button:hover {
-      background-color: #0056b3;
-    }
-
-    .warning {
-      color: red;
-      font-weight: bold;
-      display: none;
-      margin-top: 10px;
-    }
-
-    .toggle-container {
-      float: right;
-    }
-
-    .toggle-container label {
-      cursor: pointer;
-      user-select: none;
-    }
+    .category-row { background: var(--table-bg); font-weight: bold; }
+    .player-info { margin-top: 20px; }
+    .buttons { margin-top: 10px; }
+    button { margin-right: 10px; padding: 8px 12px; background-color: #007BFF; color: white; border: none; cursor: pointer; }
+    button:hover { background-color: #0056b3; }
+    .warning { color: red; font-weight: bold; display: none; margin-top: 10px; }
+    .toggle-container { float: right; text-align: right; }
+    .version-info { font-weight: bold; margin-top: 10px; }
   </style>
 </head>
 <body>
   <div class="toggle-container">
     <label>
-      🌙 Dark Mode:
-      <input type="checkbox" id="darkModeToggle" onclick="toggleDarkMode()">
+      🌙 Dark Mode: <input type="checkbox" id="darkModeToggle" onclick="toggleDarkMode()">
     </label>
   </div>
 
-  <h2>NBA 2K25 Attribute Extractor</h2>
+  <h2>NBA 2K Attribute Extractor</h2>
   <p>Paste your full raw data below:</p>
   <textarea id="input" oninput="validateInput()"></textarea>
-
   <div class="buttons">
     <button onclick="extractAttributes()">Extract</button>
     <button onclick="copyHTMLTable()" id="copyBtn" style="display:none;">Copy Table to Clipboard</button>
     <button onclick="resetAll()">Reset</button>
   </div>
-
-  <div id="warning" class="warning">⚠️ Please paste valid NBA 2K25 data to extract.</div>
-
+  <div id="warning" class="warning">⚠️ Please paste valid NBA 2K data to extract.</div>
+  <div id="version" class="version-info"></div>
   <div id="playerInfo" class="player-info" style="display:none;"></div>
-
   <table id="resultTable" style="display:none;">
-    <thead>
-      <tr><th>Attribute</th><th>Value</th></tr>
-    </thead>
+    <thead><tr><th>Attribute</th><th>Value</th></tr></thead>
     <tbody></tbody>
   </table>
 
@@ -123,47 +70,48 @@
 
     function validateInput() {
       const input = document.getElementById("input").value.trim();
-      const warning = document.getElementById("warning");
-      warning.style.display = input.length < 10 ? "block" : "none";
+      document.getElementById("warning").style.display = input.length < 10 ? "block" : "none";
     }
 
     function extractAttributes() {
       const input = document.getElementById("input").value.trim();
       const lines = input.split("\n");
-      const warning = document.getElementById("warning");
-
-      if (input.length < 10) {
-        warning.style.display = "block";
-        return;
-      }
-
-      warning.style.display = "none";
       const tbody = document.querySelector("#resultTable tbody");
       const playerInfoDiv = document.getElementById("playerInfo");
+      const versionInfo = document.getElementById("version");
+      if (input.length < 10) return document.getElementById("warning").style.display = "block";
+
+      document.getElementById("warning").style.display = "none";
       tbody.innerHTML = "";
       playerInfoDiv.innerHTML = "";
+      versionInfo.innerHTML = "";
       let currentCategory = "";
+      let detectedVersion = "Unknown";
       let htmlTable = '<table border="1" style="border-collapse:collapse;"><thead><tr><th>Attribute</th><th>Value</th></tr></thead><tbody>';
-
-      let extraFields = {
-        "Position": "",
-        "Potential Description": "",
-        "Height": "",
-        "Wingspan": "",
-        "Weight": ""
+      const extraFields = {
+        "Position": "", "Potential Description": "", "Height": "", "Wingspan": "", "Weight": ""
       };
 
       lines.forEach(line => {
         const cleanLine = line.trim();
         const parts = cleanLine.split(/\t+/);
+        const numbersOnly = parts.filter(p => /^\d+$/.test(p));
+        const name = parts[0];
+        let value = "";
 
         if (parts.length === 1 && !cleanLine.match(/\d/)) {
-          currentCategory = parts[0];
-          tbody.innerHTML += `<tr class="category-row"><td colspan="2">${currentCategory}</td></tr>`;
-          htmlTable += `<tr style="background:#f0f0f0;font-weight:bold;"><td colspan="2">${currentCategory}</td></tr>`;
-        } else if (parts.length >= 4 && !isNaN(parseInt(parts[2]))) {
-          const name = parts[0];
-          const value = parts[2];
+          currentCategory = name;
+          tbody.innerHTML += `<tr class='category-row'><td colspan='2'>${currentCategory}</td></tr>`;
+          htmlTable += `<tr style='background:#f0f0f0;font-weight:bold;'><td colspan='2'>${currentCategory}</td></tr>`;
+        } else if (numbersOnly.length === 2) {
+          value = numbersOnly[1];
+          detectedVersion = "NBA 2K24";
+        } else if (numbersOnly.length === 3) {
+          value = numbersOnly[1];
+          detectedVersion = "NBA 2K25";
+        }
+
+        if (!isNaN(parseInt(value))) {
           tbody.innerHTML += `<tr><td>${name}</td><td>${value}</td></tr>`;
           htmlTable += `<tr><td>${name}</td><td>${value}</td></tr>`;
         }
@@ -174,22 +122,18 @@
       });
 
       htmlTable += '</tbody></table>';
+      const bullets = `<ul>
+        <li><strong>Position:</strong> ${extraFields["Position"]}</li>
+        <li><strong>Archetype:</strong> ${extraFields["Potential Description"]}</li>
+        <li><strong>Height:</strong> ${extraFields["Height"]}</li>
+        <li><strong>Wingspan:</strong> ${extraFields["Wingspan"]}</li>
+        <li><strong>Weight:</strong> ${extraFields["Weight"]}</li>
+      </ul>`;
 
-      const bullets = `
-        <ul>
-          <li><strong>Position:</strong> ${extraFields["Position"]}</li>
-          <li><strong>Archetype:</strong> ${extraFields["Potential Description"]}</li>
-          <li><strong>Height:</strong> ${extraFields["Height"]}</li>
-          <li><strong>Wingspan:</strong> ${extraFields["Wingspan"]}</li>
-          <li><strong>Weight:</strong> ${extraFields["Weight"]}</li>
-        </ul>
-      `;
-
+      versionInfo.innerHTML = `Detected Version: ${detectedVersion}`;
       playerInfoDiv.style.display = "block";
       playerInfoDiv.innerHTML = bullets;
-
-      const fullHtml = bullets + htmlTable;
-      document.getElementById("copyBtn").dataset.copyhtml = fullHtml;
+      document.getElementById("copyBtn").dataset.copyhtml = bullets + htmlTable;
       document.getElementById("resultTable").style.display = "table";
       document.getElementById("copyBtn").style.display = "inline-block";
     }
@@ -198,11 +142,8 @@
       const html = document.getElementById("copyBtn").dataset.copyhtml;
       const blob = new Blob([html], { type: "text/html" });
       const data = [new ClipboardItem({ "text/html": blob })];
-      navigator.clipboard.write(data).then(() => {
-        alert("Table copied to clipboard!");
-      }).catch(() => {
-        alert("Copy failed.");
-      });
+      navigator.clipboard.write(data).then(() => alert("Table copied to clipboard!"))
+        .catch(() => alert("Copy failed."));
     }
 
     function resetAll() {
@@ -212,6 +153,7 @@
       document.getElementById("playerInfo").style.display = "none";
       document.querySelector("#resultTable tbody").innerHTML = "";
       document.getElementById("playerInfo").innerHTML = "";
+      document.getElementById("version").innerHTML = "";
       document.getElementById("warning").style.display = "none";
     }
   </script>
