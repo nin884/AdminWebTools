@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Missing Tattoo Tracker</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+  <style>
+    body { font-family: Arial; padding: 20px; }
+    table { border-collapse: collapse; width: 100%; margin-top: 20px; }
+    th, td { border: 1px solid #ddd; padding: 8px; }
+    th { background-color: #f2f2f2; }
+    #filters { margin-top: 20px; display: none; gap: 20px; align-items: center; flex-wrap: wrap; }
+    #uploadBtn, #exportBtn { margin-top: 10px; }
+    #searchInput { margin-top: 10px; width: 200px; }
+    #vcSpent { float: right; font-weight: bold; font-size: 18px; margin-top: 10px; }
+    #successMessage { display: none; color: green; font-weight: bold; margin-top: 10px; transition: opacity 0.5s ease-in-out; }
+    #paginationControls { margin-top: 20px; display: flex; justify-content: center; gap: 5px; }
+    #paginationControls button { padding: 5px 10px; cursor: pointer; }
+  </style>
+</head>
+<body>
+
+  <h2>Missing Tattoo Tracker</h2>
+  <div id="uploadContainer">
+    <label for="csvFileInput"><strong>Select CSV File:</strong></label>
+    <input type="file" id="csvFileInput" accept=".csv" onchange="document.getElementById('uploadBtn').style.display='inline-block';" />
+    <button id="uploadBtn" style="display: none; margin-left:10px;">Upload CSV</button>
+  </div>
+
+  <div id="successMessage">✅ Success! CSV uploaded.</div>
+
+  <div id="filters">
+    <div>
+      <label><input type="checkbox" id="tattooFilter" /> Tattoos Only</label>
+    </div>
+    <div>
+      <label for="groupingFilter">Filter by Grouping:</label>
+      <select id="groupingFilter"><option value="all">All</option></select>
+    </div>
+    <div>
+      <label for="transactionFilter">Filter by Transaction:</label>
+      <select id="transactionFilter"><option value="all">All</option></select>
+    </div>
+    <div>
+      <label for="dateFilter">Filter by Date:</label>
+      <input type="date" id="dateFilter" />
+    </div>
+    <div>
+      <label for="searchInput">Search:</label>
+      <input type="text" id="searchInput" placeholder="Search..." />
+    </div>
+    <div>
+      <label for="rowsPerPage">Rows per page:</label>
+      <select id="rowsPerPage">
+        <option value="10">10</option>
+        <option value="20">20</option>
+        <option value="50" selected>50</option>
+        <option value="100">100</option>
+        <option value="all">All</option>
+      </select>
+    </div>
+    <button id="exportBtn">Export CSV</button>
+    <div id="vcSpent">VC Spent: 0</div>
+  </div>
+
+  <table id="dataTable">
+    <thead></thead>
+    <tbody></tbody>
+  </table>
+
+  <div id="paginationControls"></div>
+
+  <script>
+    let parsedData = [];
+    let sortColumn = null;
+    let sortDirection = 'asc';
+    let rawCSVFile = null;
+    let currentPage = 1;
+    let rowsPerPage = 50;
+    const keywords = ['tattoo','removal','color','tint','greyscale','letter'];
+
+    const tableHead = document.querySelector('#dataTable thead');
+    const tableBody = document.querySelector('#dataTable tbody');
+    const groupingFilter = document.getElementById('groupingFilter');
+    const transactionFilter = document.getElementById('transactionFilter');
+    const dateFilter = document.getElementById('dateFilter');
+    const searchInput = document.getElementById('searchInput');
+    const rowsPerPageSelector = document.getElementById('rowsPerPage');
+    const tattooFilter = document.getElementById('tattooFilter');
+    const uploadBtn = document.getElementById('uploadBtn');
+    const exportBtn = document.getElementById('exportBtn');
+    const filtersContainer = document.getElementById('filters');
+    const vcSpentDisplay = document.getElementById('vcSpent');
+    const successMessage = document.getElementById('successMessage');
+    const paginationControls = document.getElementById('paginationControls');
+
+    document.getElementById('csvFileInput').addEventListener('change', e => {
+      rawCSVFile = e.target.files[0];
+      if (rawCSVFile) uploadBtn.style.display = 'inline-block';
+    });
+
+    uploadBtn.addEventListener('click', () => {
+      if (!rawCSVFile) return;
+      Papa.parse(rawCSVFile, {
+        header: true,
+        skipEmptyLines: true,
+        complete: results => {
+          parsedData = results.data;
+          sortByDateDescending(parsedData);
+          populateFilters(parsedData);
+          currentPage = 1;
+          renderTable(parsedData);
+          filtersContainer.style.display = 'flex';
+          successMessage.style.display = 'block';
+          successMessage.style.opacity = '1';
+          setTimeout(() => { successMessage.style.opacity = '0'; setTimeout(() => successMessage.style.display = 'none', 500); }, 2000);
+        }
+      });
+    });
+
+    [groupingFilter, transactionFilter, dateFilter, searchInput, rowsPerPageSelector, tattooFilter].forEach(el =>
+      el.addEventListener('change', () => { currentPage = 1; renderTable(getFilteredData()); })
+    );
+    rowsPerPageSelector.addEventListener('change', () => {
+      const val = rowsPerPageSelector.value;
+      const filtered = getFilteredData();
+      rowsPerPage = val === 'all' ? filtered.length : parseInt(val, 10);
+      currentPage = 1;
+      renderTable(filtered);
+    });
+    exportBtn.addEventListener('click', exportFilteredToCSV);
+
+    function populateFilters(data) {
+      const groupings = Array.from(new Set(data.map(r => r.Grouping))).sort();
+      groupingFilter.innerHTML = '<option value="all">All</option>' + groupings.map(g => `<option value="${g}">${g}</option>`).join('');
+      const transactions = Array.from(new Set(data.map(r => r.Transaction))).sort();
+      transactionFilter.innerHTML = '<option value="all">All</option>' + transactions.map(t => `<option value="${t}">${t}</option>`).join('');
+    }
+
+    function getFilteredData() {
+      return parsedData.filter(row => {
+        const groupVal = groupingFilter.value;
+        const transVal = transactionFilter.value;
+        const dateVal = dateFilter.value;
+        const searchVal = searchInput.value.toLowerCase();
+        const tattooChecked = tattooFilter.checked;
+        const actionVal = (row.Action || '').toLowerCase();
+        const matchGroup = groupVal === 'all' || row.Grouping === groupVal;
+        const matchTrans = transVal === 'all' || row.Transaction === transVal;
+        const matchDate = !dateVal || row.Date === dateVal;
+        const matchSearch = Object.values(row).some(v => v && v.toLowerCase().includes(searchVal));
+        const matchTattoo = !tattooChecked || keywords.some(k => actionVal.includes(k));
+        return matchGroup && matchTrans && matchDate && matchSearch && matchTattoo;
+      });
+    }
+
+    function renderTable(data) {
+      tableHead.innerHTML = '';
+      tableBody.innerHTML = '';
+      if (!data.length) return;
+
+      // Build headers with sorting
+      const headers = Object.keys(data[0]).filter(h => h.toLowerCase() !== 'id');
+      const headerRow = document.createElement('tr');
+      headers.forEach(header => {
+        const th = document.createElement('th');
+        th.textContent = header;
+        th.style.cursor = 'pointer';
+        if (sortColumn === header) {
+          th.textContent += sortDirection === 'asc' ? ' ▲' : ' ▼';
+        }
+        th.addEventListener('click', () => {
+          if (sortColumn === header) {
+            sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
+          } else {
+            sortColumn = header;
+            sortDirection = 'asc';
+          }
+          currentPage = 1;
+          renderTable(getFilteredData());
+        });
+        headerRow.appendChild(th);
+      });
+      tableHead.appendChild(headerRow);
+
+      // Sort data if needed
+      let tableData = data.slice();
+      if (sortColumn) {
+        tableData.sort((a, b) => {
+          let aVal = a[sortColumn];
+          let bVal = b[sortColumn];
+          const numA = parseFloat(aVal);
+          const numB = parseFloat(bVal);
+          if (!isNaN(numA) && !isNaN(numB)) {
+            aVal = numA;
+            bVal = numB;
+          }
+          if (aVal < bVal) return sortDirection === 'asc' ? -1 : 1;
+          if (aVal > bVal) return sortDirection === 'asc' ? 1 : -1;
+          return 0;
+        });
+      }
+
+      // Pagination
+      const start = (currentPage - 1) * rowsPerPage;
+      const pageData = tableData.slice(start, start + rowsPerPage);
+      pageData.forEach(row => {
+        const tr = document.createElement('tr');
+        headers.forEach(h => {
+          const td = document.createElement('td');
+          td.textContent = row[h];
+          tr.appendChild(td);
+        });
+        tableBody.appendChild(tr);
+      });
+
+      updateVCSpent(getFilteredData());
+      renderPaginationControls(data.length);
+    }
+
+    function updateVCSpent(data) { let total = 0; data.forEach(r => { const v = parseFloat(r.VC); if (!isNaN(v) && v < 0) total += Math.abs(v); }); vcSpentDisplay.textContent = `VC Spent: ${total.toLocaleString()}`; }
+
+    function renderPaginationControls(totalRows) {
+      paginationControls.innerHTML = '';
+      const totalPages = Math.ceil(totalRows / rowsPerPage);
+      const maxShow = 7;
+      let start = Math.max(1, currentPage - Math.floor(maxShow/2));
+      let end = Math.min(totalPages, start + maxShow - 1);
+      if (end - start + 1 < maxShow) start = Math.max(1, end - maxShow + 1);
+      const prev = document.createElement('button'); prev.textContent = 'Prev'; prev.disabled = currentPage===1; prev.onclick = () => { if(currentPage>1){ currentPage--; renderTable(getFilteredData()); }}; paginationControls.appendChild(prev);
+      for (let i = start; i <= end; i++) { const btn = document.createElement('button'); btn.textContent = i; btn.disabled = i===currentPage; btn.onclick = () => { currentPage = i; renderTable(getFilteredData()); }; paginationControls.appendChild(btn); }
+      const next = document.createElement('button'); next.textContent = 'Next'; next.disabled = currentPage===totalPages; next.onclick = () => { if(currentPage<totalPages){ currentPage++; renderTable(getFilteredData()); }}; paginationControls.appendChild(next);
+    }
+
+    function sortByDateDescending(arr) { arr.sort((a,b) => new Date(b.Date) - new Date(a.Date)); }
+
+    function exportFilteredToCSV() { const data = getFilteredData(); if (!data.length) { alert('No data to export'); return; } const headers = Object.keys(data[0]).filter(h => h.toLowerCase() !== 'id'); const rows = [headers.join(',')]; data.forEach(r => rows.push(headers.map(h => `"${r[h]||''}"`).join(','))); const blob = new Blob([rows.join('\n')], { type: 'text/csv' }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = 'filtered_missing_tattoos.csv'; a.click(); URL.revokeObjectURL(url); }
+  </script>
+</body>
+</html>
