@@ -31,7 +31,7 @@
     <button onclick="showTool('validator')" id="btn-validator">Win Streak Validator</button>
   </div>
 
-  <iframe id="toolFrame" src="index.html"></iframe>
+  <iframe id="toolFrame" src="attribute-extractor.html"></iframe>
 
   <script>
     function showTool(tool) {
@@ -40,7 +40,7 @@
       const btnValidator = document.getElementById('btn-validator');
 
       if (tool === 'extractor') {
-        frame.src = 'index.html';
+        frame.src = 'attribute-extractor.html';
         btnExtractor.classList.add('active');
         btnValidator.classList.remove('active');
       } else {
