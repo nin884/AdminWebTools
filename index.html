@@ -41,6 +41,7 @@
   <div class="tabs">
     <button onclick="showTool('extractor')" id="btn-extractor" class="active">Attribute Extractor</button>
     <button onclick="showTool('validator')" id="btn-validator">Win Streak Validator</button>
+    <button onclick="showTool('tattoo')" id="btn-tattoo">Missing Tattoo Tracker</button>
   </div>
 
   <iframe id="toolFrame" src="attribute-extractor.html"></iframe>
@@ -50,12 +51,23 @@
       const frame = document.getElementById('toolFrame');
       const btnExtractor = document.getElementById('btn-extractor');
       const btnValidator = document.getElementById('btn-validator');
+      const btnTattoo = document.getElementById('btn-tattoo');
+
+      btnExtractor.classList.remove('active');
+      btnValidator.classList.remove('active');
+      btnTattoo.classList.remove('active');
 
       if (tool === 'extractor') {
         frame.src = 'attribute-extractor.html';
         btnExtractor.classList.add('active');
-        btnValidator.classList.remove('active');
-      } else {
+      } else if (tool === 'validator') {
+        frame.src = 'myteam-streak-validator.html';
+        btnValidator.classList.add('active');
+      } else if (tool === 'tattoo') {
+        frame.src = 'Missing_Tattoo.html';
+        btnTattoo.classList.add('active');
+      }
+    } else {
         frame.src = 'myteam-streak-validator.html';
         btnValidator.classList.add('active');
         btnExtractor.classList.remove('active');
