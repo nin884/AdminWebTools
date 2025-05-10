@@ -47,32 +47,27 @@
   <iframe id="toolFrame" src="attribute-extractor.html"></iframe>
 
   <script>
-    function showTool(tool) {
-      const frame = document.getElementById('toolFrame');
-      const btnExtractor = document.getElementById('btn-extractor');
-      const btnValidator = document.getElementById('btn-validator');
-      const btnTattoo = document.getElementById('btn-tattoo');
+  function showTool(tool) {
+    const frame = document.getElementById('toolFrame');
+    const btnExtractor = document.getElementById('btn-extractor');
+    const btnValidator = document.getElementById('btn-validator');
+    const btnTattoo = document.getElementById('btn-tattoo');
 
-      btnExtractor.classList.remove('active');
-      btnValidator.classList.remove('active');
-      btnTattoo.classList.remove('active');
+    btnExtractor.classList.remove('active');
+    btnValidator.classList.remove('active');
+    btnTattoo.classList.remove('active');
 
-      if (tool === 'extractor') {
-        frame.src = 'attribute-extractor.html';
-        btnExtractor.classList.add('active');
-      } else if (tool === 'validator') {
-        frame.src = 'myteam-streak-validator.html';
-        btnValidator.classList.add('active');
-      } else if (tool === 'tattoo') {
-        frame.src = 'Missing_Tattoo.html';
-        btnTattoo.classList.add('active');
-      }
-    } else {
-        frame.src = 'myteam-streak-validator.html';
-        btnValidator.classList.add('active');
-        btnExtractor.classList.remove('active');
-      }
+    if (tool === 'extractor') {
+      frame.src = 'attribute-extractor.html';
+      btnExtractor.classList.add('active');
+    } else if (tool === 'validator') {
+      frame.src = 'myteam-streak-validator.html';
+      btnValidator.classList.add('active');
+    } else if (tool === 'tattoo') {
+      frame.src = 'Missing_Tattoo.html';
+      btnTattoo.classList.add('active');
     }
-  </script>
+  }
+</script>
 </body>
 </html>
