@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>NBA 2K Tools Dashboard</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #f0f0f0; padding: 20px; }
+    .tabs { display: flex; gap: 10px; margin-bottom: 20px; }
+    .tabs button {
+      padding: 10px 20px;
+      cursor: pointer;
+      border: none;
+      background: #007BFF;
+      color: white;
+      font-weight: bold;
+    }
+    .tabs button.active {
+      background: #0056b3;
+    }
+    iframe {
+      width: 100%;
+      height: 90vh;
+      border: 1px solid #ccc;
+      background: white;
+    }
+  </style>
+</head>
+<body>
+  <h1>NBA 2K Tools Dashboard</h1>
+  <div class="tabs">
+    <button onclick="showTool('extractor')" id="btn-extractor" class="active">Attribute Extractor</button>
+    <button onclick="showTool('validator')" id="btn-validator">Win Streak Validator</button>
+  </div>
+
+  <iframe id="toolFrame" src="index.html"></iframe>
+
+  <script>
+    function showTool(tool) {
+      const frame = document.getElementById('toolFrame');
+      const btnExtractor = document.getElementById('btn-extractor');
+      const btnValidator = document.getElementById('btn-validator');
+
+      if (tool === 'extractor') {
+        frame.src = 'index.html';
+        btnExtractor.classList.add('active');
+        btnValidator.classList.remove('active');
+      } else {
+        frame.src = 'myteam-streak-validator.html';
+        btnValidator.classList.add('active');
+        btnExtractor.classList.remove('active');
+      }
+    }
+  </script>
+</body>
+</html>
