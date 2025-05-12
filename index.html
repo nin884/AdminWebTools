@@ -42,32 +42,31 @@
     <button onclick="showTool('extractor')" id="btn-extractor" class="active">Attribute Extractor</button>
     <button onclick="showTool('validator')" id="btn-validator">Win Streak Validator</button>
     <button onclick="showTool('tattoo')" id="btn-tattoo">Missing Tattoo Tracker</button>
+    <button onclick="showTool('adminAudit')" id="btn-adminAudit">AdminWeb Audit</button>
   </div>
 
   <iframe id="toolFrame" src="attribute-extractor.html"></iframe>
 
   <script>
-  function showTool(tool) {
-    const frame = document.getElementById('toolFrame');
-    const btnExtractor = document.getElementById('btn-extractor');
-    const btnValidator = document.getElementById('btn-validator');
-    const btnTattoo = document.getElementById('btn-tattoo');
+    function showTool(tool) {
+      const frame = document.getElementById('toolFrame');
+      const btns = ['btn-extractor','btn-validator','btn-tattoo','btn-adminAudit'];
+      btns.forEach(id => document.getElementById(id).classList.remove('active'));
 
-    btnExtractor.classList.remove('active');
-    btnValidator.classList.remove('active');
-    btnTattoo.classList.remove('active');
-
-    if (tool === 'extractor') {
-      frame.src = 'attribute-extractor.html';
-      btnExtractor.classList.add('active');
-    } else if (tool === 'validator') {
-      frame.src = 'myteam-streak-validator.html';
-      btnValidator.classList.add('active');
-    } else if (tool === 'tattoo') {
-      frame.src = 'Missing_Tattoo.html';
-      btnTattoo.classList.add('active');
+      if (tool === 'extractor') {
+        frame.src = 'attribute-extractor.html';
+        document.getElementById('btn-extractor').classList.add('active');
+      } else if (tool === 'validator') {
+        frame.src = 'myteam-streak-validator.html';
+        document.getElementById('btn-validator').classList.add('active');
+      } else if (tool === 'tattoo') {
+        frame.src = 'Missing_Tattoo.html';
+        document.getElementById('btn-tattoo').classList.add('active');
+      } else if (tool === 'adminAudit') {
+        frame.src = 'AdminAudit.html';
+        document.getElementById('btn-adminAudit').classList.add('active');
+      }
     }
-  }
-</script>
+  </script>
 </body>
 </html>
