@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html>
 <head>
+  <title>NBA 2K Win Streak Validator</title>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
-  <title>Winsteak Validator</title>
   <style>
-    body { font-family: 'Montserrat', sans-serif; padding: 20px; background: #ffffff; color: #333; }
+    body { font-family: 'Montserrat', sans-serif; padding: 20px; background: #f9f9f9; color: #333; }
     textarea, input[type="text"], select { width: 100%; margin-bottom: 10px; }
     textarea { height: 150px; }
     table { width: 100%; border-collapse: collapse; margin-top: 20px; }
@@ -18,20 +18,19 @@
     .entry-row { display: flex; gap: 20px; align-items: flex-start; margin-bottom: 10px; flex-wrap: wrap; }
     .entry-group { flex: 1; min-width: 30%; display: none; flex-direction: column; justify-content: flex-start; }
     .entry-group.visible { display: flex; }
-    #matchStatus { font-size: 24px; margin: 20px 0; text-align: center; font-weight: bold; }
   </style>
 </head>
 <body>
   <a name="top"></a>
-  <h2>Winsteak Validator</h2>
+  <h2>NBA 2K Win Streak Validator</h2>
 
   <div class="entry-row">
     <div class="entry-group visible" id="mainGroup" style="display: flex;">
       <label><strong>Player's Gamertag:</strong></label>
       <input type="text" id="mainUser" placeholder="Player's Gamertag">
       <textarea id="rawData" placeholder="Paste Game History Data" oninput="checkForTeamEntries()"></textarea>
-      <input type="text" id="gameModeFilter" placeholder="Game Mode Filter (optional, e.g. MyTEAM Park Co-Op)">
-      <input type="number" id="minStreak" placeholder="Minimum Streak Length (optional, e.g. 3)" min="1">
+      <input type="text" id="gameModeFilter" placeholder="Game Mode Filter (e.g. MyTEAM Park Co-Op)">
+      <input type="number" id="minStreak" placeholder="Minimum Streak Length (e.g. 3)" min="1">
     </div>
 
     <div class="entry-group" id="teamFields">
@@ -49,8 +48,6 @@
 
   <button onclick="analyzeData()">Validate</button>
   <button onclick="resetForm()">Reset</button>
-
-  <div id="matchStatus"></div>
 
   <details id="summary"><summary><strong>Streak Summary</strong></summary></details>
   <table id="dataTable" style="display:none;">
@@ -71,32 +68,18 @@
     function checkForTeamEntries() {
       const rawLines = parseGameData(document.getElementById('rawData').value);
       const show = rawLines.some(cols => parseInt(cols[6]) === 6);
-      toggleTeamFields(show);
-    }
-
-    function toggleTeamFields(show) {
       document.getElementById('teamFields').classList.toggle('visible', show);
       document.getElementById('teamFields2').classList.toggle('visible', show);
     }
 
     function resetForm() {
-      document.getElementById('mainUser').value = '';
-      document.getElementById('rawData').value = '';
-      document.getElementById('user1').value = '';
-      document.getElementById('user2').value = '';
-      document.getElementById('teamData1').value = '';
-      document.getElementById('teamData2').value = '';
-      document.getElementById('gameModeFilter').value = '';
-      document.getElementById('minStreak').value = '';
-      document.getElementById('matchStatus').innerHTML = '';
+      ['mainUser','rawData','user1','user2','teamData1','teamData2','gameModeFilter','minStreak'].forEach(id => document.getElementById(id).value = '');
       document.getElementById('summary').innerHTML = '';
       document.getElementById('dataTable').style.display = 'none';
       document.querySelector('#dataTable tbody').innerHTML = '';
-      toggleTeamFields(false);
-      // Remove extra streak tables
-      document.querySelectorAll('h3[id^="streak"], table, a[href="#top"]').forEach(el => {
-        if (!el.closest('#dataTable')) el.remove();
-      });
+      document.querySelectorAll('h3[id^="streak"]').forEach(el => el.remove());
+      document.getElementById('teamFields').classList.remove('visible');
+      document.getElementById('teamFields2').classList.remove('visible');
     }
 
     function analyzeData() {
@@ -111,20 +94,85 @@
 
       const tbody = document.querySelector('#dataTable tbody');
       tbody.innerHTML = '';
-      let streakCount = 0;
+      let winStreak = [], streakCount = 0;
 
       const filteredLines = rawLines.filter(cols => gameFilter === '' || cols[3].toLowerCase().includes(gameFilter));
+
       filteredLines.forEach((cols, idx) => {
         const won = parseInt(cols[9]);
+        const endTime = cols[7];
         const game = cols[3];
+
         const row = document.createElement('tr');
-        cols.forEach(c => row.appendChild(Object.assign(document.createElement('td'), {textContent: c})));
-        row.appendChild(document.createElement('td'));
-        // Simplified for brevity
-        tbody.appendChild(row);
+        cols.forEach(c => {
+          const td = document.createElement('td');
+          td.textContent = c;
+          row.appendChild(td);
+        });
+        const labelTd = document.createElement('td');
+        row.appendChild(labelTd);
+
+        if (won === 1 && (winStreak.length === 0 || game === winStreak[0].game)) {
+          winStreak.push({ row, endTime, game });
+        } else {
+          if (winStreak.length >= minStreak) {
+            streakCount++;
+            winStreak.forEach(entry => {
+              entry.row.classList.add('streak');
+              let label = `Streak ${streakCount} (${winStreak.length} Wins)`;
+              const match1 = teamLines1.find(t => t[7] === entry.endTime && parseInt(t[9]) === 1);
+              const match2 = teamLines2.find(t => t[7] === entry.endTime && parseInt(t[9]) === 1);
+              if (parseInt(entry.row.children[6].textContent) === 6) {
+                const teammates = [];
+                if (match1) teammates.push(user1);
+                if (match2) teammates.push(user2);
+                if (teammates.length) {
+                  entry.row.classList.add('team-match');
+                  label += ` Shared with ${teammates.join(' & ')}`;
+                }
+              }
+              entry.row.id = `streak${streakCount}`;
+              entry.row.children[10].textContent = label;
+              entry.row.children[10].classList.add('label-cell');
+              tbody.appendChild(entry.row);
+            });
+          } else {
+            winStreak.forEach(entry => tbody.appendChild(entry.row));
+          }
+          winStreak = [];
+          tbody.appendChild(row);
+        }
       });
 
+      if (winStreak.length >= minStreak) {
+        streakCount++;
+        winStreak.forEach(entry => {
+          entry.row.classList.add('streak');
+          let label = `Streak ${streakCount} (${winStreak.length} Wins)`;
+          entry.row.id = `streak${streakCount}`;
+          entry.row.children[10].textContent = label;
+          entry.row.children[10].classList.add('label-cell');
+          tbody.appendChild(entry.row);
+        });
+      }
+
       document.getElementById('dataTable').style.display = 'table';
+      document.getElementById('summary').innerHTML = '';
+
+      let curr = [], summaryHtml = '';
+      filteredLines.forEach((cols, idx) => {
+        const won = parseInt(cols[9]);
+        const date = cols[2].split(' ')[0];
+        const game = cols[3];
+        if (won === 1) curr.push({ date, game });
+        const endOf = (won !== 1 || idx === filteredLines.length - 1);
+        if (endOf && curr.length >= minStreak) {
+          summaryHtml += `<p><a href="#streak${streakCount}">On ${curr[0].date}, ${mainUser} had a ${curr.length}-game win streak in ${curr[0].game}.</a></p>`;
+        }
+        if (endOf) curr = [];
+      });
+
+      document.getElementById('summary').innerHTML = summaryHtml;
     }
   </script>
 </body>
