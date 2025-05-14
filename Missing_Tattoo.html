@@ -3,19 +3,22 @@
 <head>
   <meta charset="UTF-8">
   <title>Missing Tattoo Tracker</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
   <style>
-    body { font-family: Arial; padding: 20px; }
-    table { border-collapse: collapse; width: 100%; margin-top: 20px; }
-    th, td { border: 1px solid #ddd; padding: 8px; }
+    body { font-family: 'Montserrat', sans-serif; padding: 20px; }
+    table { border-collapse: collapse; width: 100%; margin-top: 20px; font-family: 'Montserrat', sans-serif; }
+    th, td { border: 1px solid #ddd; padding: 8px; font-family: 'Montserrat', sans-serif; }
     th { background-color: #f2f2f2; }
     #filters { margin-top: 20px; display: none; gap: 20px; align-items: center; flex-wrap: wrap; }
-    #uploadBtn, #exportBtn { margin-top: 10px; }
-    #searchInput { margin-top: 10px; width: 200px; }
-    #vcSpent { float: right; font-weight: bold; font-size: 18px; margin-top: 10px; }
-    #successMessage { display: none; color: green; font-weight: bold; margin-top: 10px; transition: opacity 0.5s ease-in-out; }
+    #uploadBtn, #exportBtn { margin-top: 10px; font-family: 'Montserrat', sans-serif; }
+    #searchInput { margin-top: 10px; width: 200px; font-family: 'Montserrat', sans-serif; }
+    #vcSpent { float: right; font-weight: bold; font-size: 18px; margin-top: 10px; font-family: 'Montserrat', sans-serif; }
+    #successMessage { display: none; color: green; font-weight: bold; margin-top: 10px; transition: opacity 0.5s ease-in-out; font-family: 'Montserrat', sans-serif; }
     #paginationControls { margin-top: 20px; display: flex; justify-content: center; gap: 5px; }
-    #paginationControls button { padding: 5px 10px; cursor: pointer; }
+    #paginationControls button { padding: 5px 10px; cursor: pointer; font-family: 'Montserrat', sans-serif; }
+    h2 { font-family: 'Montserrat', sans-serif; }
+    label, select, input { font-family: 'Montserrat', sans-serif; }
   </style>
 </head>
 <body>
@@ -227,14 +230,4 @@
       let start = Math.max(1, currentPage - Math.floor(maxShow/2));
       let end = Math.min(totalPages, start + maxShow - 1);
       if (end - start + 1 < maxShow) start = Math.max(1, end - maxShow + 1);
-      const prev = document.createElement('button'); prev.textContent = 'Prev'; prev.disabled = currentPage===1; prev.onclick = () => { if(currentPage>1){ currentPage--; renderTable(getFilteredData()); }}; paginationControls.appendChild(prev);
-      for (let i = start; i <= end; i++) { const btn = document.createElement('button'); btn.textContent = i; btn.disabled = i===currentPage; btn.onclick = () => { currentPage = i; renderTable(getFilteredData()); }; paginationControls.appendChild(btn); }
-      const next = document.createElement('button'); next.textContent = 'Next'; next.disabled = currentPage===totalPages; next.onclick = () => { if(currentPage<totalPages){ currentPage++; renderTable(getFilteredData()); }}; paginationControls.appendChild(next);
-    }
-
-    function sortByDateDescending(arr) { arr.sort((a,b) => new Date(b.Date) - new Date(a.Date)); }
-
-    function exportFilteredToCSV() { const data = getFilteredData(); if (!data.length) { alert('No data to export'); return; } const headers = Object.keys(data[0]).filter(h => h.toLowerCase() !== 'id'); const rows = [headers.join(',')]; data.forEach(r => rows.push(headers.map(h => `"${r[h]||''}"`).join(','))); const blob = new Blob([rows.join('\n')], { type: 'text/csv' }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = 'filtered_missing_tattoos.csv'; a.click(); URL.revokeObjectURL(url); }
-  </script>
-</body>
-</html>
+      const prev = document.createElement('button'); prev.textContent = 'Prev'; prev.disabled = currentPage===1; prev.onclick = () => { if(current
