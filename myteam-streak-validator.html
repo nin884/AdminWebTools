@@ -95,6 +95,7 @@
       const tbody = document.querySelector('#dataTable tbody');
       tbody.innerHTML = '';
       let winStreak = [], streakCount = 0;
+      const summaryData = [];
 
       const filteredLines = rawLines.filter(cols => gameFilter === '' || cols[3].toLowerCase().includes(gameFilter));
 
@@ -102,21 +103,18 @@
         const won = parseInt(cols[9]);
         const endTime = cols[7];
         const game = cols[3];
-
         const row = document.createElement('tr');
-        cols.forEach(c => {
-          const td = document.createElement('td');
-          td.textContent = c;
-          row.appendChild(td);
-        });
-        const labelTd = document.createElement('td');
-        row.appendChild(labelTd);
+        cols.forEach(c => { const td = document.createElement('td'); td.textContent = c; row.appendChild(td); });
+        const labelTd = document.createElement('td'); row.appendChild(labelTd);
 
         if (won === 1 && (winStreak.length === 0 || game === winStreak[0].game)) {
           winStreak.push({ row, endTime, game });
         } else {
           if (winStreak.length >= minStreak) {
             streakCount++;
+            // record summary data
+            const date = winStreak[0].row.children[2].textContent.split(' ')[0];
+            summaryData.push({ id: streakCount, date, game, length: winStreak.length });
             winStreak.forEach(entry => {
               entry.row.classList.add('streak');
               let label = `Streak ${streakCount} (${winStreak.length} Wins)`;
@@ -146,9 +144,11 @@
 
       if (winStreak.length >= minStreak) {
         streakCount++;
+        const date = winStreak[0].row.children[2].textContent.split(' ')[0];
+        summaryData.push({ id: streakCount, date, game: winStreak[0].game, length: winStreak.length });
         winStreak.forEach(entry => {
           entry.row.classList.add('streak');
-          let label = `Streak ${streakCount} (${winStreak.length} Wins)`;
+          const label = `Streak ${streakCount} (${winStreak.length} Wins)`;
           entry.row.id = `streak${streakCount}`;
           entry.row.children[10].textContent = label;
           entry.row.children[10].classList.add('label-cell');
@@ -157,22 +157,9 @@
       }
 
       document.getElementById('dataTable').style.display = 'table';
-      document.getElementById('summary').innerHTML = '';
-
-      let curr = [], summaryHtml = '';
-      filteredLines.forEach((cols, idx) => {
-        const won = parseInt(cols[9]);
-        const date = cols[2].split(' ')[0];
-        const game = cols[3];
-        if (won === 1) curr.push({ date, game });
-        const endOf = (won !== 1 || idx === filteredLines.length - 1);
-        if (endOf && curr.length >= minStreak) {
-          summaryHtml += `<p><a href="#streak${streakCount}">On ${curr[0].date}, ${mainUser} had a ${curr.length}-game win streak in ${curr[0].game}.</a></p>`;
-        }
-        if (endOf) curr = [];
-      });
-
-      document.getElementById('summary').innerHTML = summaryHtml;
+      document.getElementById('summary').innerHTML = summaryData.map(s =>
+        `<p><a href="#streak${s.id}">On ${s.date}, ${mainUser} had a ${s.length}-game win streak in ${s.game}.</a></p>`
+      ).join('');
     }
   </script>
 </body>
