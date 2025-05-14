@@ -1,9 +1,10 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>NBA 2K Win Streak Validator</title>
+  <link href=\"https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap\" rel=\"stylesheet\">
+  <title>NBA 2K Tools Dashboard</title>
   <style>
-    body { font-family: Arial, sans-serif; padding: 20px; background: #f9f9f9; color: #333; }
+    body { font-family: 'Montserrat', sans-serif; padding: 20px; background: #f9f9f9; color: #333; }
     textarea, input[type="text"], select { width: 100%; margin-bottom: 10px; }
     textarea { height: 150px; }
     table { width: 100%; border-collapse: collapse; margin-top: 20px; }
@@ -21,15 +22,15 @@
 </head>
 <body>
   <a name="top"></a>
-  <h2>NBA 2K Win Streak Validator</h2>
+  <h2>NBA 2K Tools Dashboard</h2>
 
   <div class="entry-row">
     <div class="entry-group visible" id="mainGroup" style="display: flex;">
       <label><strong>Player's Gamertag:</strong></label>
       <input type="text" id="mainUser" placeholder="Player's Gamertag">
       <textarea id="rawData" placeholder="Paste Game History Data" oninput="checkForTeamEntries()"></textarea>
-      <input type="text" id="gameModeFilter" placeholder="Game Mode Filter (e.g. MyTEAM Park Co-Op)">
-      <input type="number" id="minStreak" placeholder="Minimum Streak Length (e.g. 3)" min="1">
+      <input type="text" id="gameModeFilter" placeholder="Game Mode Filter (optional, e.g. MyTEAM Park Co-Op)">
+      <input type="number" id="minStreak" placeholder="Minimum Streak Length (optional, e.g. 3)" min="1">
     </div>
 
     <div class="entry-group" id="teamFields">
