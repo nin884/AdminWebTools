@@ -11,14 +11,53 @@
     table { border-collapse: collapse; width: 100%; margin-top: 20px; }
     th, td { border: 1px solid #ddd; padding: 8px; }
     th { background-color: #f2f2f2; cursor: pointer; }
-    #filters { margin-top: 20px; display: none; gap: 20px; align-items: center; flex-wrap: wrap; }
+    #filters {
+      margin-top: 20px;
+      display: none;
+      gap: 20px;
+      align-items: center;
+      flex-wrap: wrap;
+      justify-content: center;
+      border: 2px solid #007BFF;
+      box-shadow: 0 2px 8px rgba(0, 123, 255, 0.2);
+      padding: 16px;
+      border-radius: 8px;
+      background-color: #e9f5ff;
+    }
     input, select, button { font-family: 'Montserrat', sans-serif; }
-    #uploadBtn, #exportBtn { margin-top: 10px; }
+    #uploadBtn {
+      margin-top: 10px;
+      background-color: #007BFF;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      padding: 6px 12px;
+      cursor: pointer;
+    }
     #searchInput { margin-top: 10px; width: 200px; }
-    #vcSpent { float: right; font-weight: bold; font-size: 18px; margin-top: 10px; }
+    #vcSpent {
+      font-weight: bold;
+      font-size: 20px;
+      margin-top: 10px;
+      background-color: #FF7F00;
+      color: #fff;
+      padding: 6px 12px;
+      border-radius: 4px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      display: block;
+      text-align: center;
+      margin: 10px auto;
+    }
     #successMessage { display: none; color: green; font-weight: bold; margin-top: 10px; transition: opacity 0.5s ease-in-out; }
     #paginationControls { margin-top: 20px; display: flex; justify-content: center; gap: 5px; }
-    #paginationControls button { padding: 5px 10px; cursor: pointer; }
+    #paginationControls button {
+      padding: 5px 10px;
+      cursor: pointer;
+      background-color: #007BFF;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+    }
   </style>
 </head>
 <body>
@@ -26,29 +65,38 @@
   <h2><strong>Missing Tattoo Tracker</strong></h2>
   <div id="uploadContainer">
     <label for="csvFileInput"><strong>Select CSV File:</strong></label>
-    <input type="file" id="csvFileInput" accept=".csv" />
-    <button id="uploadBtn" style="display:none; margin-left:10px;">Upload CSV</button>
+    <input type="file" id="csvFileInput" accept=".csv" onchange="rawCSVFile=this.files[0]; uploadBtn.style.display = rawCSVFile ? 'inline-block' : 'none';" />
+    <button type="button" id="uploadBtn" style="display: none; margin-left:10px;">Upload CSV</button>
   </div>
 
   <div id="successMessage">✅ Success! CSV uploaded.</div>
 
   <div id="filters">
     <div><label><input type="checkbox" id="tattooFilter" /> Tattoos Only</label></div>
+    <div><label><input type="checkbox" id="earnedInGameFilter" /> Earned In Game ONLY</label></div>
     <div><label for="groupingFilter">Filter by Grouping:</label><select id="groupingFilter"><option value="all">All</option></select></div>
     <div><label for="transactionFilter">Filter by Transaction:</label><select id="transactionFilter"><option value="all">All</option></select></div>
-    <div><label for="dateFilter">Filter by Date:</label><input type="date" id="dateFilter" /></div>
+    <div style="display:flex; gap:10px; align-items:center;">
+      <label for="dateFilterFrom">Date From:</label>
+      <input type="date" id="dateFilterFrom" />
+      <label for="dateFilterTo">Date To:</label>
+      <input type="date" id="dateFilterTo" />
+    </div>
     <div><label for="searchInput">Search:</label><input type="text" id="searchInput" placeholder="Search..." /></div>
     <div><label for="rowsPerPage">Rows per page:</label><select id="rowsPerPage"><option value="10">10</option><option value="20">20</option><option value="50" selected>50</option><option value="100">100</option><option value="all">All</option></select></div>
-    <button id="exportBtn">Export CSV</button>
-    <div id="vcSpent">VC Spent: 0</div>
+    <div id="vcSpent">VC Spent: 0 | VC Earned: 0</div>
   </div>
 
   <table id="dataTable"><thead></thead><tbody></tbody></table>
   <div id="paginationControls"></div>
 
   <script>
-    let parsedData = [], rawCSVFile = null, currentPage = 1, rowsPerPage = 50;
-    let sortColumn = null, sortDirection = 'asc';
+    let parsedData = [];
+    let rawCSVFile = null;
+    let currentPage = 1;
+    let rowsPerPage = 50;
+    let sortColumn = null;
+    let sortDirection = 'asc';
     const keywords = ['tattoo','removal','color','tint','greyscale','letter'];
 
     const csvInput = document.getElementById('csvFileInput');
@@ -56,11 +104,12 @@
     const filtersContainer = document.getElementById('filters');
     const groupingFilter = document.getElementById('groupingFilter');
     const transactionFilter = document.getElementById('transactionFilter');
-    const dateFilter = document.getElementById('dateFilter');
+    const dateFilterFrom = document.getElementById('dateFilterFrom');
+    const dateFilterTo = document.getElementById('dateFilterTo');
     const searchInput = document.getElementById('searchInput');
     const rowsPerPageSelector = document.getElementById('rowsPerPage');
     const tattooFilter = document.getElementById('tattooFilter');
-    const exportBtn = document.getElementById('exportBtn');
+    const earnedInGameFilter = document.getElementById('earnedInGameFilter');
     const successMessage = document.getElementById('successMessage');
     const tableHead = document.querySelector('#dataTable thead');
     const tableBody = document.querySelector('#dataTable tbody');
@@ -72,63 +121,152 @@
       uploadBtn.style.display = rawCSVFile ? 'inline-block' : 'none';
     });
 
-    uploadBtn.onclick = () => {
+    function uploadCSV() {
       if (!rawCSVFile) return;
-      Papa.parse(rawCSVFile, { header:true, skipEmptyLines:true,
+      Papa.parse(rawCSVFile, {
+        header: true,
+        skipEmptyLines: true,
         complete: results => {
           parsedData = results.data;
           sortByDateDescending(parsedData);
           populateFilters(parsedData);
-          currentPage=1;
-          renderTable(parsedData);
-          filtersContainer.style.display='flex';
+          currentPage = 1;
+          renderTable(getFilteredData());
+          filtersContainer.style.display = 'flex';
           showSuccess();
         }
       });
-    };
+    }
+    uploadBtn.addEventListener('click', uploadCSV);
 
-    function showSuccess(){ successMessage.style.display='block'; successMessage.style.opacity='1'; setTimeout(()=>{successMessage.style.opacity='0'; setTimeout(()=>successMessage.style.display='none',500);},2000); }
-
-    [groupingFilter,transactionFilter,dateFilter,searchInput,rowsPerPageSelector,tattooFilter].forEach(el=>el.onchange=()=>{currentPage=1; renderTable(getFilteredData());});
-    rowsPerPageSelector.onchange=()=>{const val=rowsPerPageSelector.value, filt=getFilteredData(); rowsPerPage=val==='all'?filt.length:parseInt(val,10); currentPage=1; renderTable(filt);};
-    exportBtn.onclick=exportFilteredToCSV;
-
-    function populateFilters(data){
-      groupingFilter.innerHTML='<option value="all">All</option>'+Array.from(new Set(data.map(r=>r.Grouping))).sort().map(g=>`<option value="${g}">${g}</option>`).join('');
-      transactionFilter.innerHTML='<option value="all">All</option>'+Array.from(new Set(data.map(r=>r.Transaction))).sort().map(t=>`<option value="${t}">${t}</option>`).join('');
+    function showSuccess() {
+      successMessage.style.display = 'block';
+      successMessage.style.opacity = '1';
+      setTimeout(() => {
+        successMessage.style.opacity = '0';
+        setTimeout(() => successMessage.style.display = 'none', 500);
+      }, 2000);
     }
 
-    function getFilteredData(){
-      const gv=groupingFilter.value, tv=transactionFilter.value, dv=dateFilter.value, sv=searchInput.value.toLowerCase(), tf=tattooFilter.checked;
-      return parsedData.filter(row=>{
-        const matchDate = !dv || (()=>{const d=new Date(row.Date); return !isNaN(d)&&d.toISOString().slice(0,10)===dv;})();
-        return (gv==='all'||row.Grouping===gv)
-            &&(tv==='all'||row.Transaction===tv)
-            && matchDate
-            && Object.values(row).some(v=>v&&v.toLowerCase().includes(sv))
-            &&(!tf||keywords.some(k=>row.Action&&row.Action.toLowerCase().includes(k)));
+    [groupingFilter, transactionFilter, dateFilterFrom, dateFilterTo, searchInput, rowsPerPageSelector, tattooFilter, earnedInGameFilter]
+      .forEach(el => el.onchange = () => { currentPage = 1; renderTable(getFilteredData()); });
+
+    rowsPerPageSelector.onchange = () => {
+      const val = rowsPerPageSelector.value;
+      const filt = getFilteredData();
+      rowsPerPage = val === 'all' ? filt.length : parseInt(val, 10);
+      currentPage = 1;
+      renderTable(filt);
+    };
+
+    function populateFilters(data) {
+      groupingFilter.innerHTML = '<option value="all">All</option>' +
+        Array.from(new Set(data.map(r => r.Grouping))).sort()
+          .map(g => `<option value="${g}">${g}</option>`).join('');
+      transactionFilter.innerHTML = '<option value="all">All</option>' +
+        Array.from(new Set(data.map(r => r.Transaction))).sort()
+          .map(t => `<option value="${t}">${t}</option>`).join('');
+    }
+
+    function getFilteredData() {
+      const eig = earnedInGameFilter.checked;
+      const gv = groupingFilter.value;
+      const tv = transactionFilter.value;
+      const fromVal = dateFilterFrom.value;
+      const toVal = dateFilterTo.value;
+      const sv = searchInput.value.toLowerCase();
+      const tf = tattooFilter.checked;
+      return parsedData.filter(row => {
+        const rvDate = new Date(row.Date);
+        const validDate = (!fromVal || rvDate >= new Date(fromVal)) && (!toVal || rvDate <= new Date(toVal));
+        const av = (row.Action || '').toLowerCase();
+        return (gv === 'all' || row.Grouping === gv)
+            && (tv === 'all' || row.Transaction === tv)
+            && validDate
+            && Object.values(row).some(v => v && v.toLowerCase().includes(sv))
+            && (!tf || keywords.some(k => av.includes(k)))
+            && (!eig || (av !== 'vc_voucher'));
       });
     }
 
-    function renderTable(data){
-      tableHead.innerHTML=''; tableBody.innerHTML=''; if(!data.length) return;
-      const headers=Object.keys(data[0]).filter(h=>h.toLowerCase()!=='id');
-      const trh=document.createElement('tr'); headers.forEach(h=>{const th=document.createElement('th'); th.textContent=h+(sortColumn===h?(sortDirection==='asc'?' ▲':' ▼'): ''); th.onclick=()=>toggleSort(h); trh.appendChild(th);}); tableHead.appendChild(trh);
-      let tbl=data.slice(); if(sortColumn) tbl.sort((a,b)=>compare(a[sortColumn],b[sortColumn]));
-      const start=(currentPage-1)*rowsPerPage; const pageData=tbl.slice(start,start+rowsPerPage);
-      pageData.forEach(r=>{const tr=document.createElement('tr'); headers.forEach(h=>{const td=document.createElement('td'); if(h==='Date'){const d=new Date(r.Date); td.textContent=isNaN(d)?r.Date:`${d.getMonth()+1}/${d.getDate()}/${d.getFullYear()}`;} else td.textContent=r[h]; tr.appendChild(td);} ); tableBody.appendChild(tr);});
-      updateVCSpent(getFilteredData()); renderPaginationControls(tbl.length);
+    function renderTable(data) {
+      tableHead.innerHTML = '';
+      tableBody.innerHTML = '';
+      if (!data.length) return;
+      const headers = Object.keys(data[0]).filter(h => h.toLowerCase() !== 'id');
+      const hr = document.createElement('tr');
+      headers.forEach(h => {
+        const th = document.createElement('th');
+        th.textContent = h + (sortColumn === h ? (sortDirection === 'asc' ? ' ▲' : ' ▼') : '');
+        th.onclick = () => toggleSort(h);
+        hr.appendChild(th);
+      });
+      tableHead.appendChild(hr);
+      let tbl = data.slice();
+      if (sortColumn) tbl.sort((a, b) => compare(a[sortColumn], b[sortColumn]));
+      const start = (currentPage - 1) * rowsPerPage;
+      const page = tbl.slice(start, start + rowsPerPage);
+      page.forEach(r => {
+        const tr = document.createElement('tr');
+        headers.forEach(h => {
+          const td = document.createElement('td');
+          if (h === 'Date') {
+            const d = new Date(r.Date);
+            td.textContent = isNaN(d) ? r.Date : `${d.getMonth()+1}/${d.getDate()}/${d.getFullYear()}`;
+          } else td.textContent = r[h];
+          tr.appendChild(td);
+        });
+        tableBody.appendChild(tr);
+      });
+      updateVCSpent(getFilteredData());
+      renderPaginationControls(tbl.length);
     }
 
-    function toggleSort(col){if(sortColumn===col) sortDirection=sortDirection==='asc'?'desc':'asc'; else{sortColumn=col;sortDirection='asc';} currentPage=1; renderTable(getFilteredData());}
-    function compare(a,b){const na=parseFloat(a),nb=parseFloat(b); if(!isNaN(na)&&!isNaN(nb)){a=na;b=nb;} return(a<b?-1:a>b?1:0)*(sortDirection==='asc'?1:-1);}    
+    function toggleSort(col) {
+      if (sortColumn === col) sortDirection = sortDirection === 'asc' ? 'desc' : 'asc'; else { sortColumn = col; sortDirection = 'asc'; }
+      currentPage = 1;
+      renderTable(getFilteredData());
+    }
 
-    function updateVCSpent(data){const total=data.reduce((s,r)=>{const v=parseFloat(r.VC); return s+ (isNaN(v)?0:Math.abs(v<0?v:0));},0); vcSpentDisplay.textContent=`VC Spent: ${total.toLocaleString()}`;}
+    function compare(a, b) {
+      const na = parseFloat(a), nb = parseFloat(b);
+      if (!isNaN(na) && !isNaN(nb)) { a = na; b = nb; }
+      return (a < b ? -1 : a > b ? 1 : 0) * (sortDirection === 'asc' ? 1 : -1);
+    }
 
-    function renderPaginationControls(totalRows){paginationControls.innerHTML=''; const totalPages=Math.ceil(totalRows/rowsPerPage); const maxShow=7; let start=Math.max(1,currentPage-Math.floor(maxShow/2)); let end=Math.min(totalPages,start+maxShow-1); if(end-start+1<maxShow) start=Math.max(1,end-maxShow+1); const prev=document.createElement('button'); prev.textContent='Prev'; prev.disabled=currentPage===1; prev.onclick=()=>{if(currentPage>1){currentPage--;renderTable(getFilteredData());}}; paginationControls.appendChild(prev); for(let i=start;i<=end;i++){const btn=document.createElement('button'); btn.textContent=i; btn.disabled=i===currentPage; btn.onclick=()=>{currentPage=i;renderTable(getFilteredData());}; paginationControls.appendChild(btn);} const next=document.createElement('button'); next.textContent='Next'; next.disabled=currentPage===totalPages; next.onclick=()=>{if(currentPage<totalPages){currentPage++;renderTable(getFilteredData());}}; paginationControls.appendChild(next);}
+    function updateVCSpent(data) {
+      let spent = 0, earned = 0;
+      data.forEach(r => {
+        const v = parseFloat(r.VC);
+        if (!isNaN(v)) {
+          if (r.Transaction && r.Transaction.toLowerCase() === 'credit') earned += v;
+          else if (v < 0) spent += Math.abs(v);
+        }
+      });
+      vcSpentDisplay.textContent = `VC Spent: ${spent.toLocaleString()} | VC Earned: ${earned.toLocaleString()}`;
+    }
 
-    function sortByDateDescending(arr){arr.sort((a,b)=>new Date(b.Date)-new Date(a.Date));}
-    function exportFilteredToCSV(){const data=getFilteredData(); if(!data.length) return alert('No data to export'); const headers=Object.keys(data[0]).filter(h=>h.toLowerCase()!=='id'); const rows=[headers.join(',')]; data.forEach(r=>rows.push(headers.map(h=>`"${r[h]||''}"`).join(','))); const blob=new Blob([rows.join('\n')],{type:'text/csv'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download='filtered_missing_tattoos.csv'; a.click(); URL.revokeObjectURL(url);}  
+    function renderPaginationControls(totalRows) {
+      paginationControls.innerHTML = '';
+      const totalPages = Math.ceil(totalRows / rowsPerPage);
+      const maxShow = 7;
+      let start = Math.max(1, currentPage - Math.floor(maxShow/2));
+      let end = Math.min(totalPages, start + maxShow - 1);
+      if (end - start + 1 < maxShow) start = Math.max(1, end - maxShow + 1);
+      const prev = document.createElement('button'); prev.textContent = 'Prev'; prev.disabled = currentPage===1;
+      prev.onclick = () => { if (currentPage>1) { currentPage--; renderTable(getFilteredData()); }};
+      paginationControls.appendChild(prev);
+      for (let i = start; i <= end; i++) {
+        const btn = document.createElement('button'); btn.textContent = i; btn.disabled = i===currentPage;
+        btn.onclick = () => { currentPage = i; renderTable(getFilteredData()); };
+        paginationControls.appendChild(btn);
+      }
+      const next = document.createElement('button'); next.textContent = 'Next'; next.disabled = currentPage===totalPages;
+      next.onclick = () => { if (currentPage<totalPages) { currentPage++; renderTable(getFilteredData()); }};
+      paginationControls.appendChild(next);
+    }
+
+    function sortByDateDescending(arr) { arr.sort((a,b) => new Date(b.Date) - new Date(a.Date)); }
   </script>
 </body>
 </html>
