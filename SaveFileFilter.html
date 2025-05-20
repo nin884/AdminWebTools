@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Save File Filter</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Montserrat', sans-serif; padding: 20px; }
+    h2 { font-size: 1.5em; margin-bottom: 15px; }
+    textarea, table, button, input { font-family: inherit; }
+    textarea { width: 100%; height: 150px; margin-bottom: 10px; }
+    .filters {
+      margin: 15px 0;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      padding: 12px;
+      border: 2px solid #007BFF;
+      border-radius: 8px;
+      background: #f0f8ff;
+    }
+    .filter-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 10px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      background: #fff;
+    }
+    .filter-group span { font-weight: 600; }
+    .toggle-btn {
+      padding: 6px 12px;
+      border: 1px solid #007BFF;
+      background: #fff;
+      cursor: pointer;
+      border-radius: 4px;
+      transition: background 0.2s, color 0.2s;
+    }
+    .toggle-btn.active {
+      background: #007BFF;
+      color: #fff;
+      border-color: #007BFF;
+    }
+    .toggle-btn:hover { background: #e6f0ff; }
+    #copyButton { margin-bottom: 15px; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+    th.sortable { cursor: pointer; }
+    th.sortable:hover { background: #f0f0f0; }
+  </style>
+</head>
+<body>
+  <h2>Save File Filter</h2>
+  <textarea id="dataInput" placeholder="Paste your data here, including header row"></textarea>
+  <button id="loadButton">Load Data</button>
+
+  <div class="filters">
+    <div class="filter-group">
+      <span>Position:</span>
+      <span id="positionToggles"></span>
+    </div>
+    <div class="filter-group">
+      <label><input type="checkbox" id="ovrCheckbox" /> Only OVR &gt; 65</label>
+    </div>
+  </div>
+
+  <button id="copyButton">Copy Filtered Data</button>
+
+  <table id="dataTable">
+    <thead><tr id="tableHeader"></tr></thead>
+    <tbody></tbody>
+  </table>
+
+  <script>
+    let allData = [];
+    let sortState = { column: null, asc: true };
+    let selectedPosition = '';
+
+    function parseCSV(text) {
+      return text.trim().split('\n').map(line => line.split(/\t|\s{2,}/));
+    }
+
+    function loadData() {
+      const text = document.getElementById('dataInput').value;
+      const rows = parseCSV(text);
+      if (!rows.length) return;
+      const rawHeaders = rows[0].map(h => h.trim());
+      const headersRaw = rawHeaders.filter(h => !['VC Value', 'Actions', 'Slot'].includes(h));
+      const headers = headersRaw.map(h => h === 'ID' ? 'Build Number' : h);
+      allData = rows.slice(1).map(r => {
+        const obj = {};
+        headersRaw.forEach((rawH, i) => {
+          obj[headers[i]] = (r[rawHeaders.indexOf(rawH)] || '').trim();
+        });
+        return obj;
+      });
+      populateFilters();
+      renderTable(allData);
+    }
+
+    function populateFilters() {
+      const posSet = new Set(allData.map(item => item['Position']));
+      const container = document.getElementById('positionToggles');
+      container.innerHTML = '';
+      posSet.forEach(pos => {
+        const btn = document.createElement('button');
+        btn.textContent = pos;
+        btn.className = 'toggle-btn';
+        btn.onclick = () => {
+          selectedPosition = (selectedPosition === pos ? '' : pos);
+          Array.from(container.children).forEach(b => b.classList.toggle('active', b.textContent === selectedPosition));
+          applyFilters();
+        };
+        container.appendChild(btn);
+      });
+      document.getElementById('ovrCheckbox').onchange = applyFilters;
+    }
+
+    function applyFilters() {
+      let filtered = allData;
+      if (selectedPosition) filtered = filtered.filter(item => item['Position'] === selectedPosition);
+      if (document.getElementById('ovrCheckbox').checked) filtered = filtered.filter(item => parseFloat(item['OVR']) > 65);
+      renderTable(filtered);
+    }
+
+    function renderTable(data) {
+      const thead = document.getElementById('tableHeader');
+      const tbody = document.querySelector('#dataTable tbody');
+      thead.innerHTML = '';
+      tbody.innerHTML = '';
+      if (!data.length) return;
+      const cols = Object.keys(data[0]);
+      cols.forEach(col => {
+        const th = document.createElement('th');
+        th.textContent = col + ((sortState.column === col) ? (sortState.asc ? ' ▲' : ' ▼') : '');
+        th.classList.add('sortable');
+        th.onclick = () => {
+          sortState = { column: col, asc: sortState.column === col ? !sortState.asc : true };
+          data.sort((a, b) => {
+            const vA = isNaN(a[col]) ? a[col] : parseFloat(a[col]);
+            const vB = isNaN(b[col]) ? b[col] : parseFloat(b[col]);
+            return (vA < vB ? -1 : vA > vB ? 1 : 0) * (sortState.asc ? 1 : -1);
+          });
+          renderTable(data);
+        };
+        thead.appendChild(th);
+      });
+      data.forEach(row => {
+        const tr = document.createElement('tr');
+        cols.forEach(col => {
+          const td = document.createElement('td'); td.textContent = row[col]; tr.appendChild(td);
+        });
+        tbody.appendChild(tr);
+      });
+    }
+
+    function fallbackCopyText(text) {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      document.body.appendChild(ta);
+      ta.select();
+      try {
+        document.execCommand('copy');
+        alert('Filtered data copied to clipboard');
+      } catch (e) {
+        console.error('Fallback copy failed', e);
+        alert('Copy failed');
+      }
+      document.body.removeChild(ta);
+    }
+
+    function copyFilteredData() {
+      const ths = Array.from(document.querySelectorAll('#dataTable thead th'))
+                      .map(th => th.textContent.replace(/ ▲| ▼/, '').trim());
+      const idxOVR = ths.indexOf('OVR');
+      const idxPos = ths.indexOf('Position');
+      const idxLast = ths.indexOf('Last Updated');
+      const lines = [];
+      document.querySelectorAll('#dataTable tbody tr').forEach(tr => {
+        const tds = Array.from(tr.children).map(td => td.textContent.trim());
+        const ovr = tds[idxOVR];
+        const pos = tds[idxPos];
+        const last = tds[idxLast];
+        lines.push(`• ${ovr} OVR ${pos} - Last Updated ${last}`);
+      });
+      if (!lines.length) return alert('No data to copy');
+      const text = lines.join('\n');
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(() => alert('Copied formatted data')).catch(() => fallbackCopyText(text));
+      } else {
+        fallbackCopyText(text);
+      }
+    }
+
+    document.getElementById('loadButton').addEventListener('click', loadData);
+    document.getElementById('copyButton').addEventListener('click', copyFilteredData);
+  </script>
+</body>
+</html>
