@@ -53,98 +53,149 @@
         let major = 0, minor = 0;
         const table = discrepancyContainer.querySelector('table');
         if (!table) { majorCountEl.textContent = '0'; minorCountEl.textContent = '0'; return; }
-        const rows = table.querySelectorAll('tbody tr');
-        rows.forEach(r => {
-          const type = r.cells[headers.length].textContent;
-          if (type.includes('Major')) major++; else if (type.includes('Minor')) minor++;
+        table.querySelectorAll('tbody tr').forEach(r => {
+          const typeCell = r.cells[headers.length];
+          if (typeCell && typeCell.textContent.includes('Major')) major++;
+          else if (typeCell && typeCell.textContent.includes('Minor')) minor++;
         });
         majorCountEl.textContent = major;
         minorCountEl.textContent = minor;
       }
 
-      textarea.addEventListener('paste', e => { e.preventDefault(); textarea.value = (e.clipboardData||window.clipboardData).getData('text'); });
+      textarea.addEventListener('paste', e => { e.preventDefault(); textarea.value = e.clipboardData.getData('text'); });
       textarea.addEventListener('dragover', e => e.preventDefault());
       textarea.addEventListener('drop', e => {
-        e.preventDefault(); const dt=e.dataTransfer; const text=dt.getData('text');
-        if(text) textarea.value=text; else if(dt.files.length){ const reader=new FileReader(); reader.onload=ev=>textarea.value=ev.target.result; reader.readAsText(dt.files[0]); }
+        e.preventDefault();
+        const dt = e.dataTransfer;
+        const text = dt.getData('text');
+        if (text) textarea.value = text;
+        else if (dt.files.length) {
+          const reader = new FileReader();
+          reader.onload = ev => textarea.value = ev.target.result;
+          reader.readAsText(dt.files[0]);
+        }
       });
 
       parseBtn.addEventListener('click', () => {
-        const raw = textarea.value.trim(); if(!raw){ alert('Please provide log data'); return; }
-        tableContainer.innerHTML = ''; discrepancyContainer.innerHTML = '';
-        const lines = raw.split('\n').filter(l => l.trim()); headers = lines[0].split(/\t/);
+        const raw = textarea.value.trim();
+        if (!raw) { alert('Please provide log data'); return; }
+        tableContainer.innerHTML = '';
+        discrepancyContainer.innerHTML = '';
+
+        const lines = raw.split('\n').filter(l => l.trim());
+        headers = lines[0].split(/\t/);
         const dataRows = lines.slice(1).map(l => l.split(/\t/));
 
         const table = document.createElement('table');
         const thead = document.createElement('thead');
-        const hdrRow = document.createElement('tr');
-        headers.forEach(h => { const th = document.createElement('th'); th.textContent = h; hdrRow.appendChild(th); });
-        ['Validated','Discrepancy'].forEach(h => { const th = document.createElement('th'); th.textContent = h; hdrRow.appendChild(th); });
-        thead.appendChild(hdrRow); table.appendChild(thead);
+        const headerRow = document.createElement('tr');
+        [...headers, 'Validated', 'Discrepancy'].forEach(h => {
+          const th = document.createElement('th'); th.textContent = h; headerRow.appendChild(th);
+        });
+        thead.appendChild(headerRow);
+        table.appendChild(thead);
 
         const tbody = document.createElement('tbody');
         dataRows.forEach(cells => {
           const tr = document.createElement('tr');
-          headers.forEach((h,i) => {
-            const td = document.createElement('td'); const val = cells[i]||'';
-            if(h==='CS Page'&&val){
-              const puid=cells[headers.indexOf('Puid')]; const env=cells[headers.indexOf('Environment')]; const title=cells[headers.indexOf('Title & Year')];
-              const url = `https://admin.nba2k.com/${env}/${title}/customer_service/user/edit/${puid}?titleid=61476&tab=notes`;
-              const a = document.createElement('a'); a.textContent=val; a.href=url; a.target='_blank'; td.appendChild(a);
-            } else { td.textContent = val; }
+          headers.forEach((h, i) => {
+            const td = document.createElement('td');
+            const val = cells[i] || '';
+            if (h === 'CS Page' && val) {
+              const puid = cells[headers.indexOf('Puid')];
+              const env = cells[headers.indexOf('Environment')];
+              const title = cells[headers.indexOf('Title & Year')];
+              const url = 'https://admin.nba2k.com/' + env + '/' + title + '/customer_service/user/edit/' + puid + '?titleid=61476&tab=notes';
+              const a = document.createElement('a');
+              a.textContent = val;
+              a.href = '#';
+              a.addEventListener('click', () => window.open(url, '_blank', 'noopener,noreferrer,width=800,height=600'));
+              td.appendChild(a);
+            } else {
+              td.textContent = val;
+            }
             tr.appendChild(td);
           });
-          const vtd = document.createElement('td'); const vbtn = document.createElement('button'); vbtn.textContent='Validated';
-          vbtn.addEventListener('click',()=>{tr.remove();updateCounts();}); vtd.appendChild(vbtn); tr.appendChild(vtd);
-          const dtd = document.createElement('td'); const dbtn=document.createElement('button'); dbtn.textContent='Discrepancy';
-          dbtn.addEventListener('click',()=>showDiscrepancyForm(tr,cells)); dtd.appendChild(dbtn); tr.appendChild(dtd);
+          const validTd = document.createElement('td');
+          const validBtn = document.createElement('button'); validBtn.textContent = 'Validated';
+          validBtn.addEventListener('click', () => { tr.remove(); updateCounts(); });
+          validTd.appendChild(validBtn); tr.appendChild(validTd);
+
+          const discTd = document.createElement('td');
+          const discBtn = document.createElement('button'); discBtn.textContent = 'Discrepancy';
+          discBtn.addEventListener('click', () => showDiscrepancyForm(tr, cells));
+          discTd.appendChild(discBtn); tr.appendChild(discTd);
+
           tbody.appendChild(tr);
         });
-        table.appendChild(tbody); tableContainer.appendChild(table); updateCounts();
+        table.appendChild(tbody);
+        tableContainer.appendChild(table);
+        updateCounts();
       });
 
-      function showDiscrepancyForm(row,cells){
-        const cell=row.querySelector('td:last-child'); if(cell.querySelector('select'))return;
-        const sel=document.createElement('select'); discrepancyOptions.forEach(opt=>{const o=document.createElement('option');o.value=opt;o.textContent=opt;sel.appendChild(o);});
-        const add=document.createElement('button'); add.textContent='Add'; cell.appendChild(sel); cell.appendChild(add);
-        add.addEventListener('click',()=>{ const type=sel.value; if(!type){alert('Select discrepancy type');return;} createDiscrepancyRow(cells,type+' Discrepancy'); row.remove(); updateCounts(); });
+      function showDiscrepancyForm(row, cells) {
+        const lastTd = row.querySelector('td:last-child');
+        if (lastTd.querySelector('select')) return;
+        const sel = document.createElement('select');
+        discrepancyOptions.forEach(opt => sel.appendChild(new Option(opt, opt)));
+        const addBtn = document.createElement('button'); addBtn.textContent = 'Add';
+        lastTd.append(sel, addBtn);
+        addBtn.addEventListener('click', () => {
+          const type = sel.value;
+          if (!type) return alert('Select discrepancy type');
+          createDiscrepancyRow(cells, type + ' Discrepancy');
+          row.remove(); updateCounts();
+        });
       }
 
-      function createDiscrepancyRow(cells,typeText){
-        let dtable=discrepancyContainer.querySelector('table'); if(!dtable){
-          dtable=document.createElement('table'); const dthead=document.createElement('thead'); const hdr=document.createElement('tr');
-          headers.forEach(h=>{const th=document.createElement('th'); th.textContent=h; hdr.appendChild(th);});
-          ['Type','Ticket #','Issue','Agent Location','Other Comments'].forEach(h=>{const th=document.createElement('th');th.textContent=h;hdr.appendChild(th);});
-          dthead.appendChild(hdr); dtable.appendChild(dthead); const dtbody=document.createElement('tbody'); dtable.appendChild(dtbody); discrepancyContainer.appendChild(dtable);
+      function createDiscrepancyRow(cells, typeText) {
+        let dtable = discrepancyContainer.querySelector('table');
+        if (!dtable) {
+          dtable = document.createElement('table');
+          const dhead = document.createElement('thead');
+          const hdrRow = document.createElement('tr');
+          [...headers, 'Type', 'Ticket #', 'Issue', 'Agent Location', 'Other Comments'].forEach(h => {
+            const th = document.createElement('th'); th.textContent = h; hdrRow.appendChild(th);
+          });
+          dhead.appendChild(hdrRow); dtable.appendChild(dhead);
+          dtable.appendChild(document.createElement('tbody'));
+          discrepancyContainer.appendChild(dtable);
         }
-        const dtbody=dtable.querySelector('tbody'); const tr=document.createElement('tr');
-        headers.forEach((h,i)=>{const td=document.createElement('td');td.textContent=cells[i]||'';tr.appendChild(td);});
-        const tdType=document.createElement('td'); tdType.textContent=typeText; tr.appendChild(tdType);
-        const tdTicket=document.createElement('td'); const inTicket=document.createElement('input'); inTicket.placeholder='Ticket #'; tdTicket.appendChild(inTicket); tr.appendChild(tdTicket);
-        const tdIssue=document.createElement('td'); const selIssue=document.createElement('select'); issueOptions.forEach(opt=>{const o=document.createElement('option');o.value=opt;o.textContent=opt;selIssue.appendChild(o);}); tdIssue.appendChild(selIssue); tr.appendChild(tdIssue);
-        const tdLoc=document.createElement('td'); const selLoc=document.createElement('select'); locationOptions.forEach(opt=>{const o=document.createElement('option');o.value=opt;o.textContent=opt;selLoc.appendChild(o);}); tdLoc.appendChild(selLoc); tr.appendChild(tdLoc);
-        const tdComm=document.createElement('td'); const inComm=document.createElement('input'); inComm.placeholder='Comments'; tdComm.appendChild(inComm); tr.appendChild(tdComm);
+        const dtbody = dtable.querySelector('tbody');
+        const tr = document.createElement('tr');
+        headers.forEach((h, i) => { const td = document.createElement('td'); td.textContent = cells[i] || ''; tr.appendChild(td); });
+        const tdType = document.createElement('td'); tdType.textContent = typeText; tr.appendChild(tdType);
+        const tdTicket = document.createElement('td'); const inTicket = document.createElement('input'); inTicket.placeholder = 'Ticket #'; tdTicket.appendChild(inTicket); tr.appendChild(tdTicket);
+        const tdIssue = document.createElement('td'); const selIssue = document.createElement('select'); issueOptions.forEach(opt => selIssue.appendChild(new Option(opt, opt))); tdIssue.appendChild(selIssue); tr.appendChild(tdIssue);
+        const tdLoc = document.createElement('td'); const selLoc = document.createElement('select'); locationOptions.forEach(opt => selLoc.appendChild(new Option(opt, opt))); tdLoc.appendChild(selLoc); tr.appendChild(tdLoc);
+        const tdComm = document.createElement('td'); const inComm = document.createElement('input'); inComm.placeholder = 'Comments'; tdComm.appendChild(inComm); tr.appendChild(tdComm);
         dtbody.appendChild(tr);
       }
 
-      exportBtn.addEventListener('click',()=>{
-        const table=discrepancyContainer.querySelector('table'); if(!table){ alert('No discrepancies to export'); return; }
-        const rows=Array.from(table.querySelectorAll('tbody tr'));
-        const csv=[];
-        csv.push(['Date','Your Name','Agent Name','Agent Location','Major/Minor Discrepancy','Ticket Number','Issue','Other Comments'].join(','));
-        const date=new Date().toISOString().split('T')[0];
-        rows.forEach(tr=>{
-          const tds=tr.querySelectorAll('td');
-          const agentName=tds[3].textContent;
-          const type=tds[headers.length].textContent;
-          const ticket=tds[headers.length+1].querySelector('input').value;
-          const issue=tds[headers:length+2].querySelector('select').value;
-          const loc=tds[headers:length+3].querySelector('select').value;
-          const comm=tds[headers:length+4].querySelector('input').value;
-          csv.push([date,'',`"${agentName}"`,`"${loc}"`,`"${type}"`,`"${ticket}"`,`"${issue}"`,`"${comm}"`].join(','));
+      exportBtn.addEventListener('click', () => {
+        const table = discrepancyContainer.querySelector('table');
+        if (!table) { alert('No discrepancies to export'); return; }
+        const rows = Array.from(table.querySelectorAll('tbody tr'));
+        const csvRows = [];
+        csvRows.push(['Date','Your Name','Agent Name','Agent Location','Major/Minor Discrepancy','Ticket Number','Issue','Other Comments'].join(','));
+        const date = new Date().toISOString().split('T')[0];
+        rows.forEach(tr => {
+          const cols = Array.from(tr.children);
+          const agent = cols[3].textContent;
+          const type = cols[headers.length].textContent;
+          const ticket = cols[headers.length+1].querySelector('input').value;
+          const issue = cols[headers.length+2].querySelector('select').value;
+          const loc = cols[headers.length+3].querySelector('select').value;
+          const comm = cols[headers.length+4].querySelector('input').value;
+          csvRows.push([date,'',`"${agent}"`,`"${loc}"`,`"${type}"`,ticket,issue,comm].join(','));
         });
-        const blob=new Blob([csv.join('\n')],{type:'text/csv;charset=utf-8;'});
-        const link=document.create.Element('a'); link.href=URL.createObjectURL(blob); link.download='discrepancies.csv'; document.body.appendChild(link); link.click(); document.body.removeChild(link);
+        const blob = new Blob([csvRows.join('\n')], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = 'discrepancies.csv';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
       });
     });
   </script>
