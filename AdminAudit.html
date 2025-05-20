@@ -7,12 +7,12 @@
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
   <style>
     body { font-family: 'Montserrat', sans-serif; margin: 20px; }
-    textarea { width: 100%; height: 200px; font-family: 'Montserrat', sans-serif; padding: 10px; box-sizing: border-box; padding: 10px; box-sizing: border-box; }
-    button, select, input { margin: 2px; padding: 6px; font-size: 14px; }
+    textarea { width: 100%; height: 200px; font-family: 'Montserrat', sans-serif; padding: 10px; box-sizing: border-box; }
+    button, select, input { margin: 2px; padding: 6px; font-size: 14px; font-family: 'Montserrat', sans-serif; }
     table { border-collapse: collapse; width: 100%; margin-top: 20px; }
     th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
     th { background-color: #f4f4f4; }
-    #controls { margin: 10px 0; border: 1px solid #ccc; padding: 10px; border-radius: 4px; background: #f9f9f9; display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+    #controls { margin-top: 10px; margin-bottom: 10px; border: 1px solid #ccc; padding: 10px; border-radius: 4px; background: #f9f9f9; display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
     #tableContainer, #discrepancyContainer { overflow-x: auto; margin-bottom: 20px; }
     #summary { margin-top: 20px; font-weight: 700; }
     #counts { white-space: pre-line; margin-bottom: 10px; }
@@ -25,13 +25,15 @@
 
   <div id="controls">
     <label>Date: <input type="date" id="filterDate"></label>
-    <label>Shift: <select id="filterShift">
-      <option value="Vegas AM Shift">Vegas AM Shift</option>
-      <option value="Vegas PM Shift">Vegas PM Shift</option>
-      <option value="Vegas Weekend Shift">Vegas Weekend Shift</option>
-      <option value="Madrid">Madrid</option>
-      <option value="Chengdu">Chengdu</option>
-    </select></label>
+    <label>Shift:
+      <select id="filterShift">
+        <option value="Vegas AM Shift">Vegas AM Shift</option>
+        <option value="Vegas PM Shift">Vegas PM Shift</option>
+        <option value="Vegas Weekend Shift">Vegas Weekend Shift</option>
+        <option value="Madrid">Madrid</option>
+        <option value="Chengdu">Chengdu</option>
+      </select>
+    </label>
     <label>Report From: <input type="datetime-local" id="reportFrom" step="1"></label>
     <label>Report To: <input type="datetime-local" id="reportTo" step="1"></label>
   </div>
@@ -44,7 +46,7 @@
   <div id="discrepancyContainer"></div>
 
   <script>
-    document.addEventListener('DOMContentLoaded', () => {
+    document.addEventListener('DOMContentLoaded', function() {
       const textarea = document.getElementById('logData');
       const parseBtn = document.getElementById('parseBtn');
       const exportBtn = document.getElementById('exportBtn');
@@ -59,9 +61,8 @@
       let headers = [];
       const discrepancyOptions = ['', 'Minor', 'Major'];
       const issueOptions = ['', 'Wrong Tier VC added', 'More than 50K VC added without approval',
-        'VC/MT/Items added without AT note', 'MyTeam cards/MyCareer items/Other No-Currency items...',
-        'Other actions in AT without note', 'Wrong MG provided', 'Kick off account without AT note',
-        'Cloned file without AT note', 'Agent missed PMVC 1st Party Escalation'];
+        'VC/MT/Items added without AT note', 'MyTeam cards/MyCareer items/Other No-Currency items added not noted with a ticket',
+        'Other actions in AT without note', 'Wrong MG provided', 'Kick off account without AT note', 'Cloned file without AT note', 'Agent missed PMVC 1st Party Escalation'];
       const locationOptions = ['', '5CA', 'Vegas Day', 'Vegas Swing', 'Vegas Weekend', 'Chengdu Day', 'Chengdu Weekend', 'Madrid', 'Player Advocacy'];
 
       function formatDate(val) {
@@ -89,18 +90,16 @@
       function updateCounts() {
         let major = 0, minor = 0;
         const tbl = discrepancyContainer.querySelector('table');
-        if (tbl) {
-          tbl.querySelectorAll('tbody tr').forEach(r => {
-            const type = r.cells[headers.length].textContent;
-            if (type.includes('Major')) major++;
-            else if (type.includes('Minor')) minor++;
-          });
-        }
+        if (tbl) tbl.querySelectorAll('tbody tr').forEach(r => {
+          const type = r.cells[headers.length].textContent;
+          if (type.includes('Major')) major++;
+          else if (type.includes('Minor')) minor++;
+        });
         countsEl.innerHTML = `Major discrepancies: ${major}<br>Minor discrepancies: ${minor}`;
         updateSummary();
       }
 
-      parseBtn.addEventListener('click', () => {
+      parseBtn.addEventListener('click', function() {
         const raw = textarea.value.trim();
         if (!raw) return alert('Please provide log data');
         tableContainer.innerHTML = '';
@@ -134,17 +133,23 @@
               a.href = '#';
               a.addEventListener('click', () => window.open(url, '_blank', 'noopener,noreferrer,width=800,height=600'));
               td.appendChild(a);
-            } else td.textContent = c;
+            } else {
+              td.textContent = c;
+            }
             tr.appendChild(td);
           });
           const vtd = document.createElement('td');
-          const vb = document.createElement('button'); vb.textContent = 'Validated';
+          const vb = document.createElement('button');
+          vb.textContent = 'Validated';
           vb.addEventListener('click', () => { tr.remove(); updateCounts(); });
-          vtd.appendChild(vb); tr.appendChild(vtd);
+          vtd.appendChild(vb);
+          tr.appendChild(vtd);
           const dtd = document.createElement('td');
-          const db = document.createElement('button'); db.textContent = 'Discrepancy';
+          const db = document.createElement('button');
+          db.textContent = 'Discrepancy';
           db.addEventListener('click', () => showDiscrepancyForm(tr, cells));
-          dtd.appendChild(db); tr.appendChild(dtd);
+          dtd.appendChild(db);
+          tr.appendChild(dtd);
           tbody.appendChild(tr);
         });
         table.appendChild(tbody);
@@ -156,7 +161,7 @@
         const last = row.querySelector('td:last-child');
         if (last.querySelector('select')) return;
         const sel = document.createElement('select');
-        discrepancyOptions.forEach(o => sel.appendChild(new Option(o, o)));
+        discrepancyOptions.forEach(o => sel.appendChild(new Option(o, o))); 
         const btn = document.createElement('button'); btn.textContent = 'Add';
         last.append(sel, btn);
         btn.addEventListener('click', () => {
@@ -202,24 +207,25 @@
         const tbl = discrepancyContainer.querySelector('table');
         if (!tbl) return alert('No discrepancies to export');
         const rows = Array.from(tbl.querySelectorAll('tbody tr'));
-        const csv = ['Date,Your Name,Agent Name,Agent Location,Major/Minor Discrepancy,Ticket Number,Issue,Other Comments'];
+        const csvRows = [];
+        csvRows.push(['Date','Your Name','Agent Name','Agent Location','Major/Minor Discrepancy','Ticket Number','Issue','Other Comments'].join(','));
         const date = new Date().toISOString().split('T')[0];
-        rows.forEach(r => {
-          const cols = Array.from(r.children);
+        rows.forEach(tr => {
+          const cols = Array.from(tr.children);
           const agent = cols[3].textContent.trim();
           const type = cols[headers.length].textContent.trim();
           const ticket = cols[headers.length + 1].querySelector('input').value.trim();
           const issue = cols[headers.length + 2].querySelector('select').value;
           const loc = cols[headers.length + 3].querySelector('select').value;
           const comm = cols[headers.length + 4].querySelector('input').value.trim();
-          csv.push([date, '', `"${agent}"`, `"${loc}"`, `"${type}"`, ticket, issue, comm].join(','));
+          csvRows.push([date,'',`"${agent}"`,`"${loc}"`,`"${type}"`,ticket,issue,comm].join(','));
         });
-        const blob = new Blob([csv.join('\n')], { type: 'text/csv;charset=utf-8;' });
+        // Fix newline join to use '\n'
+        const blob = new Blob([csvRows.join('\n')], { type: 'text/csv;charset=utf-8;' });
         const link = document.createElement('a'); link.href = URL.createObjectURL(blob);
         link.download = 'discrepancies.csv'; document.body.appendChild(link);
         link.click(); document.body.removeChild(link);
       });
-
       [filterDate, filterShift, reportFrom, reportTo].forEach(el => el.addEventListener('change', updateSummary));
     });
   </script>
