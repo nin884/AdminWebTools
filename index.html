@@ -1,136 +1,324 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>NBA 2K Tools Dashboard</title>
-  <link rel="icon" href="https://upload.wikimedia.org/wikipedia/commons/7/7a/Basketball.png" type="image/png">
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap">
-  <style>
-    body { font-family: 'Montserrat', sans-serif; background: #f0f0f0; padding: 20px; }
-    .tabs { display: flex; gap: 10px; margin-bottom: 20px; }
-    .tab-item { position: relative; }
-    .tab-item button {
-      padding: 10px 20px;
-      cursor: pointer;
-      border: none;
-      background: #007BFF;
-      color: white;
-      font-family: 'Montserrat', sans-serif;
-      font-weight: bold;
-      border-radius: 12px;
-      font-size: 16px;
-      letter-spacing: 0.5px;
-      text-transform: uppercase;
-      transition: background 0.2s ease;
-    }
-    .tab-item.active > button { background: #0056b3; box-shadow: 0 0 8px #007BFF; }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NBA 2K Tools Dashboard</title>
+    <link rel="icon" href="https://upload.wikimedia.org/wikipedia/commons/7/7a/Basketball.png" type="image/png">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        // Tailwind CSS Configuration for NBA 2K Branding
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        montserrat: ['Montserrat', 'sans-serif'], // Keep Montserrat as primary font
+                    },
+                    colors: {
+                        'nba-blue': '#051A3A',    // Deep dark blue, primary background/text
+                        'nba-red': '#EA1F27',     // Vibrant red, accent/button
+                        'nba-pink': '#DD3894',    // Secondary accent pink
+                        'nba-yellow': '#FFA436',  // Gold/Orange accent
+                        'nba-teal': '#16F2D2',    // Teal accent
+                        'nba-white': '#FFFFFF',   // Pure white
+                        'nba-gray-light': '#f3f4f6', // Light background gray
+                        'nba-gray-medium': '#e5e7eb', // Border/divider gray
+                    },
+                },
+            },
+        }
+    </script>
+    <style>
+        /* Base styles, primarily for font, rest handled by Tailwind */
+        body {
+            font-family: 'Montserrat', sans-serif; /* Apply Montserrat font globally */
+            margin: 0; /* Reset default body margin */
+            background-color: #051A3A; /* Direct hex for NBA Blue body background */
+            color: #FFFFFF; /* Direct hex for White text */
+        }
+        /* Iframe styling for the embedded tools */
+        iframe {
+            width: 100%;
+            height: calc(100vh - 180px); /* Adjust height to fill remaining viewport, considering header/tabs */
+            border: 1px solid #051A3A; /* Direct hex for NBA Blue border */
+            background-color: #FFFFFF; /* Direct hex for White background */
+            border-radius: 0.75rem; /* rounded-xl */
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); /* shadow-md */
+        }
 
-    /* Supervisor Tools styling */
-    #tab-supervisor { margin-left: auto; }
-    #tab-supervisor > button { background: orange; }
-    #tab-supervisor.active > button { background: darkorange; box-shadow: 0 0 8px orange; }
+        /* --- Tab Button Styling (using direct hex values for robustness) --- */
+        /* Default Main Tab Button */
+        .tab-btn {
+            padding: 10px 20px; /* px-4 py-2 sm:px-6 sm:py-3 */
+            cursor: pointer;
+            border: none;
+            font-weight: bold;
+            border-radius: 0.5rem; /* rounded-lg */
+            font-size: 0.875rem; /* text-sm sm:text-base */
+            letter-spacing: 0.05em; /* tracking-wide */
+            text-transform: uppercase;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); /* shadow-md */
+            transition: background-color 200ms ease-in-out, box-shadow 200ms ease-in-out;
+            outline: none; /* focus:outline-none */
+            
+            background-color: #EA1F27; /* nba-red */
+            color: #FFFFFF; /* nba-white */
+        }
 
-    .submenu {
-      display: none;
-      position: absolute;
-      top: 100%;
-      left: 0;
-      flex-direction: column;
-      gap: 10px;
-      background: white;
-      padding: 10px;
-      border-radius: 8px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-      z-index: 100;
-    }
-    /* Show submenu only on hover */
-    .tab-item:hover .submenu {
-      display: flex;
-    }
-    .submenu button {
-      padding: 8px 16px;
-      cursor: pointer;
-      border: none;
-      background: #28a745;
-      color: white;
-      font-family: 'Montserrat', sans-serif;
-      font-weight: bold;
-      border-radius: 8px;
-      font-size: 14px;
-      letter-spacing: 0.5px;
-      text-transform: uppercase;
-      transition: background 0.2s ease;
-    }
-    .submenu button.active { background: #1e7e34; box-shadow: 0 0 6px #28a745; }
+        .tab-btn:hover {
+            background-color: #DD3894; /* nba-pink */
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); /* hover:shadow-lg */
+        }
 
-    iframe { width: 100%; height: 80vh; border: 1px solid #ccc; background: white; }
-  </style>
+        /* Active Main Tab Button */
+        .tab-item.active > .tab-btn {
+            background-color: #051A3A; /* nba-blue */
+            color: #FFFFFF; /* nba-white */
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2), 0 10px 10px -5px rgba(0, 0, 0, 0.1); /* shadow-xl */
+        }
+        /* Active Main Tab Button Hover: Stays active color */
+        .tab-item.active > .tab-btn:hover {
+            background-color: #051A3A; /* Keep the same active color on hover */
+            color: #FFFFFF; /* Explicitly keep white text on hover */
+        }
+
+        /* Supervisor Tab Button (Default) */
+        #tab-supervisor .tab-btn {
+            background-color: #16F2D2; /* nba-teal */
+            color: #FFFFFF; /* nba-white */
+        }
+        #tab-supervisor .tab-btn:hover {
+            background-color: #FFA436; /* nba-yellow */
+            color: #051A3A; /* nba-blue for contrast */
+        }
+
+        /* Supervisor Tab Button (Active) */
+        #tab-supervisor.active > .tab-btn {
+            background-color: #FFA436; /* nba-yellow */
+            color: #051A3A; /* nba-blue for contrast */
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2), 0 10px 10px -5px rgba(0, 0, 0, 0.1); /* shadow-xl */
+        }
+        /* Supervisor Tab Button (Active Hover): Stays active color */
+        #tab-supervisor.active > .tab-btn:hover {
+            background-color: #FFA436; /* Keep the same active color on hover */
+            color: #051A3A; /* Explicitly keep blue text on hover */
+        }
+
+        /* --- Submenu Styling --- */
+        .submenu {
+            position: absolute;
+            left: 0;
+            margin-top: 0; /* mt-0 */
+            padding-top: 0.5rem; /* py-2 */
+            padding-bottom: 0.5rem; /* py-2 */
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem; /* gap-2 */
+            background-color: #FFFFFF; /* nba-white */
+            padding: 0.75rem; /* p-3 */
+            border-radius: 0.5rem; /* rounded-lg */
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); /* shadow-xl */
+            z-index: 100;
+            visibility: hidden; /* Use visibility instead of display for smoother transitions if needed, but hidden for now */
+            opacity: 0;
+            transition: opacity 0.2s ease-in-out, visibility 0.2s ease-in-out;
+            min-width: max-content; /* Ensure submenu doesn't wrap text */
+        }
+        .group:hover .submenu {
+            visibility: visible;
+            opacity: 1;
+        }
+        #tab-supervisor .submenu {
+            right: 0;
+            left: auto; /* Align supervisor submenu to the right */
+        }
+
+        /* Default Submenu Button */
+        .submenu-btn {
+            padding: 0.5rem 0.75rem; /* px-3 py-2 */
+            cursor: pointer;
+            border: none;
+            font-weight: bold;
+            border-radius: 0.375rem; /* rounded-md */
+            font-size: 0.75rem; /* text-xs sm:text-sm */
+            text-transform: uppercase;
+            letter-spacing: 0.05em; /* tracking-wide */
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); /* shadow-sm */
+            transition: background-color 200ms ease-in-out, box-shadow 200ms ease-in-out;
+            outline: none; /* focus:outline-none */
+
+            background-color: #16F2D2; /* nba-teal */
+            color: #FFFFFF; /* nba-white */
+        }
+        .submenu-btn:hover {
+            background-color: #DD3894; /* nba-pink */
+            color: #FFFFFF; /* nba-white */
+        }
+
+        /* Active Submenu Button */
+        .submenu-btn.active {
+            background-color: #051A3A; /* nba-blue */
+            color: #FFFFFF; /* nba-white */
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); /* shadow-lg */
+        }
+        /* Active Submenu Button Hover: Stays active color */
+        .submenu-btn.active:hover {
+            background-color: #051A3A; /* Keep the same active color on hover */
+            color: #FFFFFF; /* Explicitly keep white text on hover */
+        }
+
+        /* Active Submenu Button within Supervisor Tab */
+        #tab-supervisor .submenu-btn.active {
+            background-color: #FFA436; /* nba-yellow */
+            color: #051A3A; /* nba-blue */
+        }
+        #tab-supervisor .submenu-btn.active:hover {
+            background-color: #FFA436; /* Keep the same active color on hover */
+            color: #051A3A; /* Explicitly keep blue text on hover */
+        }
+    </style>
 </head>
-<body>
-  <h1 style="font-family: 'Montserrat', sans-serif; display: flex; align-items: center; gap: 10px;">
-    <img src="https://raw.githubusercontent.com/nin884/AdminWebTools/main/nba2k.png" alt="NBA 2K Logo" style="height: 50px;">
-    NBA 2K Tools Dashboard
-  </h1>
+<body class="p-4 sm:p-6 md:p-8">
+    <div class="max-w-7xl mx-auto bg-nba-blue shadow-2xl rounded-2xl p-6 sm:p-8 md:p-10 border-4 border-nba-red">
+        <header class="flex items-center gap-4 mb-8">
+            <img src="https://raw.githubusercontent.com/nin884/AdminWebTools/main/nba2k.png" alt="NBA 2K Logo" class="h-12 sm:h-16">
+            <h1 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-nba-white tracking-tight">NBA 2K Tools Dashboard</h1>
+        </header>
 
-  <div class="tabs">
-    <div class="tab-item" id="tab-restoration">
-      <button onclick="showMain('restoration')">Restoration Tools</button>
-      <div class="submenu">
-        <button onclick="showTool('extractor')" id="btn-extractor">Attribute Extractor</button>
-        <button onclick="showTool('placeholder')" id="btn-placeholder">Placeholder Validator</button>
-        <button onclick="showTool('savefilter')" id="btn-savefilter">Save File Filter</button>
-      </div>
+        <nav class="flex flex-wrap gap-3 sm:gap-4 mb-6" id="main-tabs">
+            <div class="relative group" id="tab-restoration">
+                <button data-main-tab="restoration" class="tab-btn">
+                    Restoration Tools
+                </button>
+                <div class="submenu">
+                    <button data-tool="extractor" class="submenu-btn">Attribute Extractor</button>
+                    <button data-tool="placeholder" class="submenu-btn">Placeholder Validator</button>
+                    <button data-tool="savefilter" class="submenu-btn">Save File Filter</button>
+                </div>
+            </div>
+
+            <div class="relative group" id="tab-vc">
+                <button data-main-tab="vc" class="tab-btn">
+                    VC Tools
+                </button>
+                <div class="submenu">
+                    <button data-tool="tattoo" class="submenu-btn">Missing Tattoo Tracker</button>
+                </div>
+            </div>
+
+            <div class="relative group" id="tab-validation">
+                <button data-main-tab="validation" class="tab-btn">
+                    Validation Tools
+                </button>
+                <div class="submenu">
+                    <button data-tool="validator" class="submenu-btn">Win Streak Validator</button>
+                </div>
+            </div>
+
+            <div class="relative group ml-auto" id="tab-supervisor">
+                <button data-main-tab="supervisor" class="tab-btn">
+                    Supervisor Tools
+                </button>
+                <div class="submenu">
+                    <button data-tool="adminAudit" class="submenu-btn">Admin Web Audit</button>
+                </div>
+            </div>
+        </nav>
+
+        <iframe id="toolFrame" src=""></iframe>
     </div>
-    <div class="tab-item" id="tab-vc">
-      <button onclick="showMain('vc')">VC Tools</button>
-      <div class="submenu">
-        <button onclick="showTool('tattoo')" id="btn-tattoo">Missing Tattoo Tracker</button>
-      </div>
-    </div>
-    <div class="tab-item" id="tab-validation">
-      <button onclick="showMain('validation')">Validation Tools</button>
-      <div class="submenu">
-        <button onclick="showTool('validator')" id="btn-validator">Win Streak Validator</button>
-      </div>
-    </div>
-    <div class="tab-item" id="tab-supervisor">
-      <button onclick="showMain('supervisor')">Supervisor Tools</button>
-      <div class="submenu">
-        <button onclick="showTool('adminAudit')" id="btn-adminAudit">Admin Web Audit</button>
-      </div>
-    </div>
-  </div>
 
-  <iframe id="toolFrame" src=""></iframe>
+    <script>
+        // Map tool names to their respective HTML file paths
+        const toolSrcMap = {
+            extractor: 'attribute-extractor.html', // Assuming this is the correct path
+            placeholder: 'PH_Compare.html',       // Assuming this is the correct path
+            savefilter: 'SaveFileFilter.html',    // Assuming this is the correct path
+            validator: 'myteam-streak-validator.html', // Assuming this is the correct path
+            tattoo: 'Missing_Tattoo.html',        // Assuming this is the correct path
+            adminAudit: 'AdminAudit.html'         // Assuming this is the correct path
+        };
 
-  <script>
-    function showMain(menu) {
-      document.querySelectorAll('.tab-item').forEach(item => {
-        item.classList.remove('active');
-      });
-      document.getElementById('tab-' + menu).classList.add('active');
-      const firstBtn = document.getElementById('tab-' + menu).querySelector('.submenu button');
-      if (firstBtn) firstBtn.click();
-    }
+        const toolFrame = document.getElementById('toolFrame');
+        const mainTabsContainer = document.getElementById('main-tabs');
 
-    function showTool(tool) {
-      const frame = document.getElementById('toolFrame');
-      const srcMap = {
-        extractor: 'attribute-extractor.html',
-        placeholder: 'PH_Compare.html',
-        savefilter: 'SaveFileFilter.html',
-        validator: 'myteam-streak-validator.html',
-        tattoo: 'Missing_Tattoo.html',
-        adminAudit: 'AdminAudit.html'
-      };
-      frame.src = srcMap[tool] || '';
-      document.querySelectorAll('.submenu button').forEach(btn => btn.classList.remove('active'));
-      document.getElementById('btn-' + tool).classList.add('active');
-    }
+        /**
+         * Activates a main tab and loads the first tool in its submenu.
+         * Uses event delegation on the mainTabsContainer.
+         * @param {string} mainTabId - The ID of the main tab (e.g., 'restoration').
+         */
+        function activateMainTab(mainTabId) {
+            // Remove 'active' class from all tab-item elements
+            document.querySelectorAll('.tab-item').forEach(item => {
+                item.classList.remove('active');
+            });
 
-    // Initialize
-    showMain('restoration');
-  </script>
+            // Add 'active' class to the clicked tab-item
+            const currentTabItem = document.getElementById(`tab-${mainTabId}`);
+            if (currentTabItem) {
+                currentTabItem.classList.add('active');
+            }
+
+            // Deactivate all submenu buttons
+            document.querySelectorAll('.submenu-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+
+            // Find the first tool button in the activated main tab's submenu and click it
+            const firstSubmenuBtn = currentTabItem ? currentTabItem.querySelector('.submenu-btn') : null;
+            if (firstSubmenuBtn) {
+                activateTool(firstSubmenuBtn.dataset.tool);
+            } else {
+                // If a main tab has no submenu tools, clear the iframe
+                toolFrame.src = '';
+            }
+        }
+
+        /**
+         * Loads a specific tool into the iframe and activates its submenu button.
+         * @param {string} toolName - The data-tool attribute value (e.g., 'extractor').
+         */
+        function activateTool(toolName) {
+            // Set iframe source
+            toolFrame.src = toolSrcMap[toolName] || '';
+
+            // Deactivate all submenu buttons
+            document.querySelectorAll('.submenu-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+
+            // Activate the clicked submenu button
+            const currentSubmenuBtn = document.querySelector(`[data-tool="${toolName}"]`);
+            if (currentSubmenuBtn) {
+                currentSubmenuBtn.classList.add('active');
+            }
+        }
+
+        // --- Event Delegation for Tabs ---
+        mainTabsContainer.addEventListener('click', (event) => {
+            const target = event.target;
+
+            // Handle main tab button clicks
+            const mainTabBtn = target.closest('.tab-btn');
+            if (mainTabBtn) {
+                const mainTabId = mainTabBtn.dataset.mainTab;
+                activateMainTab(mainTabId);
+            }
+
+            // Handle submenu button clicks
+            const submenuBtn = target.closest('.submenu-btn');
+            if (submenuBtn) {
+                const toolName = submenuBtn.dataset.tool;
+                activateTool(toolName);
+            }
+        });
+
+        // --- Initialization ---
+        document.addEventListener('DOMContentLoaded', () => {
+            // Activate the first main tab ('restoration') and its first tool on load
+            activateMainTab('restoration');
+        });
+    </script>
 </body>
 </html>
