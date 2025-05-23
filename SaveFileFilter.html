@@ -1,201 +1,449 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Save File Filter</title>
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
-  <style>
-    body { font-family: 'Montserrat', sans-serif; padding: 20px; }
-    h2 { font-size: 1.5em; margin-bottom: 15px; }
-    textarea, table, button, input { font-family: inherit; }
-    textarea { width: 100%; height: 150px; margin-bottom: 10px; }
-    .filters {
-      margin: 15px 0;
-      display: flex;
-      align-items: center;
-      gap: 15px;
-      padding: 12px;
-      border: 2px solid #007BFF;
-      border-radius: 8px;
-      background: #f0f8ff;
-    }
-    .filter-group {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      padding: 6px 10px;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-      background: #fff;
-    }
-    .filter-group span { font-weight: 600; }
-    .toggle-btn {
-      padding: 6px 12px;
-      border: 1px solid #007BFF;
-      background: #fff;
-      cursor: pointer;
-      border-radius: 4px;
-      transition: background 0.2s, color 0.2s;
-    }
-    .toggle-btn.active {
-      background: #007BFF;
-      color: #fff;
-      border-color: #007BFF;
-    }
-    .toggle-btn:hover { background: #e6f0ff; }
-    #copyButton { margin-bottom: 15px; }
-    table { width: 100%; border-collapse: collapse; }
-    th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
-    th.sortable { cursor: pointer; }
-    th.sortable:hover { background: #f0f0f0; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NBA 2K Save File Filter</title>
+    <link rel="icon" href="https://upload.wikimedia.org/wikipedia/commons/7/7a/Basketball.png" type="image/png">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        // Tailwind CSS Configuration for NBA 2K Branding (matches your other tools)
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        montserrat: ['Montserrat', 'sans-serif'],
+                    },
+                    colors: {
+                        'nba-blue': '#051A3A',
+                        'nba-red': '#EA1F27',
+                        'nba-pink': '#DD3894',
+                        'nba-yellow': '#FFA436',
+                        'nba-teal': '#16F2D2',
+                        'nba-white': '#FFFFFF',
+                        'nba-gray-light': '#f3f4f6',
+                        'nba-gray-medium': '#e5e7eb',
+                    },
+                },
+            },
+        }
+    </script>
+    <style>
+        /* Base styles, primarily for font and modal, rest handled by Tailwind */
+        body {
+            font-family: 'Montserrat', sans-serif;
+            margin: 0;
+            background-color: var(--tw-colors-nba-blue);
+            color: var(--tw-colors-nba-white);
+        }
+        /* Ensure all form elements also use the Montserrat font */
+        textarea, button, select, input[type="text"], input[type="number"], input[type="checkbox"] {
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        /* Table specific styles for consistency */
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+        th, td {
+            border: 1px solid var(--tw-colors-nba-gray-medium);
+            padding: 12px;
+            text-align: left;
+        }
+        th {
+            background-color: #EA1F27; /* Explicitly set NBA Red background */
+            color: #FFFFFF; /* Explicitly set White text */
+            font-weight: 600;
+        }
+        th.sortable {
+            cursor: pointer;
+            position: relative;
+        }
+        th.sortable:hover {
+            background-color: var(--tw-colors-nba-pink);
+        }
+        /* Sort indicator arrows */
+        th.sortable::after {
+            content: '↕'; /* Unicode for up-down arrow */
+            font-size: 10px;
+            opacity: 0.5;
+            position: absolute;
+            right: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #FFFFFF; /* Ensure arrow is white */
+        }
+        th.asc::after {
+            content: '▲'; /* Up arrow */
+            opacity: 1;
+        }
+        th.desc::after {
+            content: '▼'; /* Down arrow */
+            opacity: 1;
+        }
+        tbody tr {
+            background-color: var(--tw-colors-nba-white);
+            color: var(--tw-colors-nba-blue);
+        }
+        tbody tr:nth-child(even) {
+            background-color: var(--tw-colors-nba-gray-light); /* Slight stripe for readability */
+        }
+        tbody tr:hover {
+            background-color: var(--tw-colors-nba-teal); /* Hover effect for rows */
+            color: var(--tw-colors-nba-white);
+        }
+
+        /* Custom Modal Styles (reused from your other tools) */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.6);
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-content {
+            background-color: #FFFFFF;
+            color: #051A3A;
+            margin: auto;
+            padding: 24px;
+            border-radius: 1rem;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2), 0 10px 10px -5px rgba(0, 0, 0, 0.1);
+            width: 90%;
+            max-width: 480px;
+            text-align: center;
+            position: relative;
+        }
+        #modalMessage {
+            color: #051A3A;
+        }
+        .close-button {
+            position: absolute;
+            top: 8px;
+            right: 12px;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            color: #9ca3af;
+        }
+        .close-button:hover, .close-button:focus {
+            color: #6b7280;
+            text-decoration: none;
+            cursor: pointer;
+        }
+    </style>
 </head>
-<body>
-  <h2>Save File Filter</h2>
-  <textarea id="dataInput" placeholder="Paste your data here, including header row"></textarea>
-  <button id="loadButton">Load Data</button>
+<body class="p-4 sm:p-6 md:p-8">
+    <div class="max-w-6xl mx-auto bg-nba-blue shadow-2xl rounded-2xl p-6 sm:p-8 md:p-10 border-4 border-nba-red">
+        <h1 class="text-3xl sm:text-4xl font-extrabold text-nba-white mb-6 text-center">NBA 2K Save File Filter</h1>
 
-  <div class="filters">
-    <div class="filter-group">
-      <span>Position:</span>
-      <span id="positionToggles"></span>
+        <div class="mb-6">
+            <label for="dataInput" class="block text-lg font-semibold text-nba-white mb-2">Paste your data here, including header row:</label>
+            <textarea id="dataInput" placeholder="Paste tab-separated save file data..."
+                      class="w-full h-48 p-4 border-2 border-nba-red rounded-lg focus:ring-4 focus:ring-nba-yellow focus:border-transparent text-nba-blue bg-nba-white resize-y shadow-inner"></textarea>
+            <button id="loadButton"
+                    class="mt-4 w-full sm:w-auto px-6 py-3 bg-nba-red text-nba-white font-bold rounded-lg shadow-lg hover:bg-nba-pink focus:outline-none focus:ring-2 focus:ring-nba-red focus:ring-offset-2 focus:ring-offset-nba-blue transition ease-in-out duration-200 text-lg">
+                Load Data
+            </button>
+        </div>
+
+        <div id="filtersContainer" class="filters mb-6 p-4 border-2 border-nba-yellow rounded-lg bg-nba-blue flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-6 shadow-md">
+            <div class="filter-group flex flex-col sm:flex-row items-start sm:items-center gap-2 p-3 border border-nba-gray-medium rounded-lg bg-nba-white shadow-sm">
+                <span class="font-semibold text-nba-blue">Position:</span>
+                <span id="positionToggles" class="flex flex-wrap gap-2"></span>
+            </div>
+            <div class="filter-group flex items-center gap-2 p-3 border border-nba-gray-medium rounded-lg bg-nba-white shadow-sm">
+                <label for="ovrCheckbox" class="flex items-center text-nba-blue cursor-pointer">
+                    <input type="checkbox" id="ovrCheckbox" class="form-checkbox h-5 w-5 text-nba-red rounded focus:ring-nba-red">
+                    <span class="ml-2 font-semibold">Only OVR &gt; 65</span>
+                </label>
+            </div>
+        </div>
+
+        <button id="copyButton"
+                class="mb-6 px-6 py-3 bg-nba-yellow text-nba-blue font-bold rounded-lg shadow-lg hover:bg-nba-teal focus:outline-none focus:ring-2 focus:ring-nba-yellow focus:ring-offset-2 focus:ring-offset-nba-blue transition ease-in-out duration-200 text-lg">
+            Copy Filtered Data
+        </button>
+
+        <div class="overflow-x-auto shadow-md rounded-lg">
+            <table id="dataTable" class="min-w-full">
+                <thead><tr id="tableHeader"></tr></thead>
+                <tbody></tbody>
+            </table>
+        </div>
     </div>
-    <div class="filter-group">
-      <label><input type="checkbox" id="ovrCheckbox" /> Only OVR &gt; 65</label>
+
+    <div id="customModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button">&times;</span>
+            <p id="modalMessage" class="text-lg mb-4"></p>
+            <button id="modalOkButton" class="px-6 py-3 bg-nba-red text-nba-white font-bold rounded-lg hover:bg-nba-pink transition duration-200 ease-in-out">OK</button>
+        </div>
     </div>
-  </div>
 
-  <button id="copyButton">Copy Filtered Data</button>
+    <script>
+        // --- Modal Functions (reused from your other tools) ---
+        function showModal(message) {
+            const modal = document.getElementById('customModal');
+            const modalMessage = document.getElementById('modalMessage');
+            modalMessage.textContent = message;
+            modal.style.display = 'flex';
+        }
 
-  <table id="dataTable">
-    <thead><tr id="tableHeader"></tr></thead>
-    <tbody></tbody>
-  </table>
+        function hideModal() {
+            document.getElementById('customModal').style.display = 'none';
+        }
 
-  <script>
-    let allData = [];
-    let sortState = { column: null, asc: true };
-    let selectedPosition = '';
-
-    function parseCSV(text) {
-      return text.trim().split('\n').map(line => line.split(/\t|\s{2,}/));
-    }
-
-    function loadData() {
-      const text = document.getElementById('dataInput').value;
-      const rows = parseCSV(text);
-      if (!rows.length) return;
-      const rawHeaders = rows[0].map(h => h.trim());
-      const headersRaw = rawHeaders.filter(h => !['VC Value', 'Actions', 'Slot'].includes(h));
-      const headers = headersRaw.map(h => h === 'ID' ? 'Build Number' : h);
-      allData = rows.slice(1).map(r => {
-        const obj = {};
-        headersRaw.forEach((rawH, i) => {
-          obj[headers[i]] = (r[rawHeaders.indexOf(rawH)] || '').trim();
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelector('#customModal .close-button').addEventListener('click', hideModal);
+            document.getElementById('modalOkButton').addEventListener('click', hideModal);
+            document.getElementById('customModal').addEventListener('click', (e) => {
+                if (e.target === document.getElementById('customModal')) {
+                    hideModal();
+                }
+            });
         });
-        return obj;
-      });
-      populateFilters();
-      renderTable(allData);
-    }
 
-    function populateFilters() {
-      const posSet = new Set(allData.map(item => item['Position']));
-      const container = document.getElementById('positionToggles');
-      container.innerHTML = '';
-      posSet.forEach(pos => {
-        const btn = document.createElement('button');
-        btn.textContent = pos;
-        btn.className = 'toggle-btn';
-        btn.onclick = () => {
-          selectedPosition = (selectedPosition === pos ? '' : pos);
-          Array.from(container.children).forEach(b => b.classList.toggle('active', b.textContent === selectedPosition));
-          applyFilters();
+        // --- Save File Filter Logic ---
+        let allData = [];
+        let sortState = { column: null, asc: true };
+        let selectedPosition = '';
+
+        // Cache DOM elements
+        const elements = {
+            dataInput: document.getElementById('dataInput'),
+            loadButton: document.getElementById('loadButton'),
+            positionToggles: document.getElementById('positionToggles'),
+            ovrCheckbox: document.getElementById('ovrCheckbox'),
+            copyButton: document.getElementById('copyButton'),
+            dataTable: document.getElementById('dataTable'),
+            tableHeader: document.getElementById('tableHeader'),
+            tableBody: document.querySelector('#dataTable tbody'),
+            filtersContainer: document.getElementById('filtersContainer')
         };
-        container.appendChild(btn);
-      });
-      document.getElementById('ovrCheckbox').onchange = applyFilters;
-    }
 
-    function applyFilters() {
-      let filtered = allData;
-      if (selectedPosition) filtered = filtered.filter(item => item['Position'] === selectedPosition);
-      if (document.getElementById('ovrCheckbox').checked) filtered = filtered.filter(item => parseFloat(item['OVR']) > 65);
-      renderTable(filtered);
-    }
+        function parseCSV(text) {
+            // Updated regex to correctly split by tab or multiple spaces while preserving empty cells
+            return text.trim().split('\n').map(line => line.split(/\t|\s{2,}/).map(cell => cell.trim()));
+        }
 
-    function renderTable(data) {
-      const thead = document.getElementById('tableHeader');
-      const tbody = document.querySelector('#dataTable tbody');
-      thead.innerHTML = '';
-      tbody.innerHTML = '';
-      if (!data.length) return;
-      const cols = Object.keys(data[0]);
-      cols.forEach(col => {
-        const th = document.createElement('th');
-        th.textContent = col + ((sortState.column === col) ? (sortState.asc ? ' ▲' : ' ▼') : '');
-        th.classList.add('sortable');
-        th.onclick = () => {
-          sortState = { column: col, asc: sortState.column === col ? !sortState.asc : true };
-          data.sort((a, b) => {
-            const vA = isNaN(a[col]) ? a[col] : parseFloat(a[col]);
-            const vB = isNaN(b[col]) ? b[col] : parseFloat(b[col]);
-            return (vA < vB ? -1 : vA > vB ? 1 : 0) * (sortState.asc ? 1 : -1);
-          });
-          renderTable(data);
-        };
-        thead.appendChild(th);
-      });
-      data.forEach(row => {
-        const tr = document.createElement('tr');
-        cols.forEach(col => {
-          const td = document.createElement('td'); td.textContent = row[col]; tr.appendChild(td);
-        });
-        tbody.appendChild(tr);
-      });
-    }
+        function loadData() {
+            const text = elements.dataInput.value;
+            const rows = parseCSV(text);
 
-    function fallbackCopyText(text) {
-      const ta = document.createElement('textarea');
-      ta.value = text;
-      document.body.appendChild(ta);
-      ta.select();
-      try {
-        document.execCommand('copy');
-        alert('Filtered data copied to clipboard');
-      } catch (e) {
-        console.error('Fallback copy failed', e);
-        alert('Copy failed');
-      }
-      document.body.removeChild(ta);
-    }
+            if (!rows.length || rows[0].length < 2) { // Ensure there's at least a header and some columns
+                showModal('Please paste valid data with at least two columns and a header row.');
+                return;
+            }
 
-    function copyFilteredData() {
-      const ths = Array.from(document.querySelectorAll('#dataTable thead th'))
-                      .map(th => th.textContent.replace(/ ▲| ▼/, '').trim());
-      const idxOVR = ths.indexOf('OVR');
-      const idxPos = ths.indexOf('Position');
-      const idxLast = ths.indexOf('Last Updated');
-      const lines = [];
-      document.querySelectorAll('#dataTable tbody tr').forEach(tr => {
-        const tds = Array.from(tr.children).map(td => td.textContent.trim());
-        const ovr = tds[idxOVR];
-        const pos = tds[idxPos];
-        const last = tds[idxLast];
-        lines.push(`• ${ovr} OVR ${pos} - Last Updated ${last}`);
-      });
-      if (!lines.length) return alert('No data to copy');
-      const text = lines.join('\n');
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(text).then(() => alert('Copied formatted data')).catch(() => fallbackCopyText(text));
-      } else {
-        fallbackCopyText(text);
-      }
-    }
+            const rawHeaders = rows[0];
+            // Filter out 'VC Value', 'Actions', 'Slot' from rawHeaders based on column name
+            const filteredHeaderIndices = rawHeaders.map((h, i) =>
+                !['VC Value', 'Actions', 'Slot'].includes(h.trim()) ? i : -1
+            ).filter(i => i !== -1);
 
-    document.getElementById('loadButton').addEventListener('click', loadData);
-    document.getElementById('copyButton').addEventListener('click', copyFilteredData);
-  </script>
+            const headersToUse = filteredHeaderIndices.map(i => {
+                const headerName = rawHeaders[i].trim();
+                // Rename 'ID' to 'Build Number' and 'Last Updated' to 'Last Played'
+                if (headerName === 'ID') return 'Build Number';
+                if (headerName === 'Last Updated') return 'Last Played';
+                return headerName;
+            });
+
+            allData = rows.slice(1).map(r => {
+                const obj = {};
+                headersToUse.forEach((header, i) => {
+                    const originalIndex = filteredHeaderIndices[i];
+                    obj[header] = (r[originalIndex] || '').trim();
+                });
+                return obj;
+            });
+
+            // If no data rows after filtering, show a message
+            if (allData.length === 0) {
+                showModal('No valid data rows found after parsing. Please check your input.');
+                elements.tableBody.innerHTML = ''; // Clear table
+                elements.tableHeader.innerHTML = ''; // Clear header
+                elements.positionToggles.innerHTML = ''; // Clear filter toggles
+                elements.ovrCheckbox.checked = false; // Reset checkbox
+                elements.filtersContainer.classList.add('hidden'); // Hide filters
+                return;
+            }
+
+            populateFilters();
+            renderTable(allData);
+            elements.filtersContainer.classList.remove('hidden'); // Show filters once data is loaded
+        }
+
+        function populateFilters() {
+            const posSet = new Set(allData.map(item => item['Position']).filter(pos => pos)); // Filter out empty positions
+            const container = elements.positionToggles;
+            container.innerHTML = ''; // Clear previous buttons
+
+            posSet.forEach(pos => {
+                const btn = document.createElement('button');
+                btn.textContent = pos;
+                // Add default styling including border and hover for non-active state
+                btn.className = 'toggle-btn px-4 py-2 bg-nba-white text-nba-blue font-semibold rounded-md shadow-sm border border-nba-gray-medium hover:bg-nba-gray-light transition duration-150 ease-in-out';
+                btn.onclick = () => {
+                    selectedPosition = (selectedPosition === pos ? '' : pos);
+                    Array.from(container.children).forEach(b => {
+                        // Reset all buttons to default styling
+                        b.classList.remove('active', 'bg-nba-red', 'text-nba-white', 'shadow-md', 'hover:bg-nba-blue'); // Remove active and its hover
+                        b.classList.add('bg-nba-white', 'text-nba-blue', 'hover:bg-nba-gray-light'); // Add default and its hover
+                        if (b.textContent === selectedPosition) {
+                            // Apply active styling and its specific hover
+                            b.classList.add('active', 'bg-nba-red', 'text-nba-white', 'shadow-md', 'hover:bg-nba-blue');
+                            b.classList.remove('bg-nba-white', 'text-nba-blue', 'hover:bg-nba-gray-light'); // Remove default
+                        }
+                    });
+                    applyFilters();
+                };
+                container.appendChild(btn);
+            });
+            elements.ovrCheckbox.onchange = applyFilters;
+        }
+
+        function applyFilters() {
+            let filtered = allData;
+
+            if (selectedPosition) {
+                filtered = filtered.filter(item => item['Position'] === selectedPosition);
+            }
+            if (elements.ovrCheckbox.checked) {
+                filtered = filtered.filter(item => {
+                    const ovr = parseFloat(item['OVR']);
+                    return !isNaN(ovr) && ovr > 65;
+                });
+            }
+            renderTable(filtered);
+        }
+
+        function renderTable(data) {
+            elements.tableHeader.innerHTML = '';
+            elements.tableBody.innerHTML = '';
+
+            // Get the current headers from the first data object to ensure correct columns
+            const cols = data.length > 0 ? Object.keys(data[0]) : [];
+
+            if (!data.length) {
+                // Ensure colspan matches the actual number of columns being displayed
+                const colspan = cols.length > 0 ? cols.length : 1; // Default to 1 if no columns
+                elements.tableBody.innerHTML = `<tr><td colspan="${colspan}" class="text-center py-4 text-gray-600 italic">No matching data found.</td></tr>`;
+                return;
+            }
+
+
+            cols.forEach(col => {
+                const th = document.createElement('th');
+                th.textContent = col + ((sortState.column === col) ? (sortState.asc ? ' ▲' : ' ▼') : '');
+                th.className = 'px-4 py-2 text-left text-sm font-semibold whitespace-nowrap'; // Tailwind for th
+                th.classList.add('sortable');
+
+                // Update sort indicator
+                if (sortState.column === col) {
+                    th.classList.add(sortState.asc ? 'asc' : 'desc');
+                } else {
+                    th.classList.remove('asc', 'desc');
+                }
+
+
+                th.onclick = () => {
+                    sortState = { column: col, asc: sortState.column === col ? !sortState.asc : true };
+                    data.sort((a, b) => {
+                        const vA = isNaN(parseFloat(a[col])) ? a[col] : parseFloat(a[col]);
+                        const vB = isNaN(parseFloat(b[col])) ? b[col] : parseFloat(b[col]);
+
+                        if (typeof vA === 'string' && typeof vB === 'string') {
+                            return vA.localeCompare(vB) * (sortState.asc ? 1 : -1);
+                        } else {
+                            return (vA - vB) * (sortState.asc ? 1 : -1);
+                        }
+                    });
+                    renderTable(data); // Re-render with sorted data
+                };
+                elements.tableHeader.appendChild(th);
+            });
+
+            data.forEach(row => {
+                const tr = document.createElement('tr');
+                tr.className = 'bg-nba-white even:bg-nba-gray-light hover:bg-nba-teal hover:text-nba-white transition-colors duration-150';
+                cols.forEach(col => {
+                    const td = document.createElement('td');
+                    td.textContent = row[col];
+                    td.className = 'px-4 py-2 text-sm whitespace-nowrap'; // Tailwind for td
+                    tr.appendChild(td);
+                });
+                elements.tableBody.appendChild(tr);
+            });
+        }
+
+        function copyFilteredData() {
+            const tableRows = Array.from(elements.tableBody.querySelectorAll('tr'));
+            if (!tableRows.length || (tableRows.length === 1 && tableRows[0].textContent.includes('No matching data'))) {
+                showModal('No data to copy. Please load data first.');
+                return;
+            }
+
+            const lines = [];
+            // Get the current headers from the rendered table to find column indices
+            const currentDisplayedHeaders = Array.from(elements.tableHeader.querySelectorAll('th'))
+                                                .map(th => th.textContent.replace(/ ▲| ▼/, '').trim());
+
+            const ovrIndex = currentDisplayedHeaders.indexOf('OVR');
+            const positionIndex = currentDisplayedHeaders.indexOf('Position');
+            const lastPlayedIndex = currentDisplayedHeaders.indexOf('Last Played'); // Use 'Last Played'
+
+            // Ensure all required columns are found
+            if (ovrIndex === -1 || positionIndex === -1 || lastPlayedIndex === -1) {
+                showModal('Required columns (OVR, Position, Last Played) not found in the table. Cannot copy formatted data.');
+                return;
+            }
+
+            tableRows.forEach(tr => {
+                const tds = Array.from(tr.children);
+                const ovr = tds[ovrIndex] ? tds[ovrIndex].textContent.trim() : '';
+                const pos = tds[positionIndex] ? tds[positionIndex].textContent.trim() : '';
+                const lastPlayed = tds[lastPlayedIndex] ? tds[lastPlayedIndex].textContent.trim() : '';
+
+                // Format as bulleted list, excluding Build Number
+                lines.push(`• ${ovr} OVR ${pos} - Last Played ${lastPlayed}`);
+            });
+
+            const textToCopy = lines.join('\n');
+            fallbackCopyText(textToCopy); // Use existing fallback copy for plain text
+        }
+
+        // Reused from your other tools for plain text copying
+        function fallbackCopyText(text) {
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            textarea.style.position = 'fixed';
+            textarea.style.opacity = '0';
+            document.body.appendChild(textarea);
+            textarea.focus();
+            textarea.select();
+            try {
+                document.execCommand('copy');
+                showModal('Filtered data copied to clipboard!');
+            } catch (e) {
+                console.error('Fallback copy failed', e);
+                showModal('Copy failed. Your browser might not support automatic copying.');
+            } finally {
+                document.body.removeChild(textarea);
+            }
+        }
+
+        // Event Listeners
+        elements.loadButton.addEventListener('click', loadData);
+        elements.copyButton.addEventListener('click', copyFilteredData);
+    </script>
 </body>
 </html>
