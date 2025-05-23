@@ -1,187 +1,287 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Placeholder Validator</title>
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap');
-    body {
-      font-family: 'Montserrat', sans-serif;
-      padding: 20px;
-      background-color: white;
-      color: black;
-      transition: background-color 0.3s, color 0.3s;
-    }
-    .title {
-      text-align: left;
-      font-weight: 700;
-      margin-bottom: 20px;
-      font-size: 24px;
-    }
-    textarea {
-      width: 100%;
-      height: 200px;
-      margin-bottom: 10px;
-      font-family: 'Montserrat', sans-serif;
-    }
-    .textareas {
-      display: flex;
-      gap: 20px;
-    }
-    .textareas > div {
-      flex: 1;
-    }
-    #compareBtn {
-      width: 100%;
-      padding: 12px;
-      margin-top: 10px;
-      background: #007BFF;
-      color: white;
-      border: none;
-      cursor: pointer;
-      border-radius: 4px;
-      font-size: 16px;
-      font-family: 'Montserrat', sans-serif;
-    }
-    #compareBtn:hover {
-      background: #0056b3;
-    }
-    .tables-container {
-      display: flex;
-      justify-content: flex-start;
-      gap: 20px;
-      margin-top: 20px;
-      align-items: flex-start;
-    }
-    .tables-container.centered {
-      justify-content: center;
-    }
-    table {
-      border-collapse: collapse;
-      table-layout: auto;
-      font-family: 'Montserrat', sans-serif;
-    }
-    th, td {
-      border: 1px solid #ccc;
-      padding: 6px;
-      text-align: left;
-    }
-    .mismatch {
-      background-color: #ffcccc;
-    }
-    #matchStatus {
-      font-size: 24px;
-      margin: 20px 0;
-      text-align: center;
-      font-weight: bold;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NBA 2K Placeholder Validator</title>
+    <link rel="icon" href="https://upload.wikimedia.org/wikipedia/commons/7/7a/Basketball.png" type="image/png">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        // Tailwind CSS Configuration for NBA 2K Branding
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        montserrat: ['Montserrat', 'sans-serif'], // Keep Montserrat as primary font
+                    },
+                    colors: {
+                        'nba-blue': '#051A3A',    // Deep dark blue, primary background/text
+                        'nba-red': '#EA1F27',     // Vibrant red, accent/button
+                        'nba-pink': '#DD3894',    // Secondary accent pink
+                        'nba-yellow': '#FFA436',  // Gold/Orange accent
+                        'nba-teal': '#16F2D2',    // Teal accent
+                        'nba-white': '#FFFFFF',   // Pure white
+                        'nba-gray-light': '#f3f4f6', // Light background gray
+                        'nba-gray-medium': '#e5e7eb', // Border/divider gray
+                    },
+                },
+            },
+        }
+    </script>
+    <style>
+        /* Base styles, primarily for font and modal, rest handled by Tailwind */
+        body {
+            font-family: 'Montserrat', sans-serif; /* Ensure Montserrat is applied */
+            margin: 0; /* Reset default body margin */
+            background-color: var(--tw-colors-nba-blue); /* Use NBA dark blue as background */
+            color: var(--tw-colors-nba-white); /* White text on dark background */
+        }
+        /* Ensure all form elements also use the Montserrat font */
+        textarea, button, select, input[type="text"], input[type="number"] {
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        /* Custom Modal Styles (reused for consistency) */
+        .modal {
+            display: none; /* Hidden by default */
+            position: fixed; /* Stay in place */
+            z-index: 1000; /* Sit on top */
+            left: 0;
+            top: 0;
+            width: 100%; /* Full width */
+            height: 100%; /* Full height */
+            overflow: auto; /* Enable scroll if needed */
+            background-color: rgba(0,0,0,0.6); /* Darker overlay */
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-content {
+            background-color: #FFFFFF; /* Explicitly set white background */
+            color: #051A3A; /* Explicitly set NBA blue text color */
+            margin: auto;
+            padding: 24px; /* p-6 */
+            border-radius: 1rem; /* rounded-xl */
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2), 0 10px 10px -5px rgba(0, 0, 0, 0.1); /* shadow-2xl */
+            width: 90%;
+            max-width: 480px; /* max-w-sm */
+            text-align: center;
+            position: relative;
+        }
+        /* Explicitly set color for the message paragraph inside the modal */
+        #modalMessage {
+            color: #051A3A; /* Explicitly set NBA blue text color */
+        }
+        .close-button {
+            position: absolute;
+            top: 8px;
+            right: 12px;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            color: #9ca3af; /* gray-400 */
+        }
+        .close-button:hover,
+        .close-button:focus {
+            color: #6b7280; /* gray-600 */
+            text-decoration: none;
+            cursor: pointer;
+        }
+        /* Mismatch row styling */
+        .mismatch-row {
+            background-color: #fce8e6; /* light red/pink for mismatches */
+            color: #c0392b; /* dark red text */
+        }
+        .mismatch-row td {
+            border-color: #f8c8c4; /* lighter border for mismatch rows */
+        }
+    </style>
 </head>
-<body>
-  <h3 class="title">Placeholder Validator</h3>
-  <div class="textareas">
-    <div>
-      <h3>Original Build</h3>
-      <textarea id="dataInput1" placeholder="Paste original build data here..."></textarea>
+<body class="p-4 sm:p-6 md:p-8">
+    <div class="max-w-6xl mx-auto bg-nba-blue shadow-2xl rounded-2xl p-6 sm:p-8 md:p-10 border-4 border-nba-red">
+        <h1 class="text-3xl sm:text-4xl font-extrabold text-nba-white mb-6 text-center">NBA 2K Placeholder Validator</h1>
+
+        <div class="flex flex-col lg:flex-row gap-6 mb-6">
+            <div class="flex-1">
+                <h3 class="text-xl font-bold text-nba-white mb-3">Original Build</h3>
+                <textarea id="dataInput1" placeholder="Paste original build data here..."
+                          class="w-full h-72 p-4 border-2 border-nba-red rounded-lg focus:ring-4 focus:ring-nba-yellow focus:border-transparent text-nba-blue bg-nba-white resize-y shadow-inner"></textarea>
+            </div>
+            <div class="flex-1">
+                <h3 class="text-xl font-bold text-nba-white mb-3">Placeholder</h3>
+                <textarea id="dataInput2" placeholder="Paste placeholder build data here..."
+                          class="w-full h-72 p-4 border-2 border-nba-red rounded-lg focus:ring-4 focus:ring-nba-yellow focus:border-transparent text-nba-blue bg-nba-white resize-y shadow-inner"></textarea>
+            </div>
+        </div>
+
+        <button id="compareBtn"
+                class="w-full px-6 py-3 bg-nba-red text-nba-white font-bold rounded-lg shadow-lg hover:bg-nba-pink focus:outline-none focus:ring-2 focus:ring-nba-red focus:ring-offset-2 focus:ring-offset-nba-blue transition ease-in-out duration-200 text-lg">
+            Compare Builds
+        </button>
+
+        <div id="matchStatus" class="text-3xl font-extrabold text-center mt-6 mb-6">
+            </div>
+
+        <div class="flex flex-col lg:flex-row justify-center gap-6 mt-6 items-start">
+            <table id="comparisonTable" class="min-w-0 lg:min-w-[48%] bg-nba-white rounded-lg shadow-md hidden">
+                <thead>
+                    <tr>
+                        <th class="px-4 py-2 bg-nba-red text-nba-white text-left text-lg font-semibold rounded-tl-lg">Attribute</th>
+                        <th class="px-4 py-2 bg-nba-red text-nba-white text-left text-lg font-semibold">Original</th>
+                        <th class="px-4 py-2 bg-nba-red text-nba-white text-left text-lg font-semibold rounded-tr-lg">Placeholder</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-nba-gray-medium text-nba-blue"></tbody>
+            </table>
+
+            <table id="mismatchDetailsTable" class="min-w-0 bg-nba-white rounded-lg shadow-md hidden">
+                <thead>
+                    <tr>
+                        <th class="px-4 py-2 bg-nba-red text-nba-white text-left text-lg font-semibold rounded-tl-lg">Non-matching Attribute</th>
+                        <th class="px-4 py-2 bg-nba-red text-nba-white text-left text-lg font-semibold">Original</th>
+                        <th class="px-4 py-2 bg-nba-red text-nba-white text-left text-lg font-semibold rounded-tr-lg">Placeholder</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-nba-gray-medium text-nba-blue"></tbody>
+            </table>
+        </div>
     </div>
-    <div>
-      <h3>Placeholder</h3>
-      <textarea id="dataInput2" placeholder="Paste placeholder build data here..."></textarea>
+
+    <div id="customModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button">&times;</span>
+            <p id="modalMessage" class="text-lg mb-4"></p>
+            <button id="modalOkButton" class="px-6 py-3 bg-nba-red text-nba-white font-bold rounded-lg hover:bg-nba-pink transition duration-200 ease-in-out">OK</button>
+        </div>
     </div>
-  </div>
 
-  <button id="compareBtn">Compare Builds</button>
-  <div id="matchStatus"></div>
-
-  <div class="tables-container">
-    <table id="comparisonTable" style="display: none;">
-      <thead><tr><th>Attribute</th><th>Original</th><th>Placeholder</th></tr></thead>
-      <tbody></tbody>
-    </table>
-    <table id="mismatchDetailsTable" style="display: none;">
-      <thead><tr><th>Non-matching Attribute</th><th>Original</th><th>Placeholder</th></tr></thead>
-      <tbody></tbody>
-    </table>
-  </div>
-
-  <script>
-    document.getElementById('compareBtn').addEventListener('click', compareBuilds);
-
-    function parseAttributes(data) {
-      const attributes = {};
-      const extraFields = ['Position','Archetype','Height','Weight','Wingspan'];
-      data.trim().split('\n').forEach(line => {
-        if (!line) return;
-        const parts = line.trim().split(/\t+/);
-        const key = parts[0] === 'Potential Description' ? 'Archetype' : parts[0];
-        const numbers = parts.filter(p => /^\d+$/.test(p));
-        if (numbers.length >= 2) {
-          attributes[key] = numbers[1];
-        } else if (parts.length === 2 && extraFields.includes(key)) {
-          attributes[key] = parts[1];
+    <script>
+        // --- Modal Functions ---
+        function showModal(message) {
+            const modal = document.getElementById('customModal');
+            const modalMessage = document.getElementById('modalMessage');
+            modalMessage.textContent = message;
+            modal.style.display = 'flex';
         }
-      });
-      return attributes;
-    }
 
-    function compareBuilds() {
-      const attr1 = parseAttributes(document.getElementById('dataInput1').value);
-      const attr2 = parseAttributes(document.getElementById('dataInput2').value);
-      const extraOrder = ['Position','Archetype','Height','Weight','Wingspan'];
-      const allKeys = Array.from(new Set([...Object.keys(attr1), ...Object.keys(attr2)]));
-      const orderedKeys = [...extraOrder.filter(f => allKeys.includes(f)), ...allKeys.filter(k => !extraOrder.includes(k)).sort()];
-
-      // Populate comparison table
-      const compBody = document.querySelector('#comparisonTable tbody');
-      compBody.innerHTML = '';
-      let allMatch = true;
-      const compFrag = document.createDocumentFragment();
-      orderedKeys.forEach(key => {
-        const val1 = attr1[key] || '';
-        const val2 = attr2[key] || '';
-        const row = document.createElement('tr');
-        if (val1 !== val2) {
-          row.classList.add('mismatch');
-          allMatch = false;
+        function hideModal() {
+            document.getElementById('customModal').style.display = 'none';
         }
-        row.innerHTML = `<td>${key}</td><td>${val1}</td><td>${val2}</td>`;
-        compFrag.appendChild(row);
-      });
-      compBody.appendChild(compFrag);
-      document.getElementById('comparisonTable').style.display = 'table';
-      document.getElementById('matchStatus').innerHTML = allMatch
-        ? '<span style="color:green; font-weight:bold;">✔ MATCH</span>'
-        : '<span style="color:red; font-weight:bold;">✘ NOT MATCHING</span>';
 
-      // Handle container centering on full match
-      const container = document.querySelector('.tables-container');
-      if (allMatch) {
-        container.classList.add('centered');
-      } else {
-        container.classList.remove('centered');
-      }
-
-      // Populate mismatch details table
-      const detailsBody = document.querySelector('#mismatchDetailsTable tbody');
-      detailsBody.innerHTML = '';
-      if (!allMatch) {
-        const detailsFrag = document.createDocumentFragment();
-        orderedKeys.forEach(key => {
-          const val1 = attr1[key] || '';
-          const val2 = attr2[key] || '';
-          if (val1 !== val2) {
-            const detailRow = document.createElement('tr');
-            detailRow.innerHTML = `<td>${key}</td><td>${val1}</td><td>${val2}</td>`;
-            detailsFrag.appendChild(detailRow);
-          }
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelector('#customModal .close-button').addEventListener('click', hideModal);
+            document.getElementById('modalOkButton').addEventListener('click', hideModal);
+            document.getElementById('customModal').addEventListener('click', (e) => {
+                if (e.target === document.getElementById('customModal')) {
+                    hideModal();
+                }
+            });
         });
-        detailsBody.appendChild(detailsFrag);
-        document.getElementById('mismatchDetailsTable').style.display = 'table';
-      } else {
-        document.getElementById('mismatchDetailsTable').style.display = 'none';
-      }
-    }
-  </script>
+
+        // --- Placeholder Validator Logic ---
+        document.getElementById('compareBtn').addEventListener('click', compareBuilds);
+
+        function parseAttributes(data) {
+            const attributes = {};
+            // Fields that are typically single-value strings, not numeric attributes
+            const extraFields = ['Position', 'Archetype', 'Height', 'Weight', 'Wingspan'];
+
+            data.trim().split('\n').forEach(line => {
+                if (!line) return;
+                const parts = line.trim().split(/\t+/);
+                const key = parts[0] === 'Potential Description' ? 'Archetype' : parts[0]; // Standardize Archetype key
+
+                // If it's an extra field, grab the second part directly
+                if (extraFields.includes(key)) {
+                    attributes[key] = parts[1] || '';
+                } else {
+                    // For numeric attributes, filter for numbers and take the second one
+                    const numbers = parts.filter(p => /^\d+(\.\d+)?$/.test(p)); // Matches integers or floats
+                    if (numbers.length >= 2) {
+                        attributes[key] = numbers[1];
+                    }
+                }
+            });
+            return attributes;
+        }
+
+        function compareBuilds() {
+            const dataInput1 = document.getElementById('dataInput1').value.trim();
+            const dataInput2 = document.getElementById('dataInput2').value.trim();
+
+            if (!dataInput1 || !dataInput2) {
+                showModal('Please paste data into both "Original Build" and "Placeholder" text areas.');
+                return;
+            }
+
+            const attr1 = parseAttributes(dataInput1);
+            const attr2 = parseAttributes(dataInput2);
+
+            // Define the order of appearance for extra fields and then sort the rest alphabetically
+            const extraOrder = ['Position', 'Archetype', 'Height', 'Weight', 'Wingspan'];
+            const allKeys = Array.from(new Set([...Object.keys(attr1), ...Object.keys(attr2)]));
+            const orderedKeys = [
+                ...extraOrder.filter(f => allKeys.includes(f)),
+                ...allKeys.filter(k => !extraOrder.includes(k)).sort()
+            ];
+
+            // Populate comparison table
+            const compBody = document.querySelector('#comparisonTable tbody');
+            compBody.innerHTML = '';
+            let allMatch = true;
+            const compFrag = document.createDocumentFragment();
+
+            orderedKeys.forEach(key => {
+                const val1 = attr1[key] || '';
+                const val2 = attr2[key] || '';
+                const row = document.createElement('tr');
+
+                if (val1 !== val2) {
+                    row.classList.add('mismatch-row'); // Apply mismatch styling
+                    allMatch = false;
+                }
+                row.innerHTML = `
+                    <td class="px-4 py-2 text-sm">${key}</td>
+                    <td class="px-4 py-2 text-sm">${val1}</td>
+                    <td class="px-4 py-2 text-sm">${val2}</td>
+                `;
+                compFrag.appendChild(row);
+            });
+            compBody.appendChild(compFrag);
+            document.getElementById('comparisonTable').classList.remove('hidden'); // Show table
+
+            // Update match status
+            const matchStatusEl = document.getElementById('matchStatus');
+            if (allMatch) {
+                matchStatusEl.innerHTML = '<span class="text-nba-teal">✔ ALL ATTRIBUTES MATCH</span>';
+            } else {
+                matchStatusEl.innerHTML = '<span class="text-nba-red">✘ ATTRIBUTES DO NOT MATCH</span>';
+            }
+
+            // Populate mismatch details table
+            const detailsBody = document.querySelector('#mismatchDetailsTable tbody');
+            detailsBody.innerHTML = '';
+            if (!allMatch) {
+                const detailsFrag = document.createDocumentFragment();
+                orderedKeys.forEach(key => {
+                    const val1 = attr1[key] || '';
+                    const val2 = attr2[key] || '';
+                    if (val1 !== val2) {
+                        const detailRow = document.createElement('tr');
+                        detailRow.innerHTML = `
+                            <td class="px-4 py-2 text-sm">${key}</td>
+                            <td class="px-4 py-2 text-sm">${val1}</td>
+                            <td class="px-4 py-2 text-sm">${val2}</td>
+                        `;
+                        detailsFrag.appendChild(detailRow);
+                    }
+                });
+                detailsBody.appendChild(detailsFrag);
+                document.getElementById('mismatchDetailsTable').classList.remove('hidden'); // Show table
+            } else {
+                document.getElementById('mismatchDetailsTable').classList.add('hidden'); // Hide if no mismatches
+            }
+        }
+    </script>
 </body>
 </html>
