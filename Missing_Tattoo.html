@@ -1,272 +1,601 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Missing Tattoo Tracker</title>
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
-  <style>
-    body { font-family: 'Montserrat', sans-serif; padding: 20px; }
-    h2 { font-weight: 600; }
-    table { border-collapse: collapse; width: 100%; margin-top: 20px; }
-    th, td { border: 1px solid #ddd; padding: 8px; }
-    th { background-color: #f2f2f2; cursor: pointer; }
-    #filters {
-      margin-top: 20px;
-      display: none;
-      gap: 20px;
-      align-items: center;
-      flex-wrap: wrap;
-      justify-content: center;
-      border: 2px solid #007BFF;
-      box-shadow: 0 2px 8px rgba(0, 123, 255, 0.2);
-      padding: 16px;
-      border-radius: 8px;
-      background-color: #e9f5ff;
-    }
-    input, select, button { font-family: 'Montserrat', sans-serif; }
-    #uploadBtn {
-      margin-top: 10px;
-      background-color: #007BFF;
-      color: #fff;
-      border: none;
-      border-radius: 4px;
-      padding: 6px 12px;
-      cursor: pointer;
-    }
-    #searchInput { margin-top: 10px; width: 200px; }
-    #vcSpent {
-      font-weight: bold;
-      font-size: 20px;
-      margin-top: 10px;
-      background-color: #FF7F00;
-      color: #fff;
-      padding: 6px 12px;
-      border-radius: 4px;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-      display: block;
-      text-align: center;
-      margin: 10px auto;
-    }
-    #successMessage { display: none; color: green; font-weight: bold; margin-top: 10px; transition: opacity 0.5s ease-in-out; }
-    #paginationControls { margin-top: 20px; display: flex; justify-content: center; gap: 5px; }
-    #paginationControls button {
-      padding: 5px 10px;
-      cursor: pointer;
-      background-color: #007BFF;
-      color: #fff;
-      border: none;
-      border-radius: 4px;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NBA 2K Missing Tattoo Tracker</title>
+    <link rel="icon" href="https://upload.wikimedia.org/wikipedia/commons/7/7a/Basketball.png" type="image/png">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        // Tailwind CSS Configuration for NBA 2K Branding (matches your other tools)
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        montserrat: ['Montserrat', 'sans-serif'],
+                    },
+                    colors: {
+                        'nba-blue': '#051A3A',
+                        'nba-red': '#EA1F27',
+                        'nba-pink': '#DD3894',
+                        'nba-yellow': '#FFA436',
+                        'nba-teal': '#16F2D2',
+                        'nba-white': '#FFFFFF',
+                        'nba-gray-light': '#f3f4f6',
+                        'nba-gray-medium': '#e5e7eb',
+                    },
+                },
+            },
+        }
+    </script>
+    <style>
+        /* Base styles, primarily for font and modal, rest handled by Tailwind */
+        body {
+            font-family: 'Montserrat', sans-serif;
+            margin: 0;
+            background-color: var(--tw-colors-nba-blue);
+            color: var(--tw-colors-nba-white);
+        }
+        /* Ensure all form elements also use the Montserrat font */
+        textarea, button, select, input[type="text"], input[type="number"], input[type="checkbox"], input[type="date"], input[type="file"] {
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        /* Table specific styles for consistency */
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            /* Use table-layout: fixed to ensure columns respect width constraints */
+            table-layout: fixed;
+        }
+        th, td {
+            border: 1px solid var(--tw-colors-nba-gray-medium);
+            padding: 12px;
+            text-align: left;
+            /* Remove whitespace-nowrap to allow text to wrap */
+            word-wrap: break-word; /* Ensure long words break */
+            overflow: hidden; /* Hide overflowing content */
+            text-overflow: ellipsis; /* Add ellipsis for overflowed text if needed, though word-wrap should prevent most */
+        }
+        th {
+            background-color: #EA1F27; /* Explicitly set NBA Red background */
+            color: #FFFFFF; /* Explicitly set White text */
+            font-weight: 600;
+        }
+        th.sortable {
+            cursor: pointer;
+            position: relative;
+        }
+        th.sortable:hover {
+            background-color: var(--tw-colors-nba-pink);
+        }
+        /* Sort indicator arrows */
+        th.sortable::after {
+            content: '↕'; /* Unicode for up-down arrow */
+            font-size: 10px;
+            opacity: 0.5;
+            position: absolute;
+            right: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #FFFFFF; /* Ensure arrow is white */
+        }
+        th.asc::after {
+            content: '▲'; /* Up arrow */
+            opacity: 1;
+        }
+        th.desc::after {
+            content: '▼'; /* Down arrow */
+            opacity: 1;
+        }
+        tbody tr {
+            background-color: var(--tw-colors-nba-white);
+            color: var(--tw-colors-nba-blue);
+        }
+        tbody tr:nth-child(even) {
+            background-color: var(--tw-colors-nba-gray-light); /* Slight stripe for readability */
+        }
+        tbody tr:hover {
+            background-color: var(--tw-colors-nba-teal); /* Hover effect for rows */
+            color: var(--tw-colors-nba-white);
+        }
+
+        /* Custom Modal Styles (reused from your other tools) */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.6);
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-content {
+            background-color: #FFFFFF;
+            color: #051A3A;
+            margin: auto;
+            padding: 24px;
+            border-radius: 1rem;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2), 0 10px 10px -5px rgba(0, 0, 0, 0.1);
+            width: 90%;
+            max-width: 480px;
+            text-align: center;
+            position: relative;
+        }
+        #modalMessage {
+            color: #051A3A;
+        }
+        .close-button {
+            position: absolute;
+            top: 8px;
+            right: 12px;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            color: #9ca3af;
+        }
+        .close-button:hover, .close-button:focus {
+            color: #6b7280;
+            text-decoration: none;
+            cursor: pointer;
+        }
+    </style>
 </head>
-<body>
+<body class="p-4 sm:p-6 md:p-8">
+    <div class="max-w-6xl mx-auto bg-nba-blue shadow-2xl rounded-2xl p-6 sm:p-8 md:p-10 border-4 border-nba-red">
+        <h1 class="text-3xl sm:text-4xl font-extrabold text-nba-white mb-6 text-center">NBA 2K Missing Tattoo Tracker</h1>
 
-  <h2><strong>Missing Tattoo Tracker</strong></h2>
-  <div id="uploadContainer">
-    <label for="csvFileInput"><strong>Select CSV File:</strong></label>
-    <input type="file" id="csvFileInput" accept=".csv" onchange="rawCSVFile=this.files[0]; uploadBtn.style.display = rawCSVFile ? 'inline-block' : 'none';" />
-    <button type="button" id="uploadBtn" style="display: none; margin-left:10px;">Upload CSV</button>
-  </div>
+        <div id="uploadContainer" class="mb-6 p-4 border-2 border-nba-yellow rounded-lg bg-nba-blue shadow-md flex items-center justify-center sm:justify-start gap-4 flex-wrap">
+            <label for="csvFileInput" class="font-semibold text-nba-white text-lg">Select CSV File:</label>
+            <input type="file" id="csvFileInput" accept=".csv" class="text-nba-white file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-nba-red file:text-nba-white hover:file:bg-nba-pink file:cursor-pointer"/>
+            <button type="button" id="uploadBtn" style="display: none;"
+                    class="px-6 py-3 bg-nba-red text-nba-white font-bold rounded-lg shadow-lg hover:bg-nba-pink focus:outline-none focus:ring-2 focus:ring-nba-red focus:ring-offset-2 focus:ring-offset-nba-blue transition ease-in-out duration-200 text-lg">
+                Upload CSV
+            </button>
+        </div>
 
-  <div id="successMessage">✅ Success! CSV uploaded.</div>
+        <div id="successMessage" class="hidden bg-green-100 text-green-800 p-3 rounded-lg font-bold text-center mb-6 transition-opacity duration-500 ease-in-out">✅ Success! CSV uploaded.</div>
 
-  <div id="filters">
-    <div><label><input type="checkbox" id="tattooFilter" /> Tattoos Only</label></div>
-    <div><label><input type="checkbox" id="earnedInGameFilter" /> Earned In Game ONLY</label></div>
-    <div><label for="groupingFilter">Filter by Grouping:</label><select id="groupingFilter"><option value="all">All</option></select></div>
-    <div><label for="transactionFilter">Filter by Transaction:</label><select id="transactionFilter"><option value="all">All</option></select></div>
-    <div style="display:flex; gap:10px; align-items:center;">
-      <label for="dateFilterFrom">Date From:</label>
-      <input type="date" id="dateFilterFrom" />
-      <label for="dateFilterTo">Date To:</label>
-      <input type="date" id="dateFilterTo" />
+        <div id="filters" class="filters mb-6 p-4 border-2 border-nba-yellow rounded-lg bg-nba-blue flex flex-wrap items-center justify-center gap-4 sm:gap-6 shadow-md hidden">
+            <div class="filter-group flex items-center gap-2 p-2 border border-nba-gray-medium rounded-lg bg-nba-white shadow-sm">
+                <label for="tattooFilter" class="flex items-center text-nba-blue cursor-pointer text-sm">
+                    <input type="checkbox" id="tattooFilter" class="form-checkbox h-5 w-5 text-nba-red rounded focus:ring-nba-red">
+                    <span class="ml-2 font-semibold text-sm">Tattoos Only</span>
+                </label>
+            </div>
+            <div class="filter-group flex items-center gap-2 p-2 border border-nba-gray-medium rounded-lg bg-nba-white shadow-sm">
+                <label for="earnedInGameFilter" class="flex items-center text-nba-blue cursor-pointer text-sm">
+                    <input type="checkbox" id="earnedInGameFilter" class="form-checkbox h-5 w-5 text-nba-red rounded focus:ring-nba-red">
+                    <span class="ml-2 font-semibold text-sm">Earned In Game ONLY</span>
+                </label>
+            </div>
+            <div class="filter-group flex items-center gap-2 p-2 border border-nba-gray-medium rounded-lg bg-nba-white shadow-sm">
+                <label for="groupingFilter" class="font-semibold text-nba-blue whitespace-nowrap text-sm">Filter by Grouping:</label>
+                <select id="groupingFilter" class="flex-1 rounded-md border-gray-300 shadow-sm focus:border-nba-red focus:ring focus:ring-nba-red focus:ring-opacity-50 p-2 text-sm text-nba-blue">
+                    <option value="all">All</option>
+                </select>
+            </div>
+            <div class="filter-group flex items-center gap-2 p-2 border border-nba-gray-medium rounded-lg bg-nba-white shadow-sm">
+                <label for="transactionFilter" class="font-semibold text-nba-blue whitespace-nowrap text-sm">Filter by Transaction:</label>
+                <select id="transactionFilter" class="flex-1 rounded-md border-gray-300 shadow-sm focus:border-nba-red focus:ring focus:ring-nba-red focus:ring-opacity-50 p-2 text-sm text-nba-blue">
+                    <option value="all">All</option>
+                </select>
+            </div>
+            <div class="filter-group flex items-center gap-2 p-2 border border-nba-gray-medium rounded-lg bg-nba-white shadow-sm">
+                <label for="dateFilterFrom" class="font-semibold text-nba-blue whitespace-nowrap text-sm">Date From:</label>
+                <input type="date" id="dateFilterFrom" class="flex-1 rounded-md border-gray-300 shadow-sm focus:border-nba-red focus:ring focus:ring-nba-red focus:ring-opacity-50 p-2 text-sm text-nba-blue"/>
+                <label for="dateFilterTo" class="font-semibold text-nba-blue whitespace-nowrap text-sm">Date To:</label>
+                <input type="date" id="dateFilterTo" class="flex-1 rounded-md border-gray-300 shadow-sm focus:border-nba-red focus:ring focus:ring-nba-red focus:ring-opacity-50 p-2 text-sm text-nba-blue"/>
+            </div>
+            <div class="filter-group flex items-center gap-2 p-2 border border-nba-gray-medium rounded-lg bg-nba-white shadow-sm">
+                <label for="searchInput" class="font-semibold text-nba-blue whitespace-nowrap text-sm">Search:</label>
+                <input type="text" id="searchInput" placeholder="Search..."
+                       class="flex-1 rounded-md border-gray-300 shadow-sm focus:border-nba-red focus:ring focus:ring-nba-red focus:ring-opacity-50 p-2 text-sm text-nba-blue"/>
+            </div>
+            <div class="filter-group flex items-center gap-2 p-2 border border-nba-gray-medium rounded-lg bg-nba-white shadow-sm">
+                <label for="rowsPerPage" class="font-semibold text-nba-blue whitespace-nowrap text-sm">Rows per page:</label>
+                <select id="rowsPerPage" class="flex-1 rounded-md border-gray-300 shadow-sm focus:border-nba-red focus:ring focus:ring-nba-red focus:ring-opacity-50 p-2 text-sm text-nba-blue">
+                    <option value="10">10</option><option value="20">20</option><option value="50" selected>50</option><option value="100">100</option><option value="all">All</option>
+                </select>
+            </div>
+        </div>
+
+        <div id="vcSpent" class="vc-spent text-nba-white font-bold text-2xl text-center py-2 px-4 rounded-lg shadow-md mb-6 hidden">
+            VC Spent: 0 | VC Earned: 0
+        </div>
+
+        <div class="overflow-x-auto shadow-md rounded-lg">
+            <table id="dataTable" class="min-w-full">
+                <thead></thead>
+                <tbody></tbody>
+            </table>
+        </div>
+
+        <div id="paginationControls" class="flex justify-center gap-2 mt-6"></div>
     </div>
-    <div><label for="searchInput">Search:</label><input type="text" id="searchInput" placeholder="Search..." /></div>
-    <div><label for="rowsPerPage">Rows per page:</label><select id="rowsPerPage"><option value="10">10</option><option value="20">20</option><option value="50" selected>50</option><option value="100">100</option><option value="all">All</option></select></div>
-    <div id="vcSpent">VC Spent: 0 | VC Earned: 0</div>
-  </div>
 
-  <table id="dataTable"><thead></thead><tbody></tbody></table>
-  <div id="paginationControls"></div>
+    <div id="customModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button">&times;</span>
+            <p id="modalMessage" class="text-lg mb-4"></p>
+            <button id="modalOkButton" class="px-6 py-3 bg-nba-red text-nba-white font-bold rounded-lg hover:bg-nba-pink transition duration-200 ease-in-out">OK</button>
+        </div>
+    </div>
 
-  <script>
-    let parsedData = [];
-    let rawCSVFile = null;
-    let currentPage = 1;
-    let rowsPerPage = 50;
-    let sortColumn = null;
-    let sortDirection = 'asc';
-    const keywords = ['tattoo','removal','color','tint','greyscale','letter'];
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 
-    const csvInput = document.getElementById('csvFileInput');
-    const uploadBtn = document.getElementById('uploadBtn');
-    const filtersContainer = document.getElementById('filters');
-    const groupingFilter = document.getElementById('groupingFilter');
-    const transactionFilter = document.getElementById('transactionFilter');
-    const dateFilterFrom = document.getElementById('dateFilterFrom');
-    const dateFilterTo = document.getElementById('dateFilterTo');
-    const searchInput = document.getElementById('searchInput');
-    const rowsPerPageSelector = document.getElementById('rowsPerPage');
-    const tattooFilter = document.getElementById('tattooFilter');
-    const earnedInGameFilter = document.getElementById('earnedInGameFilter');
-    const successMessage = document.getElementById('successMessage');
-    const tableHead = document.querySelector('#dataTable thead');
-    const tableBody = document.querySelector('#dataTable tbody');
-    const vcSpentDisplay = document.getElementById('vcSpent');
-    const paginationControls = document.getElementById('paginationControls');
-
-    csvInput.addEventListener('change', e => {
-      rawCSVFile = e.target.files[0];
-      uploadBtn.style.display = rawCSVFile ? 'inline-block' : 'none';
-    });
-
-    function uploadCSV() {
-      if (!rawCSVFile) return;
-      Papa.parse(rawCSVFile, {
-        header: true,
-        skipEmptyLines: true,
-        complete: results => {
-          parsedData = results.data;
-          sortByDateDescending(parsedData);
-          populateFilters(parsedData);
-          currentPage = 1;
-          renderTable(getFilteredData());
-          filtersContainer.style.display = 'flex';
-          showSuccess();
+    <script>
+        // --- Modal Functions (reused from your other tools) ---
+        function showModal(message) {
+            const modal = document.getElementById('customModal');
+            const modalMessage = document.getElementById('modalMessage');
+            modalMessage.textContent = message;
+            modal.style.display = 'flex';
         }
-      });
-    }
-    uploadBtn.addEventListener('click', uploadCSV);
 
-    function showSuccess() {
-      successMessage.style.display = 'block';
-      successMessage.style.opacity = '1';
-      setTimeout(() => {
-        successMessage.style.opacity = '0';
-        setTimeout(() => successMessage.style.display = 'none', 500);
-      }, 2000);
-    }
+        function hideModal() {
+            document.getElementById('customModal').style.display = 'none';
+        }
 
-    [groupingFilter, transactionFilter, dateFilterFrom, dateFilterTo, searchInput, rowsPerPageSelector, tattooFilter, earnedInGameFilter]
-      .forEach(el => el.onchange = () => { currentPage = 1; renderTable(getFilteredData()); });
-
-    rowsPerPageSelector.onchange = () => {
-      const val = rowsPerPageSelector.value;
-      const filt = getFilteredData();
-      rowsPerPage = val === 'all' ? filt.length : parseInt(val, 10);
-      currentPage = 1;
-      renderTable(filt);
-    };
-
-    function populateFilters(data) {
-      groupingFilter.innerHTML = '<option value="all">All</option>' +
-        Array.from(new Set(data.map(r => r.Grouping))).sort()
-          .map(g => `<option value="${g}">${g}</option>`).join('');
-      transactionFilter.innerHTML = '<option value="all">All</option>' +
-        Array.from(new Set(data.map(r => r.Transaction))).sort()
-          .map(t => `<option value="${t}">${t}</option>`).join('');
-    }
-
-    function getFilteredData() {
-      const eig = earnedInGameFilter.checked;
-      const gv = groupingFilter.value;
-      const tv = transactionFilter.value;
-      const fromVal = dateFilterFrom.value;
-      const toVal = dateFilterTo.value;
-      const sv = searchInput.value.toLowerCase();
-      const tf = tattooFilter.checked;
-      return parsedData.filter(row => {
-        const rvDate = new Date(row.Date);
-        const validDate = (!fromVal || rvDate >= new Date(fromVal)) && (!toVal || rvDate <= new Date(toVal));
-        const av = (row.Action || '').toLowerCase();
-        return (gv === 'all' || row.Grouping === gv)
-            && (tv === 'all' || row.Transaction === tv)
-            && validDate
-            && Object.values(row).some(v => v && v.toLowerCase().includes(sv))
-            && (!tf || keywords.some(k => av.includes(k)))
-            && (!eig || (av !== 'vc_voucher'));
-      });
-    }
-
-    function renderTable(data) {
-      tableHead.innerHTML = '';
-      tableBody.innerHTML = '';
-      if (!data.length) return;
-      const headers = Object.keys(data[0]).filter(h => h.toLowerCase() !== 'id');
-      const hr = document.createElement('tr');
-      headers.forEach(h => {
-        const th = document.createElement('th');
-        th.textContent = h + (sortColumn === h ? (sortDirection === 'asc' ? ' ▲' : ' ▼') : '');
-        th.onclick = () => toggleSort(h);
-        hr.appendChild(th);
-      });
-      tableHead.appendChild(hr);
-      let tbl = data.slice();
-      if (sortColumn) tbl.sort((a, b) => compare(a[sortColumn], b[sortColumn]));
-      const start = (currentPage - 1) * rowsPerPage;
-      const page = tbl.slice(start, start + rowsPerPage);
-      page.forEach(r => {
-        const tr = document.createElement('tr');
-        headers.forEach(h => {
-          const td = document.createElement('td');
-          if (h === 'Date') {
-            const d = new Date(r.Date);
-            td.textContent = isNaN(d) ? r.Date : `${d.getMonth()+1}/${d.getDate()}/${d.getFullYear()}`;
-          } else td.textContent = r[h];
-          tr.appendChild(td);
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelector('#customModal .close-button').addEventListener('click', hideModal);
+            document.getElementById('modalOkButton').addEventListener('click', hideModal);
+            document.getElementById('customModal').addEventListener('click', (e) => {
+                if (e.target === document.getElementById('customModal')) {
+                    hideModal();
+                }
+            });
         });
-        tableBody.appendChild(tr);
-      });
-      updateVCSpent(getFilteredData());
-      renderPaginationControls(tbl.length);
-    }
 
-    function toggleSort(col) {
-      if (sortColumn === col) sortDirection = sortDirection === 'asc' ? 'desc' : 'asc'; else { sortColumn = col; sortDirection = 'asc'; }
-      currentPage = 1;
-      renderTable(getFilteredData());
-    }
+        // --- Missing Tattoo Tracker Logic ---
+        let parsedData = [];
+        let rawCSVFile = null;
+        let currentPage = 1;
+        let rowsPerPage = 50;
+        let sortColumn = null;
+        let sortDirection = 'asc';
+        const keywords = ['tattoo', 'removal', 'color', 'tint', 'greyscale', 'letter'];
 
-    function compare(a, b) {
-      const na = parseFloat(a), nb = parseFloat(b);
-      if (!isNaN(na) && !isNaN(nb)) { a = na; b = nb; }
-      return (a < b ? -1 : a > b ? 1 : 0) * (sortDirection === 'asc' ? 1 : -1);
-    }
+        const elements = {
+            csvInput: document.getElementById('csvFileInput'),
+            uploadBtn: document.getElementById('uploadBtn'),
+            filtersContainer: document.getElementById('filters'),
+            groupingFilter: document.getElementById('groupingFilter'),
+            transactionFilter: document.getElementById('transactionFilter'),
+            dateFilterFrom: document.getElementById('dateFilterFrom'),
+            dateFilterTo: document.getElementById('dateFilterTo'),
+            searchInput: document.getElementById('searchInput'),
+            rowsPerPageSelector: document.getElementById('rowsPerPage'),
+            tattooFilter: document.getElementById('tattooFilter'),
+            earnedInGameFilter: document.getElementById('earnedInGameFilter'),
+            successMessage: document.getElementById('successMessage'),
+            tableHead: document.querySelector('#dataTable thead'),
+            tableBody: document.querySelector('#dataTable tbody'),
+            vcSpentDisplay: document.getElementById('vcSpent'),
+            paginationControls: document.getElementById('paginationControls'),
+        };
 
-    function updateVCSpent(data) {
-      let spent = 0, earned = 0;
-      data.forEach(r => {
-        const v = parseFloat(r.VC);
-        if (!isNaN(v)) {
-          if (r.Transaction && r.Transaction.toLowerCase() === 'credit') earned += v;
-          else if (v < 0) spent += Math.abs(v);
+        elements.csvInput.addEventListener('change', e => {
+            rawCSVFile = e.target.files[0];
+            elements.uploadBtn.style.display = rawCSVFile ? 'inline-block' : 'none';
+        });
+
+        function uploadCSV() {
+            // Defensive check for PapaParse library
+            if (typeof Papa === 'undefined') {
+                showModal("Error: PapaParse library is not loaded. Please try again or check your internet connection.");
+                console.error("PapaParse library (Papa) is not defined.");
+                return;
+            }
+
+            if (!rawCSVFile) {
+                showModal("Please select a CSV file first.");
+                return;
+            }
+            Papa.parse(rawCSVFile, {
+                header: true,
+                skipEmptyLines: true,
+                complete: results => {
+                    if (results.errors.length) {
+                        console.error("CSV Parsing Errors:", results.errors);
+                        showModal("Error parsing CSV. Please check the file format.");
+                        return;
+                    }
+                    if (!results.data.length) {
+                        showModal("CSV file is empty or contains no valid data.");
+                        return;
+                    }
+                    parsedData = results.data;
+                    // Ensure 'Date' column exists for sorting
+                    if (parsedData[0] && parsedData[0].Date) {
+                        sortByDateDescending(parsedData);
+                    } else {
+                         console.warn("Date column not found for initial sort.");
+                    }
+
+                    populateFilters(parsedData);
+                    currentPage = 1;
+                    renderTable(getFilteredData());
+                    elements.filtersContainer.classList.remove('hidden'); // Show filters
+                    elements.vcSpentDisplay.classList.remove('hidden'); // Show VC display
+                    showSuccess();
+                }
+            });
         }
-      });
-      vcSpentDisplay.textContent = `VC Spent: ${spent.toLocaleString()} | VC Earned: ${earned.toLocaleString()}`;
-    }
+        elements.uploadBtn.addEventListener('click', uploadCSV);
 
-    function renderPaginationControls(totalRows) {
-      paginationControls.innerHTML = '';
-      const totalPages = Math.ceil(totalRows / rowsPerPage);
-      const maxShow = 7;
-      let start = Math.max(1, currentPage - Math.floor(maxShow/2));
-      let end = Math.min(totalPages, start + maxShow - 1);
-      if (end - start + 1 < maxShow) start = Math.max(1, end - maxShow + 1);
-      const prev = document.createElement('button'); prev.textContent = 'Prev'; prev.disabled = currentPage===1;
-      prev.onclick = () => { if (currentPage>1) { currentPage--; renderTable(getFilteredData()); }};
-      paginationControls.appendChild(prev);
-      for (let i = start; i <= end; i++) {
-        const btn = document.createElement('button'); btn.textContent = i; btn.disabled = i===currentPage;
-        btn.onclick = () => { currentPage = i; renderTable(getFilteredData()); };
-        paginationControls.appendChild(btn);
-      }
-      const next = document.createElement('button'); next.textContent = 'Next'; next.disabled = currentPage===totalPages;
-      next.onclick = () => { if (currentPage<totalPages) { currentPage++; renderTable(getFilteredData()); }};
-      paginationControls.appendChild(next);
-    }
+        function showSuccess() {
+            elements.successMessage.classList.remove('hidden');
+            elements.successMessage.style.opacity = '1';
+            setTimeout(() => {
+                elements.successMessage.style.opacity = '0';
+                setTimeout(() => elements.successMessage.classList.add('hidden'), 500);
+            }, 2000);
+        }
 
-    function sortByDateDescending(arr) { arr.sort((a,b) => new Date(b.Date) - new Date(a.Date)); }
-  </script>
+        [elements.groupingFilter, elements.transactionFilter, elements.dateFilterFrom, elements.dateFilterTo, elements.searchInput, elements.tattooFilter, elements.earnedInGameFilter]
+            .forEach(el => el.onchange = () => { currentPage = 1; renderTable(getFilteredData()); });
+
+        elements.rowsPerPageSelector.onchange = () => {
+            const val = elements.rowsPerPageSelector.value;
+            const filt = getFilteredData();
+            rowsPerPage = val === 'all' ? filt.length : parseInt(val, 10);
+            currentPage = 1;
+            renderTable(filt);
+        };
+
+        function populateFilters(data) {
+            // Grouping Filter
+            const groupingOptions = Array.from(new Set(data.map(r => r.Grouping).filter(g => g))).sort();
+            elements.groupingFilter.innerHTML = '<option value="all">All</option>' + groupingOptions.map(g => `<option value="${g}">${g}</option>`).join('');
+
+            // Transaction Filter
+            const transactionOptions = Array.from(new Set(data.map(r => r.Transaction).filter(t => t))).sort();
+            elements.transactionFilter.innerHTML = '<option value="all">All</option>' + transactionOptions.map(t => `<option value="${t}">${t}</option>`).join('');
+        }
+
+        function getFilteredData() {
+            const eig = elements.earnedInGameFilter.checked;
+            const gv = elements.groupingFilter.value;
+            const tv = elements.transactionFilter.value;
+            const fromVal = elements.dateFilterFrom.value;
+            const toVal = elements.dateFilterTo.value;
+            const sv = elements.searchInput.value.toLowerCase();
+            const tf = elements.tattooFilter.checked;
+
+            return parsedData.filter(row => {
+                const rowDate = row.Date ? new Date(row.Date) : null;
+                const validDate = (!rowDate || isNaN(rowDate.getTime())) ? true : // If Date is invalid or missing, don't filter by date
+                                  (!fromVal || rowDate >= new Date(fromVal)) &&
+                                  (!toVal || rowDate <= new Date(toVal));
+
+                const actionValue = (row.Action || '').toLowerCase();
+                const includesSearch = Object.values(row).some(v => v && String(v).toLowerCase().includes(sv));
+
+                return (gv === 'all' || row.Grouping === gv) &&
+                       (tv === 'all' || row.Transaction === tv) &&
+                       validDate &&
+                       includesSearch &&
+                       (!tf || keywords.some(k => actionValue.includes(k))) &&
+                       (!eig || (actionValue.includes('vc_voucher') || actionValue.includes('mt_voucher'))); // Adjusted 'Earned In Game' logic
+            });
+        }
+
+        function renderTable(data) {
+            elements.tableHead.innerHTML = '';
+            elements.tableBody.innerHTML = '';
+
+            const headers = data.length > 0 ? Object.keys(data[0]).filter(h => h.toLowerCase() !== 'id') : [];
+
+            if (!headers.length) { // No data or no valid headers after ID filter
+                elements.tableBody.innerHTML = '<tr><td colspan="1" class="text-center py-4 text-gray-600 italic">No data to display.</td></tr>';
+                return;
+            }
+            if (!data.length) { // Data exists but no rows after filtering
+                elements.tableBody.innerHTML = `<tr><td colspan="${headers.length}" class="text-center py-4 text-gray-600 italic">No matching data found.</td></tr>`;
+                 updateVCSpent([]); // Reset VC display if no data
+                renderPaginationControls(0);
+                return;
+            }
+
+            // Create colgroup for column widths
+            const colgroup = document.createElement('colgroup');
+            headers.forEach(h => {
+                const col = document.createElement('col');
+                if (h === 'VC' || h === 'MTP') {
+                    col.style.width = '8%'; // Smaller width for VC and MTP
+                } else if (h === 'Action') {
+                    col.style.width = '25%'; // Larger width for Action
+                }
+                // Other columns will auto-distribute remaining space
+                colgroup.appendChild(col);
+            });
+            elements.tableHead.appendChild(colgroup); // Append colgroup to thead
+
+
+            const headerRow = document.createElement('tr');
+            headers.forEach(h => {
+                const th = document.createElement('th');
+                th.textContent = h + (sortColumn === h ? (sortDirection === 'asc' ? ' ▲' : ' ▼') : '');
+                th.className = 'px-4 py-2 text-left text-sm font-semibold'; // Removed whitespace-nowrap
+                th.classList.add('sortable');
+
+                if (sortColumn === h) {
+                    th.classList.add(sortDirection);
+                } else {
+                    th.classList.remove('asc', 'desc');
+                }
+
+                th.onclick = () => toggleSort(h);
+                headerRow.appendChild(th);
+            });
+            elements.tableHead.appendChild(headerRow);
+
+            let tableData = data.slice(); // Use a slice to sort the current view without affecting original filtered data
+            if (sortColumn) {
+                tableData.sort((a, b) => compare(a[sortColumn], b[sortColumn]));
+            }
+
+            const start = (currentPage - 1) * rowsPerPage;
+            const page = tableData.slice(start, start + rowsPerPage);
+
+            page.forEach(r => {
+                const tr = document.createElement('tr');
+                tr.className = 'bg-nba-white even:bg-nba-gray-light hover:bg-nba-teal hover:text-nba-white transition-colors duration-150';
+                headers.forEach(h => {
+                    const td = document.createElement('td');
+                    if (h === 'Date') {
+                        const d = new Date(r.Date);
+                        td.textContent = isNaN(d) ? r.Date : `${d.getMonth() + 1}/${d.getDate()}/${d.getFullYear()}`;
+                    } else {
+                        td.textContent = r[h];
+                    }
+                    td.className = 'px-4 py-2 text-sm'; // Removed whitespace-nowrap
+                    tr.appendChild(td);
+                });
+                elements.tableBody.appendChild(tr);
+            });
+            updateVCSpent(getFilteredData()); // Update VC based on all filtered data, not just current page
+            renderPaginationControls(getFilteredData().length); // Total rows for pagination should be from filtered data
+        }
+
+        function toggleSort(col) {
+            if (sortColumn === col) {
+                sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
+            } else {
+                sortColumn = col;
+                sortDirection = 'asc';
+            }
+            currentPage = 1;
+            renderTable(getFilteredData());
+        }
+
+        function compare(a, b) {
+            const valA = String(a).toLowerCase(); // Convert to string for consistent comparison
+            const valB = String(b).toLowerCase();
+
+            const numA = parseFloat(valA);
+            const numB = parseFloat(valB);
+
+            if (!isNaN(numA) && !isNaN(numB)) {
+                return (numA - numB) * (sortDirection === 'asc' ? 1 : -1);
+            } else {
+                return valA.localeCompare(valB) * (sortDirection === 'asc' ? 1 : -1);
+            }
+        }
+
+        function updateVCSpent(data) {
+            let spent = 0;
+            let earned = 0;
+            data.forEach(r => {
+                const vcValue = parseFloat(r.VC);
+                if (!isNaN(vcValue)) {
+                    if (r.Transaction && r.Transaction.toLowerCase().includes('credit')) { // Check if 'credit' is part of transaction
+                        earned += vcValue;
+                    } else if (vcValue < 0) { // If VC is negative, it's spent
+                        spent += Math.abs(vcValue);
+                    }
+                }
+            });
+            elements.vcSpentDisplay.textContent = `VC Spent: ${spent.toLocaleString()} | VC Earned: ${earned.toLocaleString()}`;
+            elements.vcSpentDisplay.classList.remove('hidden'); // Ensure VC display is shown
+            elements.vcSpentDisplay.classList.remove('bg-nba-yellow', 'bg-nba-red'); // Remove previous color classes
+            elements.vcSpentDisplay.classList.add(spent > earned ? 'bg-nba-red' : 'bg-nba-yellow'); // Dynamic background based on spent/earned
+        }
+
+        function renderPaginationControls(totalRows) {
+            elements.paginationControls.innerHTML = '';
+            const totalPages = rowsPerPage === 0 ? 1 : Math.ceil(totalRows / rowsPerPage); // Handle rowsPerPage 'all' or 0
+            if (totalPages <= 1) return; // No need for pagination if 1 or less pages
+
+            const maxShow = 7; // Max number of page buttons to show
+            let startPage, endPage;
+
+            if (totalPages <= maxShow) {
+                // Less than maxShow total pages so show all
+                startPage = 1;
+                endPage = totalPages;
+            } else {
+                // More than maxShow total pages so calculate start and end pages
+                startPage = Math.max(1, currentPage - Math.floor(maxShow / 2));
+                endPage = Math.min(totalPages, startPage + maxShow - 1);
+
+                if (endPage - startPage + 1 < maxShow) {
+                    startPage = Math.max(1, endPage - maxShow + 1);
+                }
+            }
+
+            const prevBtn = document.createElement('button');
+            prevBtn.textContent = 'Prev';
+            prevBtn.className = 'px-3 py-1 bg-nba-yellow text-nba-blue font-semibold rounded-md shadow-sm hover:bg-nba-teal transition-colors duration-150 disabled:opacity-50 disabled:cursor-not-allowed';
+            prevBtn.disabled = currentPage === 1;
+            prevBtn.onclick = () => { if (currentPage > 1) { currentPage--; renderTable(getFilteredData()); } };
+            elements.paginationControls.appendChild(prevBtn);
+
+            if (startPage > 1) {
+                const firstPageBtn = document.createElement('button');
+                firstPageBtn.textContent = '1';
+                firstPageBtn.className = 'px-3 py-1 bg-nba-yellow text-nba-blue font-semibold rounded-md shadow-sm hover:bg-nba-teal transition-colors duration-150';
+                firstPageBtn.onclick = () => { currentPage = 1; renderTable(getFilteredData()); };
+                elements.paginationControls.appendChild(firstPageBtn);
+                if (startPage > 2) {
+                    const dots = document.createElement('span');
+                    dots.textContent = '...';
+                    dots.className = 'px-3 py-1 text-nba-white';
+                    elements.paginationControls.appendChild(dots);
+                }
+            }
+
+            for (let i = startPage; i <= endPage; i++) {
+                const btn = document.createElement('button');
+                btn.textContent = i;
+                btn.className = `px-3 py-1 font-semibold rounded-md shadow-sm transition-colors duration-150 ${i === currentPage ? 'bg-nba-red text-nba-white' : 'bg-nba-yellow text-nba-blue hover:bg-nba-teal'}`;
+                btn.disabled = i === currentPage;
+                btn.onclick = () => { currentPage = i; renderTable(getFilteredData()); };
+                elements.paginationControls.appendChild(btn);
+            }
+
+            if (endPage < totalPages) {
+                if (endPage < totalPages - 1) {
+                    const dots = document.createElement('span');
+                    dots.textContent = '...';
+                    dots.className = 'px-3 py-1 text-nba-white';
+                    elements.paginationControls.appendChild(dots);
+                }
+                const lastPageBtn = document.createElement('button');
+                lastPageBtn.textContent = totalPages;
+                lastPageBtn.className = 'px-3 py-1 bg-nba-yellow text-nba-blue font-semibold rounded-md shadow-sm hover:bg-nba-teal transition-colors duration-150';
+                lastPageBtn.onclick = () => { currentPage = totalPages; renderTable(getFilteredData()); };
+                elements.paginationControls.appendChild(lastPageBtn);
+            }
+
+            const nextBtn = document.createElement('button');
+            nextBtn.textContent = 'Next';
+            nextBtn.className = 'px-3 py-1 bg-nba-yellow text-nba-blue font-semibold rounded-md shadow-sm hover:bg-nba-teal transition-colors duration-150 disabled:opacity-50 disabled:cursor-not-allowed';
+            nextBtn.disabled = currentPage === totalPages;
+            nextBtn.onclick = () => { if (currentPage < totalPages) { currentPage++; renderTable(getFilteredData()); } };
+            elements.paginationControls.appendChild(nextBtn);
+        }
+
+        function sortByDateDescending(arr) {
+            // Ensure 'Date' column exists before attempting to sort
+            if (arr.length > 0 && arr[0].Date !== undefined) {
+                arr.sort((a, b) => {
+                    const dateA = new Date(a.Date);
+                    const dateB = new Date(b.Date);
+                    // Handle invalid dates by placing them at the end or treating as equal
+                    if (isNaN(dateA.getTime()) && isNaN(dateB.getTime())) return 0;
+                    if (isNaN(dateA.getTime())) return 1;
+                    if (isNaN(dateB.getTime())) return -1;
+                    return dateB.getTime() - dateA.getTime(); // Descending order
+                });
+            }
+        }
+    </script>
 </body>
 </html>
