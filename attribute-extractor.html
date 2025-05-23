@@ -1,147 +1,341 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>NBA 2K Attribute Extractor</title>
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
-  <style>
-    body { font-family: 'Montserrat', sans-serif; padding: 20px; background: #ffffff; color: #000000; }
-    .header-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-    .header-row p { margin: 0; font-size: 1rem; }
-    .version-info { font-weight: bold; background: #007BFF; color: white; padding: 4px 8px; border-radius: 4px; font-size: 0.9rem; }
-    .layout { display: flex; gap: 20px; }
-    .left, .right { flex: 1; }
-    textarea { width: 100%; height: 300px; border: 1px solid #ccc; padding: 10px; box-sizing: border-box; font-family: inherit; }
-    .buttons { margin-top: 10px; }
-    button { padding: 8px 16px; margin-right: 10px; background: #007BFF; color: white; border: none; cursor: pointer; border-radius: 4px; font-family: inherit; }
-    button:hover { background: #0056b3; }
-    .warning { color: red; font-weight: bold; display: none; margin-top: 10px; }
-    .player-info ul { list-style: none; padding: 0; margin: 0; }
-    .player-info li { margin-bottom: 4px; }
-    table { border-collapse: collapse; width: 100%; background: #ffffff; }
-    th, td { border: 1px solid #ccc; padding: 8px; text-align: left; font-family: inherit; }
-    .category-row { background: #f0f0f0; font-weight: bold; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NBA 2K Attribute Extractor</title>
+    <link rel="icon" href="https://upload.wikimedia.org/wikipedia/commons/7/7a/Basketball.png" type="image/png">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        // Tailwind CSS Configuration for NBA 2K Branding
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        montserrat: ['Montserrat', 'sans-serif'], // Keep Montserrat as primary font
+                    },
+                    colors: {
+                        'nba-blue': '#051A3A',    // Deep dark blue, primary background/text
+                        'nba-red': '#EA1F27',     // Vibrant red, accent/button
+                        'nba-pink': '#DD3894',    // Secondary accent pink
+                        'nba-yellow': '#FFA436',  // Gold/Orange accent
+                        'nba-teal': '#16F2D2',    // Teal accent
+                        'nba-white': '#FFFFFF',   // Pure white
+                        'nba-gray-light': '#f3f4f6', // Light background gray
+                        'nba-gray-medium': '#e5e7eb', // Border/divider gray
+                    },
+                },
+            },
+        }
+    </script>
+    <style>
+        /* Base styles, primarily for font and modal, rest handled by Tailwind */
+        body {
+            font-family: 'Montserrat', sans-serif; /* Ensure Montserrat is applied */
+            margin: 0; /* Reset default body margin */
+            background-color: var(--tw-colors-nba-blue); /* Use NBA dark blue as background */
+            color: var(--tw-colors-nba-white); /* White text on dark background */
+        }
+        /* Ensure all form elements also use the Montserrat font */
+        textarea, button, select, input[type="text"], input[type="number"] {
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        /* Custom Modal Styles (reused for consistency) */
+        .modal {
+            display: none; /* Hidden by default */
+            position: fixed; /* Stay in place */
+            z-index: 1000; /* Sit on top */
+            left: 0;
+            top: 0;
+            width: 100%; /* Full width */
+            height: 100%; /* Full height */
+            overflow: auto; /* Enable scroll if needed */
+            background-color: rgba(0,0,0,0.6); /* Darker overlay */
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-content {
+            background-color: var(--tw-colors-nba-white);
+            color: var(--tw-colors-nba-blue);
+            margin: auto;
+            padding: 24px; /* p-6 */
+            border-radius: 1rem; /* rounded-xl */
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2), 0 10px 10px -5px rgba(0, 0, 0, 0.1); /* shadow-2xl */
+            width: 90%;
+            max-width: 480px; /* max-w-sm */
+            text-align: center;
+            position: relative;
+        }
+        .close-button {
+            position: absolute;
+            top: 8px;
+            right: 12px;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            color: #9ca3af; /* gray-400 */
+        }
+        .close-button:hover,
+        .close-button:focus {
+            color: #6b7280; /* gray-600 */
+            text-decoration: none;
+            cursor: pointer;
+        }
+    </style>
 </head>
-<body>
-  <h2>NBA 2K Attribute Extractor</h2>
-  <div class="header-row">
-    <p>Enter Build Details from Admin Web:</p>
-    <div id="version" class="version-info">Detected Version: Unknown</div>
-  </div>
-  <div class="layout">
-    <div class="left">
-      <textarea id="input" placeholder="Paste build data here..." oninput="validateInput()"></textarea>
-      <div class="buttons">
-        <button onclick="extractAttributes()">Extract</button>
-        <button onclick="copyHTMLTable()" id="copyBtn" style="display:none;">Copy Table to Clipboard</button>
-        <button onclick="resetAll()">Reset</button>
-      </div>
-      <div id="warning" class="warning">⚠️ Please paste valid NBA 2K data to extract.</div>
+<body class="p-4 sm:p-6 md:p-8">
+    <div class="max-w-6xl mx-auto bg-nba-blue shadow-2xl rounded-2xl p-6 sm:p-8 md:p-10 border-4 border-nba-red">
+        <div class="flex flex-col sm:flex-row justify-between items-center mb-6">
+            <h1 class="text-3xl sm:text-4xl font-extrabold text-nba-white mb-4 sm:mb-0">NBA 2K Attribute Extractor</h1>
+            <div id="version" class="version-info bg-nba-red text-nba-white px-4 py-2 rounded-full font-bold text-sm shadow-md">
+                Detected Version: Unknown
+            </div>
+        </div>
+
+        <p class="text-nba-white text-lg mb-4">Paste build data from Admin Web:</p>
+
+        <div class="flex flex-col lg:flex-row gap-6">
+            <div class="flex-1">
+                <textarea id="input" placeholder="Paste build data here..." oninput="validateInput()"
+                          class="w-full h-72 p-4 border-2 border-nba-red rounded-lg focus:ring-4 focus:ring-nba-yellow focus:border-transparent text-nba-blue bg-nba-white resize-y shadow-inner"></textarea>
+                <div class="flex flex-wrap gap-4 mt-4">
+                    <button onclick="extractAttributes()"
+                            class="px-6 py-3 bg-nba-red text-nba-white font-bold rounded-lg shadow-lg hover:bg-nba-pink focus:outline-none focus:ring-2 focus:ring-nba-red focus:ring-offset-2 focus:ring-offset-nba-blue transition ease-in-out duration-200 text-lg">
+                        Extract Attributes
+                    </button>
+                    <button onclick="copyHTMLTable()" id="copyBtn" style="display:none;"
+                            class="px-6 py-3 bg-nba-yellow text-nba-blue font-bold rounded-lg shadow-lg hover:bg-nba-teal focus:outline-none focus:ring-2 focus:ring-nba-yellow focus:ring-offset-2 focus:ring-offset-nba-blue transition ease-in-out duration-200 text-lg">
+                        Copy Table to Clipboard
+                    </button>
+                    <button onclick="resetAll()"
+                            class="px-6 py-3 bg-gray-600 text-nba-white font-bold rounded-lg shadow-lg hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 focus:ring-offset-nba-blue transition ease-in-out duration-200 text-lg">
+                        Reset
+                    </button>
+                </div>
+                <div id="warning" class="warning text-nba-yellow font-bold mt-4 text-center text-base animate-pulse hidden">
+                    ⚠️ Please paste valid NBA 2K data to extract.
+                </div>
+            </div>
+
+            <div class="flex-1 bg-nba-white p-6 rounded-lg shadow-xl border-2 border-nba-teal">
+                <div id="playerInfo" class="player-info text-nba-blue mb-6 hidden">
+                    <h3 class="text-2xl font-bold mb-3 text-nba-red">Player Details</h3>
+                    <ul class="list-none p-0 m-0 text-lg">
+                        <li><strong>Position:</strong> <span id="info-position"></span></li>
+                        <li><strong>OVR:</strong> <span id="info-ovr"></span></li>
+                        <li><strong>Archetype:</strong> <span id="info-archetype"></span></li>
+                        <li><strong>Height:</strong> <span id="info-height"></span></li>
+                        <li><strong>Wingspan:</strong> <span id="info-wingspan"></span></li>
+                        <li><strong>Weight:</strong> <span id="info-weight"></span></li>
+                    </ul>
+                </div>
+                <table id="resultTable" class="min-w-full bg-nba-white rounded-lg shadow-md hidden">
+                    <thead>
+                        <tr>
+                            <th class="px-4 py-2 bg-nba-red text-nba-white text-left text-lg font-semibold rounded-tl-lg">Attribute</th>
+                            <th class="px-4 py-2 bg-nba-red text-nba-white text-left text-lg font-semibold rounded-tr-lg">Value</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-nba-gray-medium text-nba-blue">
+                        </tbody>
+                </table>
+            </div>
+        </div>
     </div>
-    <div class="right">
-      <div id="playerInfo" class="player-info" style="display:none;"></div>
-      <table id="resultTable" style="display:none;">
-        <thead><tr><th>Attribute</th><th>Value</th></tr></thead>
-        <tbody></tbody>
-      </table>
+
+    <div id="customModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button">&times;</span>
+            <p id="modalMessage" class="text-lg text-nba-blue mb-4"></p>
+            <button id="modalOkButton" class="px-6 py-3 bg-nba-red text-nba-white font-bold rounded-lg hover:bg-nba-pink transition duration-200 ease-in-out">OK</button>
+        </div>
     </div>
-  </div>
 
-  <script>
-    function validateInput() {
-      const input = document.getElementById('input').value.trim();
-      document.getElementById('warning').style.display = input.length < 10 ? 'block' : 'none';
-    }
-
-    function extractAttributes() {
-      const data = document.getElementById('input').value.trim();
-      if (data.length < 10) {
-        document.getElementById('warning').style.display = 'block';
-        return;
-      }
-      document.getElementById('warning').style.display = 'none';
-
-      const lines = data.split('\n');
-      const tbody = document.querySelector('#resultTable tbody');
-      const playerInfo = document.getElementById('playerInfo');
-      const versionInfo = document.getElementById('version');
-
-      tbody.innerHTML = '';
-      playerInfo.innerHTML = '';
-
-      const extra = { Position: '', OVR: '', Archetype: '', Height: '', Wingspan: '', Weight: '' };
-      let detected = 'Unknown';
-
-      lines.forEach(line => {
-        const parts = line.trim().split(/\t+/);
-        const nums = parts.filter(p => /^\d+$/.test(p));
-        const name = parts[0];
-        let value = '';
-
-        if (parts.length === 1 && !/\d/.test(parts[0])) {
-          tbody.innerHTML += `<tr class='category-row'><td colspan=2>${name}</td></tr>`;
-          return;
+    <script>
+        // --- Modal Functions ---
+        function showModal(message) {
+            const modal = document.getElementById('customModal');
+            const modalMessage = document.getElementById('modalMessage');
+            modalMessage.textContent = message;
+            modal.style.display = 'flex';
         }
 
-        if (nums.length === 2) {
-          value = nums[1]; detected = 'NBA 2K24';
-        } else if (nums.length === 3) {
-          value = nums[1]; detected = 'NBA 2K25';
+        function hideModal() {
+            document.getElementById('customModal').style.display = 'none';
         }
 
-        if (!isNaN(parseInt(value))) {
-          tbody.innerHTML += `<tr><td>${name}</td><td>${value}</td></tr>`;
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelector('#customModal .close-button').addEventListener('click', hideModal);
+            document.getElementById('modalOkButton').addEventListener('click', hideModal);
+            document.getElementById('customModal').addEventListener('click', (e) => {
+                if (e.target === document.getElementById('customModal')) {
+                    hideModal();
+                }
+            });
+        });
+
+        // --- Attribute Extractor Logic ---
+        function validateInput() {
+            const input = document.getElementById('input').value.trim();
+            document.getElementById('warning').classList.toggle('hidden', input.length >= 10);
         }
 
-        if (parts.length >= 2) {
-          if (name === 'Position') extra.Position = parts[1];
-          else if (name === 'Overall' || name === 'OVR') extra.OVR = parts[1];
-          else if (name === 'Potential Description') extra.Archetype = parts[1];
-          else if (['Height','Wingspan','Weight'].includes(name)) extra[name] = parts[1];
+        function extractAttributes() {
+            const data = document.getElementById('input').value.trim();
+            if (data.length < 10) {
+                document.getElementById('warning').classList.remove('hidden');
+                return;
+            }
+            document.getElementById('warning').classList.add('hidden');
+
+            const lines = data.split('\n');
+            const tbody = document.querySelector('#resultTable tbody');
+            const playerInfoDiv = document.getElementById('playerInfo');
+            const versionInfoSpan = document.getElementById('version');
+
+            // Clear previous results
+            tbody.innerHTML = '';
+            playerInfoDiv.classList.add('hidden'); // Hide player info until populated
+            document.getElementById('resultTable').classList.add('hidden'); // Hide table until populated
+            document.getElementById('copyBtn').style.display = 'none'; // Hide copy button
+
+            // Cache player info spans
+            const infoSpans = {
+                Position: document.getElementById('info-position'),
+                OVR: document.getElementById('info-ovr'),
+                Archetype: document.getElementById('info-archetype'),
+                Height: document.getElementById('info-height'),
+                Wingspan: document.getElementById('info-wingspan'),
+                Weight: document.getElementById('info-weight'),
+            };
+
+            const extra = { Position: 'N/A', OVR: 'N/A', Archetype: 'N/A', Height: 'N/A', Wingspan: 'N/A', Weight: 'N/A' };
+            let detectedVersion = 'Unknown';
+
+            lines.forEach(line => {
+                const parts = line.trim().split(/\t+/); // Split by one or more tabs
+                const name = parts[0];
+                let value = '';
+
+                // Handle category rows
+                if (parts.length === 1 && !/\d/.test(parts[0])) {
+                    const tr = document.createElement('tr');
+                    tr.className = 'bg-nba-gray-light font-bold text-nba-blue'; // Tailwind for category row
+                    const td = document.createElement('td');
+                    td.setAttribute('colspan', '2');
+                    td.textContent = name;
+                    td.className = 'px-4 py-2'; // Tailwind padding
+                    tr.appendChild(td);
+                    tbody.appendChild(tr);
+                    return; // Skip to next line
+                }
+
+                // Determine version and extract value
+                const numbersInParts = parts.filter(p => /^\d+(\.\d+)?$/.test(p)); // Filter for numbers (integers or floats)
+
+                if (numbersInParts.length >= 2) { // Covers both 2K24 (2 numbers) and 2K25 (3 numbers)
+                    value = numbersInParts[1]; // The second number is usually the attribute value
+                    if (numbersInParts.length === 2) {
+                        detectedVersion = 'NBA 2K24';
+                    } else if (numbersInParts.length === 3) {
+                        detectedVersion = 'NBA 2K25';
+                    }
+                }
+
+                if (value !== '' && !isNaN(parseFloat(value))) { // Ensure value is a valid number
+                    const tr = document.createElement('tr');
+                    tr.className = 'hover:bg-nba-gray-light'; // Tailwind hover
+                    const tdName = document.createElement('td');
+                    tdName.textContent = name;
+                    tdName.className = 'px-4 py-2';
+                    const tdValue = document.createElement('td');
+                    tdValue.textContent = value;
+                    tdValue.className = 'px-4 py-2';
+                    tr.appendChild(tdName);
+                    tr.appendChild(tdValue);
+                    tbody.appendChild(tr);
+                }
+
+                // Extract player info
+                if (parts.length >= 2) {
+                    if (name === 'Position') extra.Position = parts[1];
+                    else if (name === 'Overall' || name === 'OVR') extra.OVR = parts[1];
+                    else if (name === 'Potential Description') extra.Archetype = parts[1];
+                    else if (['Height', 'Wingspan', 'Weight'].includes(name)) extra[name] = parts[1];
+                }
+            });
+
+            versionInfoSpan.textContent = `Detected Version: ${detectedVersion}`;
+
+            // Populate player info spans
+            infoSpans.Position.textContent = extra.Position;
+            infoSpans.OVR.textContent = extra.OVR;
+            infoSpans.Archetype.textContent = extra.Archetype;
+            infoSpans.Height.textContent = extra.Height;
+            infoSpans.Wingspan.textContent = extra.Wingspan;
+            infoSpans.Weight.textContent = extra.Weight;
+
+            playerInfoDiv.classList.remove('hidden'); // Show player info
+            document.getElementById('resultTable').classList.remove('hidden'); // Show table
+            document.getElementById('copyBtn').style.display = 'inline-block'; // Show copy button
         }
-      });
 
-      versionInfo.textContent = `Detected Version: ${detected}`;
-      playerInfo.style.display = 'block';
-      playerInfo.innerHTML = `<ul>
-        <li><strong>Position:</strong> ${extra.Position}</li>
-        <li><strong>OVR:</strong> ${extra.OVR}</li>
-        <li><strong>Archetype:</strong> ${extra.Archetype}</li>
-        <li><strong>Height:</strong> ${extra.Height}</li>
-        <li><strong>Wingspan:</strong> ${extra.Wingspan}</li>
-        <li><strong>Weight:</strong> ${extra.Weight}</li>
-      </ul>`;
+        function resetAll() {
+            document.getElementById('input').value = '';
+            document.getElementById('warning').classList.add('hidden');
+            document.getElementById('version').textContent = 'Detected Version: Unknown';
+            document.getElementById('playerInfo').classList.add('hidden');
+            document.querySelector('#resultTable tbody').innerHTML = '';
+            document.getElementById('resultTable').classList.add('hidden');
+            document.getElementById('copyBtn').style.display = 'none';
 
-      document.getElementById('resultTable').style.display = 'table';
-      document.getElementById('copyBtn').style.display = 'inline-block';
-    }
+            // Reset player info spans to N/A
+            document.getElementById('info-position').textContent = 'N/A';
+            document.getElementById('info-ovr').textContent = 'N/A';
+            document.getElementById('info-archetype').textContent = 'N/A';
+            document.getElementById('info-height').textContent = 'N/A';
+            document.getElementById('info-wingspan').textContent = 'N/A';
+            document.getElementById('info-weight').textContent = 'N/A';
+        }
 
-    function resetAll() {
-      document.getElementById('input').value = '';
-      document.getElementById('warning').style.display = 'none';
-      document.getElementById('version').textContent = 'Detected Version: Unknown';
-      document.getElementById('playerInfo').style.display = 'none';
-      document.querySelector('#resultTable tbody').innerHTML = '';
-      document.getElementById('resultTable').style.display = 'none';
-      document.getElementById('copyBtn').style.display = 'none';
-    }
+        function copyHTMLTable() {
+            const playerInfoContent = document.getElementById('playerInfo').innerHTML;
+            const tableHtml = document.getElementById('resultTable').outerHTML;
+            const fullHtml = playerInfoContent + tableHtml;
 
-    function copyHTMLTable() {
-      const playerInfo = document.getElementById('playerInfo').innerHTML;
-      const tableHtml = document.getElementById('resultTable').outerHTML;
-      const fullHtml = playerInfo + tableHtml;
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(fullHtml).then(() => alert('Table copied to clipboard!')).catch(() => fallbackCopy(fullHtml));
-      } else fallbackCopy(fullHtml);
-    }
+            // Use navigator.clipboard.writeText for modern browsers
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(fullHtml)
+                    .then(() => showModal('Table copied to clipboard!'))
+                    .catch(err => {
+                        console.error('Failed to copy text: ', err);
+                        fallbackCopy(fullHtml); // Fallback if writeText fails
+                    });
+            } else {
+                fallbackCopy(fullHtml); // Fallback for older browsers
+            }
+        }
 
-    function fallbackCopy(text) {
-      const ta = document.createElement('textarea'); ta.value = text; document.body.appendChild(ta); ta.select();
-      try { document.execCommand('copy'); alert('Table copied to clipboard!'); } catch { alert('Copy failed.'); }
-      document.body.removeChild(ta);
-    }
-  </script>
+        function fallbackCopy(text) {
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            textarea.style.position = 'fixed'; // Prevent scrolling to bottom of page
+            textarea.style.opacity = '0'; // Make it invisible
+            document.body.appendChild(textarea);
+            textarea.focus();
+            textarea.select();
+            try {
+                document.execCommand('copy');
+                showModal('Table copied to clipboard!');
+            } catch (err) {
+                console.error('Fallback copy failed:', err);
+                showModal('Copy failed. Your browser might not support automatic copying.');
+            } finally {
+                document.body.removeChild(textarea);
+            }
+        }
+    </script>
 </body>
 </html>
