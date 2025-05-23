@@ -57,8 +57,8 @@
             align-items: center;
         }
         .modal-content {
-            background-color: var(--tw-colors-nba-white);
-            color: var(--tw-colors-nba-blue);
+            background-color: #FFFFFF; /* Explicitly set white background */
+            color: #051A3A; /* Explicitly set NBA blue text color */
             margin: auto;
             padding: 24px; /* p-6 */
             border-radius: 1rem; /* rounded-xl */
@@ -67,6 +67,10 @@
             max-width: 480px; /* max-w-sm */
             text-align: center;
             position: relative;
+        }
+        /* Explicitly set color for the message paragraph inside the modal */
+        #modalMessage {
+            color: #051A3A; /* Explicitly set NBA blue text color */
         }
         .close-button {
             position: absolute;
@@ -89,8 +93,14 @@
     <div class="max-w-6xl mx-auto bg-nba-blue shadow-2xl rounded-2xl p-6 sm:p-8 md:p-10 border-4 border-nba-red">
         <div class="flex flex-col sm:flex-row justify-between items-center mb-6">
             <h1 class="text-3xl sm:text-4xl font-extrabold text-nba-white mb-4 sm:mb-0">NBA 2K Attribute Extractor</h1>
-            <div id="version" class="version-info bg-nba-red text-nba-white px-4 py-2 rounded-full font-bold text-sm shadow-md">
-                Detected Version: Unknown
+            <div id="version" class="version-info bg-nba-red text-nba-white px-4 py-2 rounded-full font-bold text-sm shadow-md flex flex-col items-start gap-1">
+                <div class="flex items-center gap-2">
+                    Detected Version: <span id="detectedVersionText">Unknown</span>
+                </div>
+                <div class="flex items-center gap-4">
+                    <span id="notTemplateStatus"></span>
+                    <span id="notRebirthStatus"></span>
+                </div>
             </div>
         </div>
 
@@ -105,9 +115,9 @@
                             class="px-6 py-3 bg-nba-red text-nba-white font-bold rounded-lg shadow-lg hover:bg-nba-pink focus:outline-none focus:ring-2 focus:ring-nba-red focus:ring-offset-2 focus:ring-offset-nba-blue transition ease-in-out duration-200 text-lg">
                         Extract Attributes
                     </button>
-                    <button onclick="copyHTMLTable()" id="copyBtn" style="display:none;"
+                    <button onclick="copyHTMLContent()" id="copyBtn" style="display:none;"
                             class="px-6 py-3 bg-nba-yellow text-nba-blue font-bold rounded-lg shadow-lg hover:bg-nba-teal focus:outline-none focus:ring-2 focus:ring-nba-yellow focus:ring-offset-2 focus:ring-offset-nba-blue transition ease-in-out duration-200 text-lg">
-                        Copy Table to Clipboard
+                        Copy Data to Clipboard
                     </button>
                     <button onclick="resetAll()"
                             class="px-6 py-3 bg-gray-600 text-nba-white font-bold rounded-lg shadow-lg hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 focus:ring-offset-nba-blue transition ease-in-out duration-200 text-lg">
@@ -121,8 +131,8 @@
 
             <div class="flex-1 bg-nba-white p-6 rounded-lg shadow-xl border-2 border-nba-teal">
                 <div id="playerInfo" class="player-info text-nba-blue mb-6 hidden">
-                    <h3 class="text-2xl font-bold mb-3 text-nba-red">Player Details</h3>
-                    <ul class="list-none p-0 m-0 text-lg">
+                    <h3 class="text-2xl font-bold mb-3 text-nba-red">Build Details</h3>
+                    <ul class="p-0 m-0 text-lg space-y-1">
                         <li><strong>Position:</strong> <span id="info-position"></span></li>
                         <li><strong>OVR:</strong> <span id="info-ovr"></span></li>
                         <li><strong>Archetype:</strong> <span id="info-archetype"></span></li>
@@ -148,7 +158,7 @@
     <div id="customModal" class="modal">
         <div class="modal-content">
             <span class="close-button">&times;</span>
-            <p id="modalMessage" class="text-lg text-nba-blue mb-4"></p>
+            <p id="modalMessage" class="text-lg mb-4"></p>
             <button id="modalOkButton" class="px-6 py-3 bg-nba-red text-nba-white font-bold rounded-lg hover:bg-nba-pink transition duration-200 ease-in-out">OK</button>
         </div>
     </div>
@@ -193,13 +203,22 @@
             const lines = data.split('\n');
             const tbody = document.querySelector('#resultTable tbody');
             const playerInfoDiv = document.getElementById('playerInfo');
-            const versionInfoSpan = document.getElementById('version');
+            const detectedVersionTextSpan = document.getElementById('detectedVersionText');
+            const notTemplateStatusSpan = document.getElementById('notTemplateStatus');
+            const notRebirthStatusSpan = document.getElementById('notRebirthStatus');
+
 
             // Clear previous results
             tbody.innerHTML = '';
-            playerInfoDiv.classList.add('hidden'); // Hide player info until populated
-            document.getElementById('resultTable').classList.add('hidden'); // Hide table until populated
-            document.getElementById('copyBtn').style.display = 'none'; // Hide copy button
+            playerInfoDiv.classList.add('hidden');
+            document.getElementById('resultTable').classList.add('hidden');
+            document.getElementById('copyBtn').style.display = 'none';
+
+            // Reset status indicators
+            detectedVersionTextSpan.textContent = 'Unknown';
+            notTemplateStatusSpan.innerHTML = '';
+            notRebirthStatusSpan.innerHTML = '';
+
 
             // Cache player info spans
             const infoSpans = {
@@ -213,30 +232,52 @@
 
             const extra = { Position: 'N/A', OVR: 'N/A', Archetype: 'N/A', Height: 'N/A', Wingspan: 'N/A', Weight: 'N/A' };
             let detectedVersion = 'Unknown';
+            let isNotTemplate = false;
+            let isNotRebirth = true;
+            let featuresUnlockedFound = false;
+
 
             lines.forEach(line => {
-                const parts = line.trim().split(/\t+/); // Split by one or more tabs
+                const parts = line.trim().split(/\t+/);
                 const name = parts[0];
                 let value = '';
+
+                // --- Logic for Not Template ---
+                if (line.includes("Player Template Name")) {
+                    if (line.includes("No Template Used")) {
+                        isNotTemplate = true;
+                    } else {
+                        isNotTemplate = false;
+                    }
+                }
+
+                // --- Logic for Not Rebirth ---
+                if (line.includes("Features Unlocked")) {
+                    featuresUnlockedFound = true;
+                }
+                if (featuresUnlockedFound && line.includes("Rebirth")) {
+                    isNotRebirth = false;
+                }
+
 
                 // Handle category rows
                 if (parts.length === 1 && !/\d/.test(parts[0])) {
                     const tr = document.createElement('tr');
-                    tr.className = 'bg-nba-gray-light font-bold text-nba-blue'; // Tailwind for category row
+                    tr.className = 'bg-nba-gray-light font-bold text-nba-blue';
                     const td = document.createElement('td');
                     td.setAttribute('colspan', '2');
                     td.textContent = name;
-                    td.className = 'px-4 py-2'; // Tailwind padding
+                    td.className = 'px-4 py-2';
                     tr.appendChild(td);
                     tbody.appendChild(tr);
-                    return; // Skip to next line
+                    return;
                 }
 
                 // Determine version and extract value
-                const numbersInParts = parts.filter(p => /^\d+(\.\d+)?$/.test(p)); // Filter for numbers (integers or floats)
+                const numbersInParts = parts.filter(p => /^\d+(\.\d+)?$/.test(p));
 
-                if (numbersInParts.length >= 2) { // Covers both 2K24 (2 numbers) and 2K25 (3 numbers)
-                    value = numbersInParts[1]; // The second number is usually the attribute value
+                if (numbersInParts.length >= 2) {
+                    value = numbersInParts[1];
                     if (numbersInParts.length === 2) {
                         detectedVersion = 'NBA 2K24';
                     } else if (numbersInParts.length === 3) {
@@ -244,9 +285,9 @@
                     }
                 }
 
-                if (value !== '' && !isNaN(parseFloat(value))) { // Ensure value is a valid number
+                if (value !== '' && !isNaN(parseFloat(value))) {
                     const tr = document.createElement('tr');
-                    tr.className = 'hover:bg-nba-gray-light'; // Tailwind hover
+                    tr.className = 'hover:bg-nba-gray-light';
                     const tdName = document.createElement('td');
                     tdName.textContent = name;
                     tdName.className = 'px-4 py-2';
@@ -267,7 +308,10 @@
                 }
             });
 
-            versionInfoSpan.textContent = `Detected Version: ${detectedVersion}`;
+            detectedVersionTextSpan.textContent = detectedVersion;
+            notTemplateStatusSpan.innerHTML = isNotTemplate ? 'Not Template: &#9989;' : 'Not Template: &#10060;';
+            notRebirthStatusSpan.innerHTML = isNotRebirth ? 'Not Rebirth: &#9989;' : 'Not Rebirth: &#10060;';
+
 
             // Populate player info spans
             infoSpans.Position.textContent = extra.Position;
@@ -277,15 +321,17 @@
             infoSpans.Wingspan.textContent = extra.Wingspan;
             infoSpans.Weight.textContent = extra.Weight;
 
-            playerInfoDiv.classList.remove('hidden'); // Show player info
-            document.getElementById('resultTable').classList.remove('hidden'); // Show table
-            document.getElementById('copyBtn').style.display = 'inline-block'; // Show copy button
+            playerInfoDiv.classList.remove('hidden');
+            document.getElementById('resultTable').classList.remove('hidden');
+            document.getElementById('copyBtn').style.display = 'inline-block';
         }
 
         function resetAll() {
             document.getElementById('input').value = '';
             document.getElementById('warning').classList.add('hidden');
-            document.getElementById('version').textContent = 'Detected Version: Unknown';
+            document.getElementById('detectedVersionText').textContent = 'Unknown';
+            document.getElementById('notTemplateStatus').innerHTML = '';
+            document.getElementById('notRebirthStatus').innerHTML = '';
             document.getElementById('playerInfo').classList.add('hidden');
             document.querySelector('#resultTable tbody').innerHTML = '';
             document.getElementById('resultTable').classList.add('hidden');
@@ -300,25 +346,42 @@
             document.getElementById('info-weight').textContent = 'N/A';
         }
 
-        function copyHTMLTable() {
-            const playerInfoContent = document.getElementById('playerInfo').innerHTML;
-            const tableHtml = document.getElementById('resultTable').outerHTML;
-            const fullHtml = playerInfoContent + tableHtml;
+        // Function to copy HTML content to clipboard
+        function copyHTMLContent() {
+            let contentToCopy = '';
 
-            // Use navigator.clipboard.writeText for modern browsers
-            if (navigator.clipboard && navigator.clipboard.writeText) {
-                navigator.clipboard.writeText(fullHtml)
-                    .then(() => showModal('Table copied to clipboard!'))
-                    .catch(err => {
-                        console.error('Failed to copy text: ', err);
-                        fallbackCopy(fullHtml); // Fallback if writeText fails
-                    });
-            } else {
-                fallbackCopy(fullHtml); // Fallback for older browsers
+            const playerInfoDiv = document.getElementById('playerInfo');
+            if (playerInfoDiv && playerInfoDiv.classList.contains('hidden') === false) {
+                // Copy the Build Details header
+                contentToCopy += `<h3>${playerInfoDiv.querySelector('h3').textContent}</h3>`;
+                // Reconstruct the bulleted list with space after colon
+                let bulletedListHtml = '<ul>';
+                playerInfoDiv.querySelectorAll('ul li').forEach(item => {
+                    const label = item.querySelector('strong').textContent;
+                    const value = item.querySelector('span').textContent.trim();
+                    if (value !== 'N/A') {
+                        bulletedListHtml += `<li>${label.replace(':', ': ')} ${value}</li>`;
+                    }
+                });
+                bulletedListHtml += '</ul>';
+                contentToCopy += bulletedListHtml;
             }
+
+            const resultTable = document.getElementById('resultTable');
+            if (resultTable && resultTable.classList.contains('hidden') === false) {
+                // Add a line break for separation if both exist
+                if (contentToCopy) {
+                    contentToCopy += '<br><br>'; // Use <br> for HTML line breaks
+                }
+                // Copy the entire table's HTML content
+                contentToCopy += resultTable.outerHTML;
+            }
+
+            // Use the fallback copy method for HTML content
+            fallbackCopy(contentToCopy, true); // Pass true to indicate HTML content
         }
 
-        function fallbackCopy(text) {
+        function fallbackCopy(text, isHtml = false) {
             const textarea = document.createElement('textarea');
             textarea.value = text;
             textarea.style.position = 'fixed'; // Prevent scrolling to bottom of page
@@ -326,14 +389,36 @@
             document.body.appendChild(textarea);
             textarea.focus();
             textarea.select();
+
             try {
-                document.execCommand('copy');
-                showModal('Table copied to clipboard!');
+                if (isHtml) {
+                    // For HTML content, we need to use a different approach for rich text pasting
+                    // This creates a temporary div, puts the HTML in it, selects it, and copies
+                    const tempDiv = document.createElement('div');
+                    tempDiv.innerHTML = text;
+                    tempDiv.style.position = 'fixed';
+                    tempDiv.style.opacity = '0';
+                    document.body.appendChild(tempDiv);
+
+                    const range = document.createRange();
+                    range.selectNode(tempDiv);
+                    window.getSelection().removeAllRanges();
+                    window.getSelection().addRange(range);
+
+                    document.execCommand('copy');
+
+                    window.getSelection().removeAllRanges(); // Clear selection
+                    document.body.removeChild(tempDiv); // Clean up temp div
+                } else {
+                    // For plain text, use the textarea method
+                    document.execCommand('copy');
+                }
+                showModal('Data copied to clipboard!');
             } catch (err) {
-                console.error('Fallback copy failed:', err);
-                showModal('Copy failed. Your browser might not support automatic copying.');
+                console.error('Copy failed:', err);
+                showModal('Copy failed. Your browser might not support automatic copying of rich text.');
             } finally {
-                document.body.removeChild(textarea);
+                document.body.removeChild(textarea); // Always remove the textarea
             }
         }
     </script>
