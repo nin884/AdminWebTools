@@ -1,180 +1,180 @@
-!DOCTYPE html
-html lang=en
-head
-    meta charset=UTF-8
-    meta name=viewport content=width=device-width, initial-scale=1.0
-    titleNBA 2K Admin Web Audittitle
-    link rel=icon href=httpsupload.wikimedia.orgwikipediacommons77aBasketball.png type=imagepng
-    link href=httpsfonts.googleapis.comcss2family=Montserratwght@400;600;700;800;900&display=swap rel=stylesheet
-    script src=httpscdn.tailwindcss.comscript
-    script
-         Tailwind CSS Configuration for NBA 2K Branding (matches your other tools)
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NBA 2K Admin Web Audit</title>
+    <link rel="icon" href="https://upload.wikimedia.org/wikipedia/commons/7/7a/Basketball.png" type="image/png">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        // Tailwind CSS Configuration for NBA 2K Branding (matches your other tools)
         tailwind.config = {
-            theme {
-                extend {
-                    fontFamily {
-                        montserrat ['Montserrat', 'sans-serif'],
+            theme: {
+                extend: {
+                    fontFamily: {
+                        montserrat: ['Montserrat', 'sans-serif'],
                     },
-                    colors {
-                        'nba-blue' '#051A3A',
-                        'nba-red' '#EA1F27',
-                        'nba-pink' '#DD3894',
-                        'nba-yellow' '#FFA436',
-                        'nba-teal' '#16F2D2',
-                        'nba-white' '#FFFFFF',
-                        'nba-gray-light' '#f3f4f6',
-                        'nba-gray-medium' '#e5e7eb',
+                    colors: {
+                        'nba-blue': '#051A3A',
+                        'nba-red': '#EA1F27',
+                        'nba-pink': '#DD3894',
+                        'nba-yellow': '#FFA436',
+                        'nba-teal': '#16F2D2',
+                        'nba-white': '#FFFFFF',
+                        'nba-gray-light': '#f3f4f6',
+                        'nba-gray-medium': '#e5e7eb',
                     },
                 },
             },
         }
-    script
-    style
-         Base styles, primarily for font and modal, rest handled by Tailwind 
+    </script>
+    <style>
+        /* Base styles, primarily for font and modal, rest handled by Tailwind */
         body {
-            font-family 'Montserrat', sans-serif;
-            margin 0;
-            background-color var(--tw-colors-nba-blue);  Use NBA dark blue as background 
-            color var(--tw-colors-nba-white);  White text on dark background 
+            font-family: 'Montserrat', sans-serif;
+            margin: 0;
+            background-color: var(--tw-colors-nba-blue); /* Use NBA dark blue as background */
+            color: var(--tw-colors-nba-white); /* White text on dark background */
         }
-         Ensure all form elements also use the Montserrat font 
-        textarea, button, select, input[type=text], input[type=number], input[type=date], input[type=datetime-local] {
-            font-family 'Montserrat', sans-serif;
+        /* Ensure all form elements also use the Montserrat font */
+        textarea, button, select, input[type="text"], input[type="number"], input[type="date"], input[type="datetime-local"] {
+            font-family: 'Montserrat', sans-serif;
         }
 
-         Table specific styles for consistency 
+        /* Table specific styles for consistency */
         table {
-            border-collapse collapse;
-            width 100%;
+            border-collapse: collapse;
+            width: 100%;
         }
         th, td {
-            border 1px solid var(--tw-colors-nba-gray-medium);
-            padding 12px;
-            text-align left;
+            border: 1px solid var(--tw-colors-nba-gray-medium);
+            padding: 12px;
+            text-align: left;
         }
         th {
-            background-color #EA1F27;  Explicitly set NBA Red background 
-            color #FFFFFF;  Explicitly set White text 
-            font-weight 600;
+            background-color: #EA1F27; /* Explicitly set NBA Red background */
+            color: #FFFFFF; /* Explicitly set White text */
+            font-weight: 600;
         }
         tbody tr {
-            background-color var(--tw-colors-nba-white);
-            color var(--tw-colors-nba-blue);
+            background-color: var(--tw-colors-nba-white);
+            color: var(--tw-colors-nba-blue);
         }
-        tbody trnth-child(even) {
-            background-color var(--tw-colors-nba-gray-light);  Slight stripe for readability 
+        tbody tr:nth-child(even) {
+            background-color: var(--tw-colors-nba-gray-light); /* Slight stripe for readability */
         }
-        tbody trhover {
-            background-color var(--tw-colors-nba-teal);  Hover effect for rows 
-            color var(--tw-colors-nba-white);
+        tbody tr:hover {
+            background-color: var(--tw-colors-nba-teal); /* Hover effect for rows */
+            color: var(--tw-colors-nba-white);
         }
 
-         Custom Modal Styles (reused from your other tools) 
+        /* Custom Modal Styles (reused from your other tools) */
         .modal {
-            display none;
-            position fixed;
-            z-index 1000;
-            left 0;
-            top 0;
-            width 100%;
-            height 100%;
-            overflow auto;
-            background-color rgba(0,0,0,0.6);
-            justify-content center;
-            align-items center;
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.6);
+            justify-content: center;
+            align-items: center;
         }
         .modal-content {
-            background-color #FFFFFF;
-            color #051A3A;
-            margin auto;
-            padding 24px;
-            border-radius 1rem;
-            box-shadow 0 20px 25px -5px rgba(0, 0, 0, 0.2), 0 10px 10px -5px rgba(0, 0, 0, 0.1);
-            width 90%;
-            max-width 480px;
-            text-align center;
-            position relative;
+            background-color: #FFFFFF;
+            color: #051A3A;
+            margin: auto;
+            padding: 24px;
+            border-radius: 1rem;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2), 0 10px 10px -5px rgba(0, 0, 0, 0.1);
+            width: 90%;
+            max-width: 480px;
+            text-align: center;
+            position: relative;
         }
         #modalMessage {
-            color #051A3A;
+            color: #051A3A;
         }
         .close-button {
-            position absolute;
-            top 8px;
-            right 12px;
-            font-size 28px;
-            font-weight bold;
-            cursor pointer;
-            color #9ca3af;
+            position: absolute;
+            top: 8px;
+            right: 12px;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            color: #9ca3af;
         }
-        .close-buttonhover, .close-buttonfocus {
-            color #6b7280;
-            text-decoration none;
-            cursor pointer;
+        .close-button:hover, .close-button:focus {
+            color: #6b7280;
+            text-decoration: none;
+            cursor: pointer;
         }
-    style
-head
-body class=p-4 smp-6 mdp-8
-    div class=max-w-6xl mx-auto bg-nba-blue shadow-2xl rounded-2xl p-6 smp-8 mdp-10 border-4 border-nba-red
-        h1 class=text-3xl smtext-4xl font-extrabold text-nba-white mb-6 text-centerNBA 2K Admin Web Audith1
+    </style>
+</head>
+<body class="p-4 sm:p-6 md:p-8">
+    <div class="max-w-6xl mx-auto bg-nba-blue shadow-2xl rounded-2xl p-6 sm:p-8 md:p-10 border-4 border-nba-red">
+        <h1 class="text-3xl sm:text-4xl font-extrabold text-nba-white mb-6 text-center">NBA 2K Admin Web Audit</h1>
 
-        div class=mb-6
-            label for=logData class=block text-lg font-semibold text-nba-white mb-2Paste filtered Admin Web data herelabel
-            textarea id=logData placeholder=Paste tab-separated data (e.g., from ExcelGoogle Sheets) here....
-                      class=w-full h-48 p-4 border-2 border-nba-red rounded-lg focusring-4 focusring-nba-yellow focusborder-transparent text-nba-blue bg-nba-white resize-y shadow-innertextarea
-            button id=parseBtn type=button
-                    class=mt-4 w-full smw-auto px-6 py-3 bg-nba-red text-nba-white font-bold rounded-lg shadow-lg hoverbg-nba-pink focusoutline-none focusring-2 focusring-nba-red focusring-offset-2 focusring-offset-nba-blue transition ease-in-out duration-200 text-lg
+        <div class="mb-6">
+            <label for="logData" class="block text-lg font-semibold text-nba-white mb-2">Paste filtered Admin Web data here:</label>
+            <textarea id="logData" placeholder="Paste tab-separated data (e.g., from Excel/Google Sheets) here...."
+                      class="w-full h-48 p-4 border-2 border-nba-red rounded-lg focus:ring-4 focus:ring-nba-yellow focus:border-transparent text-nba-blue bg-nba-white resize-y shadow-inner"></textarea>
+            <button id="parseBtn" type="button"
+                    class="mt-4 w-full sm:w-auto px-6 py-3 bg-nba-red text-nba-white font-bold rounded-lg shadow-lg hover:bg-nba-pink focus:outline-none focus:ring-2 focus:ring-nba-red focus:ring-offset-2 focus:ring-offset-nba-blue transition ease-in-out duration-200 text-lg">
                 Submit Data
-            button
-        div
+            </button>
+        </div>
 
-        div id=controls class=mb-6 p-4 border-2 border-nba-yellow rounded-lg bg-nba-blue flex flex-wrap gap-4 items-center justify-between shadow-md
-            label class=block text-nba-white text-sm font-mediumDate
-                input type=date id=filterDate class=mt-1 block w-auto rounded-md border-gray-300 shadow-sm focusborder-nba-red focusring focusring-nba-red focusring-opacity-50 p-2 text-nba-blue
-            label
-            label class=block text-nba-white text-sm font-mediumShift
-                select id=filterShift class=mt-1 block w-auto rounded-md border-gray-300 shadow-sm focusborder-nba-red focusring focusring-nba-red focusring-opacity-50 p-2 text-nba-blue
-                    option value=Vegas AM ShiftVegas AM Shiftoption
-                    option value=Vegas PM ShiftVegas PM Shiftoption
-                    option value=Vegas Weekend ShiftVegas Weekend Shiftoption
-                    option value=MadridMadridoption
-                    option value=ChengduChengduoption
-                select
-            label
-            label class=block text-nba-white text-sm font-mediumReport From
-                input type=datetime-local id=reportFrom step=1 class=mt-1 block w-auto rounded-md border-gray-300 shadow-sm focusborder-nba-red focusring focusring-nba-red focusring-opacity-50 p-2 text-nba-blue
-            label
-            label class=block text-nba-white text-sm font-mediumReport To
-                input type=datetime-local id=reportTo step=1 class=mt-1 block w-auto rounded-md border-gray-300 shadow-sm focusborder-nba-red focusring focusring-nba-red focusring-opacity-50 p-2 text-nba-blue
-            label
-        div
+        <div id="controls" class="mb-6 p-4 border-2 border-nba-yellow rounded-lg bg-nba-blue flex flex-wrap gap-4 items-center justify-between shadow-md">
+            <label class="block text-nba-white text-sm font-medium">Date:
+                <input type="date" id="filterDate" class="mt-1 block w-auto rounded-md border-gray-300 shadow-sm focus:border-nba-red focus:ring focus:ring-nba-red focus:ring-opacity-50 p-2 text-nba-blue">
+            </label>
+            <label class="block text-nba-white text-sm font-medium">Shift:
+                <select id="filterShift" class="mt-1 block w-auto rounded-md border-gray-300 shadow-sm focus:border-nba-red focus:ring focus:ring-nba-red focus:ring-opacity-50 p-2 text-nba-blue">
+                    <option value="Vegas AM Shift">Vegas AM Shift</option>
+                    <option value="Vegas PM Shift">Vegas PM Shift</option>
+                    <option value="Vegas Weekend Shift">Vegas Weekend Shift</option>
+                    <option value="Madrid">Madrid</option>
+                    <option value="Chengdu">Chengdu</option>
+                </select>
+            </label>
+            <label class="block text-nba-white text-sm font-medium">Report From:
+                <input type="datetime-local" id="reportFrom" step="1" class="mt-1 block w-auto rounded-md border-gray-300 shadow-sm focus:border-nba-red focus:ring focus:ring-nba-red focus:ring-opacity-50 p-2 text-nba-blue">
+            </label>
+            <label class="block text-nba-white text-sm font-medium">Report To:
+                <input type="datetime-local" id="reportTo" step="1" class="mt-1 block w-auto rounded-md border-gray-300 shadow-sm focus:border-nba-red focus:ring focus:ring-nba-red focus:ring-opacity-50 p-2 text-nba-blue">
+            </label>
+        </div>
 
-        div id=tableContainer class=overflow-x-auto shadow-md rounded-lg mb-8
-            div
+        <div id="tableContainer" class="overflow-x-auto shadow-md rounded-lg mb-8">
+            </div>
 
-        h2 class=text-2xl smtext-3xl font-bold text-nba-white mb-4Discrepanciesh2
-        div id=summary class=text-lg font-semibold text-nba-yellow mb-2div
-        div id=counts class=text-base text-nba-white mb-4Major discrepancies 0brMinor discrepancies 0div
+        <h2 class="text-2xl sm:text-3xl font-bold text-nba-white mb-4">Discrepancies</h2>
+        <div id="summary" class="text-lg font-semibold text-nba-yellow mb-2"></div>
+        <div id="counts" class="text-base text-nba-white mb-4">Major discrepancies: 0<br>Minor discrepancies: 0</div>
         
-        button id=exportBtn type=button
-                class=px-6 py-3 bg-nba-yellow text-nba-blue font-bold rounded-lg shadow-lg hoverbg-nba-teal focusoutline-none focusring-2 focusring-nba-yellow focusring-offset-2 focusring-offset-nba-blue transition ease-in-out duration-200 text-lg mb-6
+        <button id="exportBtn" type="button"
+                class="px-6 py-3 bg-nba-yellow text-nba-blue font-bold rounded-lg shadow-lg hover:bg-nba-teal focus:outline-none focus:ring-2 focus:ring-nba-yellow focus:ring-offset-2 focus:ring-offset-nba-blue transition ease-in-out duration-200 text-lg mb-6">
             Export Discrepancies to CSV
-        button
+        </button>
 
-        div id=discrepancyContainer class=overflow-x-auto shadow-md rounded-lg mb-8
-            div
-    div
+        <div id="discrepancyContainer" class="overflow-x-auto shadow-md rounded-lg mb-8">
+            </div>
+    </div>
 
-    div id=customModal class=modal
-        div class=modal-content
-            span class=close-button&times;span
-            p id=modalMessage class=text-lg mb-4p
-            button id=modalOkButton class=px-6 py-3 bg-nba-red text-nba-white font-bold rounded-lg hoverbg-nba-pink transition duration-200 ease-in-outOKbutton
-        div
-    div
+    <div id="customModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button">&times;</span>
+            <p id="modalMessage" class="text-lg mb-4"></p>
+            <button id="modalOkButton" class="px-6 py-3 bg-nba-red text-nba-white font-bold rounded-lg hover:bg-nba-pink transition duration-200 ease-in-out">OK</button>
+        </div>
+    </div>
 
-    script
-         --- Modal Functions (reused from your other tools) ---
+    <script>
+        // --- Modal Functions (reused from your other tools) ---
         function showModal(message) {
             const modal = document.getElementById('customModal');
             const modalMessage = document.getElementById('modalMessage');
@@ -186,68 +186,68 @@ body class=p-4 smp-6 mdp-8
             document.getElementById('customModal').style.display = 'none';
         }
 
-        document.addEventListener('DOMContentLoaded', () = {
+        document.addEventListener('DOMContentLoaded', () => {
             document.querySelector('#customModal .close-button').addEventListener('click', hideModal);
             document.getElementById('modalOkButton').addEventListener('click', hideModal);
-            document.getElementById('customModal').addEventListener('click', (e) = {
+            document.getElementById('customModal').addEventListener('click', (e) => {
                 if (e.target === document.getElementById('customModal')) {
                     hideModal();
                 }
             });
         });
 
-         --- Admin Web Audit Logic ---
+        // --- Admin Web Audit Logic ---
         document.addEventListener('DOMContentLoaded', function() {
-             Cache DOM elements
+            // Cache DOM elements
             const elements = {
-                textarea document.getElementById('logData'),
-                parseBtn document.getElementById('parseBtn'),
-                exportBtn document.getElementById('exportBtn'),
-                tableContainer document.getElementById('tableContainer'),
-                discrepancyContainer document.getElementById('discrepancyContainer'),
-                summaryEl document.getElementById('summary'),
-                countsEl document.getElementById('counts'),
-                filterDate document.getElementById('filterDate'),
-                filterShift document.getElementById('filterShift'),
-                reportFrom document.getElementById('reportFrom'),
-                reportTo document.getElementById('reportTo')
+                textarea: document.getElementById('logData'),
+                parseBtn: document.getElementById('parseBtn'),
+                exportBtn: document.getElementById('exportBtn'),
+                tableContainer: document.getElementById('tableContainer'),
+                discrepancyContainer: document.getElementById('discrepancyContainer'),
+                summaryEl: document.getElementById('summary'),
+                countsEl: document.getElementById('counts'),
+                filterDate: document.getElementById('filterDate'),
+                filterShift: document.getElementById('filterShift'),
+                reportFrom: document.getElementById('reportFrom'),
+                reportTo: document.getElementById('reportTo')
             };
 
-            let originalHeaders = [];  Stores the raw parsed headers from the log data
-             Options for discrepancy types, issues, and agent locations
+            let originalHeaders = []; // Stores the raw parsed headers from the log data
+            // Options for discrepancy types, issues, and agent locations
             const discrepancyOptions = ['', 'Minor', 'Major'];
             const issueOptions = ['', 'Wrong Tier VC added', 'More than 50K VC added without approval',
-                'VCMTItems added without AT note', 'MyTeam cardsMyCareer itemsOther No-Currency items added not noted with a ticket',
+                'VC/MT/Items added without AT note', 'MyTeam cards/MyCareer items/Other No-Currency items added not noted with a ticket',
                 'Other actions in AT without note', 'Wrong MG provided', 'Kick off account without AT note', 'Cloned file without AT note', 'Agent missed PMVC 1st Party Escalation'];
             const locationOptions = ['', '5CA', 'Vegas Day', 'Vegas Swing', 'Vegas Weekend', 'Chengdu Day', 'Chengdu Weekend', 'Madrid', 'Player Advocacy'];
 
-             Define the desired order of leading columns for the main table
+            // Define the desired order of leading columns for the main table
             const mainTableLeadingColumns = ['CS Page', 'Validated', 'Discrepancy'];
-             Define the desired order of leading columns for the discrepancy table
+            // Define the desired order of leading columns for the discrepancy table
             const discrepancyTableLeadingColumns = ['CS Page', 'Type', 'Ticket #', 'Issue', 'Agent Location', 'Other Comments'];
 
-             --- Utility Functions ---
+            // --- Utility Functions ---
 
-            
-              Formats a date string from 'YYYY-MM-DD' to 'MDYYYY'.
-              @param {string} val - The date string in 'YYYY-MM-DD' format.
-              @returns {string} Formatted date string.
-             
+            /**
+             * Formats a date string from 'YYYY-MM-DD' to 'M/D/YYYY'.
+             * @param {string} val - The date string in 'YYYY-MM-DD' format.
+             * @returns {string} Formatted date string.
+             */
             function formatDate(val) {
                 if (!val) return '';
                 const [y, m, d] = val.split('-');
-                return `${parseInt(m)}${parseInt(d)}}${y}`;
+                return `${parseInt(m)}/${parseInt(d)}}/${y}`;
             }
 
-            
-              Formats a datetime string to 'YYYY-MM-DD HHMMSS'.
-              @param {string} val - The datetime string.
-              @returns {string} Formatted datetime string.
-             
+            /**
+             * Formats a datetime string to 'YYYY-MM-DD HH:MM:SS'.
+             * @param {string} val - The datetime string.
+             * @returns {string} Formatted datetime string.
+             */
             function formatDateTime(val) {
-                if (!val) return 'YYYY-MM-DD 000000';
+                if (!val) return 'YYYY-MM-DD 00:00:00';
                 const dt = new Date(val);
-                 Check for invalid date
+                // Check for invalid date
                 if (isNaN(dt.getTime())) return 'Invalid Date';
 
                 const y = dt.getFullYear();
@@ -256,51 +256,51 @@ body class=p-4 smp-6 mdp-8
                 const h = String(dt.getHours()).padStart(2, '0');
                 const mi = String(dt.getMinutes()).padStart(2, '0');
                 const s = String(dt.getSeconds()).padStart(2, '0');
-                return `${y}-${mo}-${da} ${h}${mi}${s}`;
+                return `${y}-${mo}-${da} ${h}:${mi}:${s}`;
             }
 
-            
-              Updates the majorminor discrepancy counts.
-             
+            /**
+             * Updates the major/minor discrepancy counts.
+             */
             function updateCounts() {
                 let major = 0, minor = 0;
                 const tbl = elements.discrepancyContainer.querySelector('table');
                 if (tbl) {
-                    tbl.querySelectorAll('tbody tr').forEach(r = {
-                         The 'Type' column is at index 1 in the discrepancy table
+                    tbl.querySelectorAll('tbody tr').forEach(r => {
+                        // The 'Type' column is at index 1 in the discrepancy table
                         const typeCell = r.cells[discrepancyTableLeadingColumns.indexOf('Type')];
-                        if (typeCell) {  Ensure cell exists
+                        if (typeCell) { // Ensure cell exists
                             const type = typeCell.textContent;
                             if (type.includes('Major')) major++;
                             else if (type.includes('Minor')) minor++;
                         }
                     });
                 }
-                elements.countsEl.innerHTML = `Major discrepancies ${major}brMinor discrepancies ${minor}`;
-                updateSummary();  Also update summary when counts change
+                elements.countsEl.innerHTML = `Major discrepancies: ${major}<br>Minor discrepancies: ${minor}`;
+                updateSummary(); // Also update summary when counts change
             }
 
-            
-              Updates the summary text based on filter inputs.
-             
+            /**
+             * Updates the summary text based on filter inputs.
+             */
             function updateSummary() {
-                const dateVal = elements.filterDate.value  formatDate(elements.filterDate.value)  '[Date]';
+                const dateVal = elements.filterDate.value ? formatDate(elements.filterDate.value) : '[Date]';
                 const shiftVal = elements.filterShift.value;
                 const fromVal = formatDateTime(elements.reportFrom.value);
                 const toVal = formatDateTime(elements.reportTo.value);
-                elements.summaryEl.textContent = `${dateVal}  ${shiftVal} AT Audit ${fromVal}  ${toVal}`;
+                elements.summaryEl.textContent = `${dateVal} | ${shiftVal} AT Audit: ${fromVal} / ${toVal}`;
             }
 
-            
-              Creates a select element with given options.
-              @param {Arraystring} options - An array of strings for select options.
-              @returns {HTMLSelectElement} The created select element.
-             
+            /**
+             * Creates a <select> element with given options.
+             * @param {Array<string>} options - An array of strings for select options.
+             * @returns {HTMLSelectElement} The created select element.
+             */
             function createSelectElement(options) {
                 const select = document.createElement('select');
-                 Updated class for discrepancy select to stand out more
-                select.className = 'block w-full rounded-md border-2 border-nba-yellow shadow-sm focusborder-nba-red focusring focusring-nba-red focusring-opacity-50 p-2 text-sm text-nba-blue';
-                options.forEach(optionText = {
+                // Updated class for discrepancy select to stand out more
+                select.className = 'block w-full rounded-md border-2 border-nba-yellow shadow-sm focus:border-nba-red focus:ring focus:ring-nba-red focus:ring-opacity-50 p-2 text-sm text-nba-blue';
+                options.forEach(optionText => {
                     const option = document.createElement('option');
                     option.value = optionText;
                     option.textContent = optionText;
@@ -309,24 +309,24 @@ body class=p-4 smp-6 mdp-8
                 return select;
             }
 
-            
-              Creates an input element with given placeholder and class.
-              @param {string} placeholder - The placeholder text.
-              @returns {HTMLInputElement} The created input element.
-             
+            /**
+             * Creates an <input> element with given placeholder and class.
+             * @param {string} placeholder - The placeholder text.
+             * @returns {HTMLInputElement} The created input element.
+             */
             function createInputElement(placeholder) {
                 const input = document.createElement('input');
                 input.type = 'text';
                 input.placeholder = placeholder;
-                input.className = 'block w-full rounded-md border-gray-300 shadow-sm focusborder-nba-red focusring focusring-nba-red focusring-opacity-50 p-2 text-sm text-nba-blue';
+                input.className = 'block w-full rounded-md border-gray-300 shadow-sm focus:border-nba-red focus:ring focus:ring-nba-red focus:ring-opacity-50 p-2 text-sm text-nba-blue';
                 return input;
             }
 
-             --- Main Logic Functions ---
+            // --- Main Logic Functions ---
 
-            
-              Parses the log data and renders the main audit table.
-             
+            /**
+             * Parses the log data and renders the main audit table.
+             */
             elements.parseBtn.addEventListener('click', function() {
                 const raw = elements.textarea.value.trim();
                 if (!raw) {
@@ -334,29 +334,29 @@ body class=p-4 smp-6 mdp-8
                     return;
                 }
 
-                elements.tableContainer.innerHTML = '';  Clear previous table
-                elements.discrepancyContainer.innerHTML = '';  Clear previous discrepancies
-                elements.countsEl.innerHTML = 'Major discrepancies 0brMinor discrepancies 0';  Reset counts
+                elements.tableContainer.innerHTML = ''; // Clear previous table
+                elements.discrepancyContainer.innerHTML = ''; // Clear previous discrepancies
+                elements.countsEl.innerHTML = 'Major discrepancies: 0<br>Minor discrepancies: 0'; // Reset counts
 
-                const lines = raw.split('n').filter(l = l.trim());
-                if (lines.length  2) {
-                    showModal('Invalid data format need at least a header and one row.');
+                const lines = raw.split('\n').filter(l => l.trim());
+                if (lines.length < 2) {
+                    showModal('Invalid data format: need at least a header and one row.');
                     return;
                 }
 
-                originalHeaders = lines[0].split('t').map(h = h.trim());  Store original headers
-                const rows = lines.slice(1).map(l = l.split('t'));
+                originalHeaders = lines[0].split('\t').map(h => h.trim()); // Store original headers
+                const rows = lines.slice(1).map(l => l.split('\t'));
 
                 renderDataTable(originalHeaders, rows, elements.tableContainer);
                 updateCounts();
             });
 
-            
-              Renders the main data table with reordered columns.
-              @param {Arraystring} originalHeaders - The headers from the raw input.
-              @param {ArrayArraystring} rows - The raw data rows.
-              @param {HTMLElement} container - The container to render the table into.
-             
+            /**
+             * Renders the main data table with reordered columns.
+             * @param {Array<string>} originalHeaders - The headers from the raw input.
+             * @param {Array<Array<string>>} rows - The raw data rows.
+             * @param {HTMLElement} container - The container to render the table into.
+             */
             function renderDataTable(originalHeaders, rows, container) {
                 const table = document.createElement('table');
                 table.className = 'min-w-full divide-y divide-gray-200';
@@ -365,14 +365,14 @@ body class=p-4 smp-6 mdp-8
                 thead.className = 'bg-nba-red';
                 const headerRow = document.createElement('tr');
 
-                 Construct the new display headers for the main table
-                 Start with leading columns, then add remaining original headers (excluding 'Environment' and those already in leadingColumns)
-                const otherOriginalHeaders = originalHeaders.filter(h =
+                // Construct the new display headers for the main table
+                // Start with leading columns, then add remaining original headers (excluding 'Environment' and those already in leadingColumns)
+                const otherOriginalHeaders = originalHeaders.filter(h =>
                     h !== 'Environment' && !mainTableLeadingColumns.includes(h)
                 );
                 const displayHeaders = [...mainTableLeadingColumns, ...otherOriginalHeaders];
 
-                displayHeaders.forEach(h = {
+                displayHeaders.forEach(h => {
                     const th = document.createElement('th');
                     th.textContent = h;
                     th.className = 'px-6 py-3 text-left text-xs font-medium text-nba-white uppercase tracking-wider';
@@ -384,34 +384,34 @@ body class=p-4 smp-6 mdp-8
                 const tbody = document.createElement('tbody');
                 tbody.className = 'bg-nba-white divide-y divide-nba-gray-medium';
 
-                rows.forEach(cells = {
+                rows.forEach(cells => {
                     const tr = document.createElement('tr');
-                    tr.className = 'hoverbg-nba-gray-light';
+                    tr.className = 'hover:bg-nba-gray-light';
 
-                     Create a map from original header name to its cell value for easier lookup
+                    // Create a map from original header name to its cell value for easier lookup
                     const originalRowData = {};
-                    originalHeaders.forEach((header, index) = {
-                        originalRowData[header] = cells[index]  '';
+                    originalHeaders.forEach((header, index) => {
+                        originalRowData[header] = cells[index] || '';
                     });
 
-                     Render cells based on the new display order
-                    displayHeaders.forEach(header = {
+                    // Render cells based on the new display order
+                    displayHeaders.forEach(header => {
                         const td = document.createElement('td');
                         td.className = 'px-6 py-4 whitespace-nowrap text-sm text-nba-blue';
 
                         if (header === 'CS Page') {
                             const puid = originalRowData['Puid'];
-                            const env = originalRowData['Environment'];  Still need original 'Environment' for URL construction
+                            const env = originalRowData['Environment']; // Still need original 'Environment' for URL construction
                             const title = originalRowData['Title & Year'];
                             const csPageValue = originalRowData['CS Page'];
 
                             if (csPageValue) {
-                                const url = `httpsadmin.nba2k.com${encodeURIComponent(env)}${encodeURIComponent(title)}customer_serviceuseredit${encodeURIComponent(puid)}titleid=61476&tab=notes`;
+                                const url = `https://admin.nba2k.com/${encodeURIComponent(env)}/${encodeURIComponent(title)}/customer_service/user/edit/${encodeURIComponent(puid)}?titleid=61476&tab=notes`;
                                 const a = document.createElement('a');
                                 a.textContent = csPageValue;
                                 a.href = '#';
-                                a.className = 'text-nba-blue hoverunderline font-medium';  Changed to nba-blue
-                                a.addEventListener('click', (e) = {
+                                a.className = 'text-nba-blue hover:underline font-medium'; // Changed to nba-blue
+                                a.addEventListener('click', (e) => {
                                     e.preventDefault();
                                     window.open(url, '_blank', 'noopener,noreferrer,width=800,height=600');
                                 });
@@ -422,8 +422,8 @@ body class=p-4 smp-6 mdp-8
                         } else if (header === 'Validated') {
                             const validatedBtn = document.createElement('button');
                             validatedBtn.textContent = 'Validated';
-                            validatedBtn.className = 'px-3 py-1 bg-green-500 text-nba-white rounded-md hoverbg-green-600 transition duration-150 ease-in-out';
-                            validatedBtn.addEventListener('click', () = {
+                            validatedBtn.className = 'px-3 py-1 bg-green-500 text-nba-white rounded-md hover:bg-green-600 transition duration-150 ease-in-out';
+                            validatedBtn.addEventListener('click', () => {
                                 tr.remove();
                                 updateCounts();
                             });
@@ -431,8 +431,8 @@ body class=p-4 smp-6 mdp-8
                         } else if (header === 'Discrepancy') {
                             const discrepancyBtn = document.createElement('button');
                             discrepancyBtn.textContent = 'Discrepancy';
-                            discrepancyBtn.className = 'px-3 py-1 bg-nba-red text-nba-white rounded-md hoverbg-nba-pink transition duration-150 ease-in-out';
-                            discrepancyBtn.addEventListener('click', () = showDiscrepancyForm(tr, originalRowData, td));  Pass originalRowData
+                            discrepancyBtn.className = 'px-3 py-1 bg-nba-red text-nba-white rounded-md hover:bg-nba-pink transition duration-150 ease-in-out';
+                            discrepancyBtn.addEventListener('click', () => showDiscrepancyForm(tr, originalRowData, td)); // Pass originalRowData
                             td.appendChild(discrepancyBtn);
                         } else {
                             td.textContent = originalRowData[header];
@@ -445,12 +445,12 @@ body class=p-4 smp-6 mdp-8
                 container.appendChild(table);
             }
 
-            
-              Shows the form for adding discrepancy details to a row.
-              @param {HTMLTableRowElement} row - The table row element.
-              @param {Object} originalRowData - The original row data as an object (headervalue).
-              @param {HTMLTableCellElement} targetCell - The cell where the form will be injected.
-             
+            /**
+             * Shows the form for adding discrepancy details to a row.
+             * @param {HTMLTableRowElement} row - The table row element.
+             * @param {Object} originalRowData - The original row data as an object (header:value).
+             * @param {HTMLTableCellElement} targetCell - The cell where the form will be injected.
+             */
             function showDiscrepancyForm(row, originalRowData, targetCell) {
                 if (targetCell.querySelector('select')) return;
 
@@ -459,12 +459,12 @@ body class=p-4 smp-6 mdp-8
                 const typeSelect = createSelectElement(discrepancyOptions);
                 const addButton = document.createElement('button');
                 addButton.textContent = 'Add';
-                addButton.className = 'ml-2 px-3 py-1 bg-nba-blue text-nba-white rounded-md hoverbg-nba-teal transition duration-150 ease-in-out';
+                addButton.className = 'ml-2 px-3 py-1 bg-nba-blue text-nba-white rounded-md hover:bg-nba-teal transition duration-150 ease-in-out';
 
                 targetCell.appendChild(typeSelect);
                 targetCell.appendChild(addButton);
 
-                addButton.addEventListener('click', () = {
+                addButton.addEventListener('click', () => {
                     if (!typeSelect.value) {
                         showModal('Please select a discrepancy type.');
                         return;
@@ -475,11 +475,11 @@ body class=p-4 smp-6 mdp-8
                 });
             }
 
-            
-              Creates and appends a new row to the discrepancy table.
-              @param {Object} originalRowData - The original row data as an object (headervalue).
-              @param {string} typeText - The type of discrepancy (e.g., 'Major Discrepancy').
-             
+            /**
+             * Creates and appends a new row to the discrepancy table.
+             * @param {Object} originalRowData - The original row data as an object (header:value).
+             * @param {string} typeText - The type of discrepancy (e.g., 'Major Discrepancy').
+             */
             function createDiscrepancyRow(originalRowData, typeText) {
                 let table = elements.discrepancyContainer.querySelector('table');
                 if (!table) {
@@ -489,13 +489,13 @@ body class=p-4 smp-6 mdp-8
                     thead.className = 'bg-nba-red';
                     const headerRow = document.createElement('tr');
 
-                     Construct headers for the discrepancy table
-                    const otherOriginalHeaders = originalHeaders.filter(h =
+                    // Construct headers for the discrepancy table
+                    const otherOriginalHeaders = originalHeaders.filter(h =>
                         h !== 'Environment' && !discrepancyTableLeadingColumns.includes(h)
                     );
                     const displayHeadersForDiscrepancy = [...discrepancyTableLeadingColumns, ...otherOriginalHeaders];
 
-                    displayHeadersForDiscrepancy.forEach(h = {
+                    displayHeadersForDiscrepancy.forEach(h => {
                         const th = document.createElement('th');
                         th.textContent = h;
                         th.className = 'px-6 py-3 text-left text-xs font-medium text-nba-white uppercase tracking-wider';
@@ -513,12 +513,12 @@ body class=p-4 smp-6 mdp-8
 
                 const tbody = table.querySelector('tbody');
                 const tr = document.createElement('tr');
-                tr.className = 'hoverbg-nba-gray-light';
+                tr.className = 'hover:bg-nba-gray-light';
 
-                 Get the headers currently displayed in the discrepancy table for correct cell order
-                const currentDiscrepancyHeaders = Array.from(table.querySelector('thead tr').children).map(th = th.textContent);
+                // Get the headers currently displayed in the discrepancy table for correct cell order
+                const currentDiscrepancyHeaders = Array.from(table.querySelector('thead tr').children).map(th => th.textContent);
 
-                currentDiscrepancyHeaders.forEach(header = {
+                currentDiscrepancyHeaders.forEach(header => {
                     const td = document.createElement('td');
                     td.className = 'px-6 py-4 whitespace-nowrap text-sm text-nba-blue';
 
@@ -529,12 +529,12 @@ body class=p-4 smp-6 mdp-8
                         const csPageValue = originalRowData['CS Page'];
 
                         if (csPageValue) {
-                            const url = `httpsadmin.nba2k.com${encodeURIComponent(env)}${encodeURIComponent(title)}customer_serviceuseredit${encodeURIComponent(puid)}titleid=61476&tab=notes`;
+                            const url = `https://admin.nba2k.com/${encodeURIComponent(env)}/${encodeURIComponent(title)}/customer_service/user/edit/${encodeURIComponent(puid)}?titleid=61476&tab=notes`;
                             const a = document.createElement('a');
                             a.textContent = csPageValue;
                             a.href = '#';
-                            a.className = 'text-nba-blue hoverunderline font-medium';  Changed to nba-blue
-                            a.addEventListener('click', (e) = {
+                            a.className = 'text-nba-blue hover:underline font-medium'; // Changed to nba-blue
+                            a.addEventListener('click', (e) => {
                                 e.preventDefault();
                                 window.open(url, '_blank', 'noopener,noreferrer,width=800,height=600');
                             });
@@ -553,18 +553,18 @@ body class=p-4 smp-6 mdp-8
                     } else if (header === 'Other Comments') {
                         td.appendChild(createInputElement('Comments'));
                     } else {
-                         For other original data columns
-                        td.textContent = originalRowData[header]  '';
+                        // For other original data columns
+                        td.textContent = originalRowData[header] || '';
                     }
                     tr.appendChild(td);
                 });
                 tbody.appendChild(tr);
             }
 
-            
-              Exports the discrepancy table data to a CSV file.
-             
-            elements.exportBtn.addEventListener('click', () = {
+            /**
+             * Exports the discrepancy table data to a CSV file.
+             */
+            elements.exportBtn.addEventListener('click', () => {
                 const tbl = elements.discrepancyContainer.querySelector('table');
                 if (!tbl) {
                     showModal('No discrepancies to export.');
@@ -574,18 +574,18 @@ body class=p-4 smp-6 mdp-8
                 const rows = Array.from(tbl.querySelectorAll('tbody tr'));
                 const csvRows = [];
 
-                 Define the specific CSV header order including 'Agent Name'
-                const exportHeaders = ['Date', 'Your Name', 'Agent Name', 'Agent Location', 'MajorMinor Discrepancy', 'Ticket #', 'Issue', 'Other Comments'];
+                // Define the specific CSV header order including 'Agent Name'
+                const exportHeaders = ['Date', 'Your Name', 'Agent Name', 'Agent Location', 'Major/Minor Discrepancy', 'Ticket #', 'Issue', 'Other Comments'];
                 csvRows.push(exportHeaders.join(','));
 
                 const currentDate = new Date().toISOString().split('T')[0];
 
-                rows.forEach(tr = {
+                rows.forEach(tr => {
                     const cols = Array.from(tr.children);
-                     Create a map from displayed table header to its cell value for easier lookup
-                    const displayedTableHeaders = Array.from(tbl.querySelectorAll('thead th')).map(th = th.textContent.trim());
+                    // Create a map from displayed table header to its cell value for easier lookup
+                    const displayedTableHeaders = Array.from(tbl.querySelectorAll('thead th')).map(th => th.textContent.trim());
                     const rowDataMap = {};
-                    displayedTableHeaders.forEach((header, index) = {
+                    displayedTableHeaders.forEach((header, index) => {
                         const cell = cols[index];
                         if (cell) {
                             const input = cell.querySelector('input');
@@ -602,41 +602,41 @@ body class=p-4 smp-6 mdp-8
                         }
                     });
 
-                     Construct the row values based on the desired exportHeaders order
-                    const rowValues = exportHeaders.map(header = {
+                    // Construct the row values based on the desired exportHeaders order
+                    const rowValues = exportHeaders.map(header => {
                         switch (header) {
-                            case 'Date'
-                                 Get the Date from the original data (assuming it's passed through originalRowData to createDiscrepancyRow)
-                                 If 'Date' is not a header in the discrepancy table, we need to pull it from originalRowData
-                                 For robustness, let's assume 'Date' is in originalRowData and use that.
-                                 If originalRowData isn't directly available here, we'd need to store it with the discrepancy row.
-                                 For now, I'll use the current date as a fallback if 'Date' isn't in rowDataMap.
-                                return rowDataMap['Date']  formatDate(currentDate);
-                            case 'Your Name'
-                                return '';  Left blank as requested
-                            case 'Agent Name'
-                                 Assuming 'User' is the header for Agent Name in the original data
-                                return rowDataMap['User']  '';
-                            case 'Agent Location'
-                                return rowDataMap['Agent Location']  '';
-                            case 'MajorMinor Discrepancy'
-                                return rowDataMap['Type']  '';  'Type' in table is 'MajorMinor Discrepancy' in CSV
-                            case 'Ticket #'
-                                return rowDataMap['Ticket #']  '';
-                            case 'Issue'
-                                return rowDataMap['Issue']  '';
-                            case 'Other Comments'
-                                return rowDataMap['Other Comments']  '';
-                            default
-                                return '';  Should not happen with defined headers
+                            case 'Date':
+                                // Get the Date from the original data (assuming it's passed through originalRowData to createDiscrepancyRow)
+                                // If 'Date' is not a header in the discrepancy table, we need to pull it from originalRowData
+                                // For robustness, let's assume 'Date' is in originalRowData and use that.
+                                // If originalRowData isn't directly available here, we'd need to store it with the discrepancy row.
+                                // For now, I'll use the current date as a fallback if 'Date' isn't in rowDataMap.
+                                return rowDataMap['Date'] || formatDate(currentDate);
+                            case 'Your Name':
+                                return ''; // Left blank as requested
+                            case 'Agent Name':
+                                // Assuming 'User' is the header for Agent Name in the original data
+                                return rowDataMap['User'] || '';
+                            case 'Agent Location':
+                                return rowDataMap['Agent Location'] || '';
+                            case 'Major/Minor Discrepancy':
+                                return rowDataMap['Type'] || ''; // 'Type' in table is 'Major/Minor Discrepancy' in CSV
+                            case 'Ticket #':
+                                return rowDataMap['Ticket #'] || '';
+                            case 'Issue':
+                                return rowDataMap['Issue'] || '';
+                            case 'Other Comments':
+                                return rowDataMap['Other Comments'] || '';
+                            default:
+                                return ''; // Should not happen with defined headers
                         }
                     });
 
-                     Function to safely quote CSV fields
-                    const escapeCsv = (value) = {
+                    // Function to safely quote CSV fields
+                    const escapeCsv = (value) => {
                         if (typeof value !== 'string') value = String(value);
-                        if (value.includes(',')  value.includes('')  value.includes('n')  value.includes('r')) {
-                            return `${value.replace(g, '')}`;
+                        if (value.includes(',') || value.includes('"') || value.includes('\n') || value.includes('\r')) {
+                            return `"${value.replace(/"/g, '""')}"`;
                         }
                         return value;
                     };
@@ -644,22 +644,22 @@ body class=p-4 smp-6 mdp-8
                     csvRows.push(rowValues.map(escapeCsv).join(','));
                 });
 
-                const blob = new Blob([csvRows.join('n')], { type 'textcsv;charset=utf-8;' });
+                const blob = new Blob([csvRows.join('\n')], { type: 'text/csv;charset=utf-8;' });
                 const link = document.createElement('a');
                 link.href = URL.createObjectURL(blob);
                 link.download = 'discrepancies.csv';
                 document.body.appendChild(link);
                 link.click();
                 document.body.removeChild(link);
-                URL.revokeObjectURL(link.href);  Clean up the URL object
+                URL.revokeObjectURL(link.href); // Clean up the URL object
             });
 
-             Add event listeners for filter controls to update summary dynamically
-            [elements.filterDate, elements.filterShift, elements.reportFrom, elements.reportTo].forEach(el = el.addEventListener('change', updateSummary));
+            // Add event listeners for filter controls to update summary dynamically
+            [elements.filterDate, elements.filterShift, elements.reportFrom, elements.reportTo].forEach(el => el.addEventListener('change', updateSummary));
 
-             Initial summary update when the page loads
+            // Initial summary update when the page loads
             updateSummary();
         });
-    script
-body
-html
+    </script>
+</body>
+</html>
