@@ -1,166 +1,535 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>NBA 2K Win Streak Validator</title>
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
-  <style>
-    body { font-family: 'Montserrat', sans-serif; padding: 20px; background: #f9f9f9; color: #333; }
-    textarea, input[type="text"], select { width: 100%; margin-bottom: 10px; }
-    textarea { height: 150px; }
-    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-    th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
-    th { background: #eee; }
-    .streak { background-color: #c6f6d5 !important; }
-    .label-cell { font-weight: bold; color: #1a7f37; white-space: pre-wrap; }
-    .team-match { background-color: #d0e6ff !important; }
-    button { padding: 8px 12px; margin-top: 10px; background: #007BFF; color: white; border: none; cursor: pointer; margin-right: 10px; }
-    button:hover { background: #0056b3; }
-    .entry-row { display: flex; gap: 20px; align-items: flex-start; margin-bottom: 10px; flex-wrap: wrap; }
-    .entry-group { flex: 1; min-width: 30%; display: none; flex-direction: column; justify-content: flex-start; }
-    .entry-group.visible { display: flex; }
-  </style>
-</head>
-<body>
-  <a name="top"></a>
-  <h2>NBA 2K Win Streak Validator</h2>
-
-  <div class="entry-row">
-    <div class="entry-group visible" id="mainGroup" style="display: flex;">
-      <label><strong>Player's Gamertag:</strong></label>
-      <input type="text" id="mainUser" placeholder="Player's Gamertag">
-      <textarea id="rawData" placeholder="Paste Game History Data" oninput="checkForTeamEntries()"></textarea>
-      <input type="text" id="gameModeFilter" placeholder="Game Mode Filter (e.g. MyTEAM Park Co-Op)">
-      <input type="number" id="minStreak" placeholder="Minimum Streak Length (e.g. 3)" min="1">
-    </div>
-
-    <div class="entry-group" id="teamFields">
-      <label><strong>Teammate #1:</strong></label>
-      <input type="text" id="user1" placeholder="Teammate Gamertag 1">
-      <textarea id="teamData1" placeholder="Paste Teammate 1 Game History"></textarea>
-    </div>
-
-    <div class="entry-group" id="teamFields2">
-      <label><strong>Teammate #2:</strong></label>
-      <input type="text" id="user2" placeholder="Teammate Gamertag 2">
-      <textarea id="teamData2" placeholder="Paste Teammate 2 Game History"></textarea>
-    </div>
-  </div>
-
-  <button onclick="analyzeData()">Validate</button>
-  <button onclick="resetForm()">Reset</button>
-
-  <details id="summary"><summary><strong>Streak Summary</strong></summary></details>
-  <table id="dataTable" style="display:none;">
-    <thead>
-      <tr>
-        <th>ID</th><th>Context</th><th>Start Time</th><th>Game</th><th>Save ID</th>
-        <th>Milestone</th><th>Num Users</th><th>End Time</th><th>Minutes</th><th>Won</th><th>Streak Count</th>
-      </tr>
-    </thead>
-    <tbody></tbody>
-  </table>
-
-  <script>
-    function parseGameData(raw) {
-      return raw.split('\n').map(line => line.trim().split('\t')).filter(cols => cols.length >= 10);
-    }
-
-    function checkForTeamEntries() {
-      const rawLines = parseGameData(document.getElementById('rawData').value);
-      const show = rawLines.some(cols => parseInt(cols[6]) === 6);
-      document.getElementById('teamFields').classList.toggle('visible', show);
-      document.getElementById('teamFields2').classList.toggle('visible', show);
-    }
-
-    function resetForm() {
-      ['mainUser','rawData','user1','user2','teamData1','teamData2','gameModeFilter','minStreak'].forEach(id => document.getElementById(id).value = '');
-      document.getElementById('summary').innerHTML = '';
-      document.getElementById('dataTable').style.display = 'none';
-      document.querySelector('#dataTable tbody').innerHTML = '';
-      document.querySelectorAll('h3[id^="streak"]').forEach(el => el.remove());
-      document.getElementById('teamFields').classList.remove('visible');
-      document.getElementById('teamFields2').classList.remove('visible');
-    }
-
-    function analyzeData() {
-      const rawLines = parseGameData(document.getElementById('rawData').value);
-      const teamLines1 = parseGameData(document.getElementById('teamData1').value);
-      const teamLines2 = parseGameData(document.getElementById('teamData2').value);
-      const user1 = document.getElementById('user1').value;
-      const user2 = document.getElementById('user2').value;
-      const gameFilter = document.getElementById('gameModeFilter').value.toLowerCase();
-      const minStreak = parseInt(document.getElementById('minStreak').value) || 2;
-      const mainUser = document.getElementById('mainUser').value || 'Player';
-
-      const tbody = document.querySelector('#dataTable tbody');
-      tbody.innerHTML = '';
-      let winStreak = [], streakCount = 0;
-      const summaryData = [];
-
-      const filteredLines = rawLines.filter(cols => gameFilter === '' || cols[3].toLowerCase().includes(gameFilter));
-
-      filteredLines.forEach((cols, idx) => {
-        const won = parseInt(cols[9]);
-        const endTime = cols[7];
-        const game = cols[3];
-        const row = document.createElement('tr');
-        cols.forEach(c => { const td = document.createElement('td'); td.textContent = c; row.appendChild(td); });
-        const labelTd = document.createElement('td'); row.appendChild(labelTd);
-
-        if (won === 1 && (winStreak.length === 0 || game === winStreak[0].game)) {
-          winStreak.push({ row, endTime, game });
-        } else {
-          if (winStreak.length >= minStreak) {
-            streakCount++;
-            // record summary data
-            const date = winStreak[0].row.children[2].textContent.split(' ')[0];
-            summaryData.push({ id: streakCount, date, game, length: winStreak.length });
-            winStreak.forEach(entry => {
-              entry.row.classList.add('streak');
-              let label = `Streak ${streakCount} (${winStreak.length} Wins)`;
-              const match1 = teamLines1.find(t => t[7] === entry.endTime && parseInt(t[9]) === 1);
-              const match2 = teamLines2.find(t => t[7] === entry.endTime && parseInt(t[9]) === 1);
-              if (parseInt(entry.row.children[6].textContent) === 6) {
-                const teammates = [];
-                if (match1) teammates.push(user1);
-                if (match2) teammates.push(user2);
-                if (teammates.length) {
-                  entry.row.classList.add('team-match');
-                  label += ` Shared with ${teammates.join(' & ')}`;
-                }
-              }
-              entry.row.id = `streak${streakCount}`;
-              entry.row.children[10].textContent = label;
-              entry.row.children[10].classList.add('label-cell');
-              tbody.appendChild(entry.row);
-            });
-          } else {
-            winStreak.forEach(entry => tbody.appendChild(entry.row));
-          }
-          winStreak = [];
-          tbody.appendChild(row);
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NBA 2K Win Streak Validator</title>
+    <link rel="icon" href="https://upload.wikimedia.org/wikipedia/commons/7/7a/Basketball.png" type="image/png">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        // Tailwind CSS Configuration for NBA 2K Branding (matches your other tools)
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        montserrat: ['Montserrat', 'sans-serif'],
+                    },
+                    colors: {
+                        'nba-blue': '#051A3A',
+                        'nba-red': '#EA1F27',
+                        'nba-pink': '#DD3894',
+                        'nba-yellow': '#FFA436',
+                        'nba-teal': '#16F2D2',
+                        'nba-white': '#FFFFFF',
+                        'nba-gray-light': '#f3f4f6',
+                        'nba-gray-medium': '#e5e7eb',
+                    },
+                },
+            },
         }
-      });
+    </script>
+    <style>
+        /* Base styles, primarily for font and modal, rest handled by Tailwind */
+        body {
+            font-family: 'Montserrat', sans-serif;
+            margin: 0;
+            background-color: var(--tw-colors-nba-blue); /* Use NBA dark blue as background */
+            color: var(--tw-colors-nba-white); /* White text on dark background */
+        }
+        /* Ensure all form elements also use the Montserrat font */
+        textarea, button, select, input[type="text"], input[type="number"] {
+            font-family: 'Montserrat', sans-serif;
+        }
 
-      if (winStreak.length >= minStreak) {
-        streakCount++;
-        const date = winStreak[0].row.children[2].textContent.split(' ')[0];
-        summaryData.push({ id: streakCount, date, game: winStreak[0].game, length: winStreak.length });
-        winStreak.forEach(entry => {
-          entry.row.classList.add('streak');
-          const label = `Streak ${streakCount} (${winStreak.length} Wins)`;
-          entry.row.id = `streak${streakCount}`;
-          entry.row.children[10].textContent = label;
-          entry.row.children[10].classList.add('label-cell');
-          tbody.appendChild(entry.row);
+        /* Table specific styles for consistency */
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+        th, td {
+            border: 1px solid var(--tw-colors-nba-gray-medium);
+            padding: 12px;
+            text-align: left;
+        }
+        th {
+            background-color: #EA1F27; /* Explicitly set NBA Red background */
+            color: #FFFFFF; /* Explicitly set White text */
+            font-weight: 600;
+        }
+        th.sortable {
+            cursor: pointer;
+            position: relative;
+        }
+        th.sortable:hover {
+            background-color: var(--tw-colors-nba-pink);
+        }
+        tbody tr {
+            background-color: var(--tw-colors-nba-white);
+            color: var(--tw-colors-nba-blue);
+        }
+        tbody tr:nth-child(even) {
+            background-color: var(--tw-colors-nba-gray-light); /* Slight stripe for readability */
+        }
+        tbody tr:hover {
+            background-color: var(--tw-colors-nba-teal); /* Hover effect for rows */
+            color: var(--tw-colors-nba-white);
+        }
+
+        /* Specific styles for streak and team match rows */
+        .streak {
+            background-color: #d1fae5 !important; /* Tailwind green-100 */
+            color: #065f46 !important; /* Tailwind green-800 */
+        }
+        .streak td {
+            border-color: #a7f3d0 !important; /* Tailwind green-200 */
+        }
+        .team-match {
+            background-color: #dbeafe !important; /* Tailwind blue-100 */
+            color: #1e40af !important; /* Tailwind blue-800 */
+        }
+        .team-match td {
+            border-color: #bfdbfe !important; /* Tailwind blue-200 */
+        }
+        .label-cell {
+            font-weight: bold;
+            color: #1a7f37; /* A darker green for labels */
+            white-space: pre-wrap;
+        }
+
+        /* Custom Modal Styles (reused from your other tools) */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.6);
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-content {
+            background-color: #FFFFFF;
+            color: #051A3A;
+            margin: auto;
+            padding: 24px;
+            border-radius: 1rem;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2), 0 10px 10px -5px rgba(0, 0, 0, 0.1);
+            width: 90%;
+            max-width: 480px;
+            text-align: center;
+            position: relative;
+        }
+        #modalMessage {
+            color: #051A3A;
+        }
+        .close-button {
+            position: absolute;
+            top: 8px;
+            right: 12px;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            color: #9ca3af;
+        }
+        .close-button:hover, .close-button:focus {
+            color: #6b7280;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        .modal-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        /* New: Shared Streak Summary Styling */
+        .shared-streak-summary {
+            border: 2px solid var(--tw-colors-nba-yellow); /* Yellow border */
+            padding: 0.75rem; /* p-3 */
+            border-radius: 0.5rem; /* rounded-lg */
+            background-color: rgba(255, 164, 54, 0.1); /* Light yellow background */
+            margin-top: 0.5rem; /* mt-2 */
+            display: block; /* Ensure it takes full width for border */
+        }
+    </style>
+</head>
+<body class="p-4 sm:p-6 md:p-8">
+    <div class="max-w-6xl mx-auto bg-nba-blue shadow-2xl rounded-2xl p-6 sm:p-8 md:p-10 border-4 border-nba-red">
+        <a name="top"></a>
+        <h1 class="text-3xl sm:text-4xl font-extrabold text-nba-white mb-6 text-center">NBA 2K Win Streak Validator</h1>
+
+        <div class="entry-row flex flex-col lg:flex-row gap-6 mb-6">
+            <div class="entry-group flex-1 flex flex-col" id="mainGroup">
+                <label for="mainUser" class="font-semibold text-nba-white mb-2">Player's Gamertag:</label>
+                <input type="text" id="mainUser" placeholder="Player's Gamertag"
+                       class="w-full p-3 border-2 border-nba-red rounded-lg focus:ring-4 focus:ring-nba-yellow focus:border-transparent text-nba-blue bg-nba-white shadow-inner mb-4"/>
+
+                <label for="rawData" class="font-semibold text-nba-white mb-2">Paste Game History Data:</label>
+                <textarea id="rawData" placeholder="Paste Game History Data" oninput="checkForTeamEntries()"
+                          class="w-full h-48 p-3 border-2 border-nba-red rounded-lg focus:ring-4 focus:ring-nba-yellow focus:border-transparent text-nba-blue bg-nba-white resize-y shadow-inner mb-4"></textarea>
+
+                <label for="gameModeFilter" class="font-semibold text-nba-white mb-2">Game Mode Filter (e.g. MyTEAM Park Co-Op):</label>
+                <input type="text" id="gameModeFilter" placeholder="Game Mode Filter"
+                       class="w-full p-3 border-2 border-nba-red rounded-lg focus:ring-4 focus:ring-nba-yellow focus:border-transparent text-nba-blue bg-nba-white shadow-inner mb-4"/>
+
+                <label for="minStreak" class="font-semibold text-nba-white mb-2">Minimum Streak Length (e.g. 3):</label>
+                <input type="number" id="minStreak" placeholder="Minimum Streak Length" min="1"
+                       class="w-full p-3 border-2 border-nba-red rounded-lg focus:ring-4 focus:ring-nba-yellow focus:border-transparent text-nba-blue bg-nba-white shadow-inner"/>
+            </div>
+
+            <div class="entry-group flex-1 flex flex-col hidden" id="teamFields">
+                <label for="user1" class="font-semibold text-nba-white mb-2">Teammate #1:</label>
+                <input type="text" id="user1" placeholder="Teammate Gamertag 1"
+                       class="w-full p-3 border-2 border-nba-red rounded-lg focus:ring-4 focus:ring-nba-yellow focus:border-transparent text-nba-blue bg-nba-white shadow-inner mb-4"/>
+                <label for="teamData1" class="font-semibold text-nba-white mb-2">Paste Teammate 1 Game History:</label>
+                <textarea id="teamData1" placeholder="Paste Teammate 1 Game History"
+                          class="w-full h-48 p-3 border-2 border-nba-red rounded-lg focus:ring-4 focus:ring-nba-yellow focus:border-transparent text-nba-blue bg-nba-white resize-y shadow-inner"></textarea>
+            </div>
+
+            <div class="entry-group flex-1 flex flex-col hidden" id="teamFields2">
+                <label for="user2" class="font-semibold text-nba-white mb-2">Teammate #2:</label>
+                <input type="text" id="user2" placeholder="Teammate Gamertag 2"
+                       class="w-full p-3 border-2 border-nba-red rounded-lg focus:ring-4 focus:ring-nba-yellow focus:border-transparent text-nba-blue bg-nba-white shadow-inner mb-4"/>
+                <label for="teamData2" class="font-semibold text-nba-white mb-2">Paste Teammate 2 Game History:</label>
+                <textarea id="teamData2" placeholder="Paste Teammate 2 Game History"
+                          class="w-full h-48 p-3 border-2 border-nba-red rounded-lg focus:ring-4 focus:ring-nba-yellow focus:border-transparent text-nba-blue bg-nba-white resize-y shadow-inner"></textarea>
+            </div>
+        </div>
+
+        <div class="flex flex-wrap gap-4 mt-4">
+            <button onclick="analyzeData()"
+                    class="px-6 py-3 bg-nba-red text-nba-white font-bold rounded-lg shadow-lg hover:bg-nba-pink focus:outline-none focus:ring-2 focus:ring-nba-red focus:ring-offset-2 focus:ring-offset-nba-blue transition ease-in-out duration-200 text-lg">
+                Validate
+            </button>
+            <button onclick="resetForm()"
+                    class="px-6 py-3 bg-gray-600 text-nba-white font-bold rounded-lg shadow-lg hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 focus:ring-offset-nba-blue transition ease-in-out duration-200 text-lg">
+                Reset
+            </button>
+        </div>
+
+        <details id="summary" class="mt-8 p-4 bg-nba-white text-nba-blue rounded-lg shadow-md">
+            <summary class="text-xl font-bold text-nba-red cursor-pointer">Streak Summary</summary>
+            </details>
+
+        <div class="overflow-x-auto shadow-md rounded-lg mt-6">
+            <table id="dataTable" class="min-w-full bg-nba-white hidden">
+                <thead>
+                    <tr>
+                        <th class="px-4 py-2 bg-nba-red text-nba-white text-left text-lg font-semibold">ID</th>
+                        <th class="px-4 py-2 bg-nba-red text-nba-white text-left text-lg font-semibold">Context</th>
+                        <th class="px-4 py-2 bg-nba-red text-nba-white text-left text-lg font-semibold">Start Time</th>
+                        <th class="px-4 py-2 bg-nba-red text-nba-white text-left text-lg font-semibold">Game</th>
+                        <th class="px-4 py-2 bg-nba-red text-nba-white text-left text-lg font-semibold">Save ID</th>
+                        <th class="px-4 py-2 bg-nba-red text-nba-white text-left text-lg font-semibold">Milestone</th>
+                        <th class="px-4 py-2 bg-nba-red text-nba-white text-left text-lg font-semibold">Num Users</th>
+                        <th class="px-4 py-2 bg-nba-red text-nba-white text-left text-lg font-semibold">End Time</th>
+                        <th class="px-4 py-2 bg-nba-red text-nba-white text-left text-lg font-semibold">Minutes</th>
+                        <th class="px-4 py-2 bg-nba-red text-nba-white text-left text-lg font-semibold">Won</th>
+                        <th class="px-4 py-2 bg-nba-red text-nba-white text-left text-lg font-semibold">Streak Count</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-nba-gray-medium text-nba-blue"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <div id="customModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button">&times;</span>
+            <p id="modalMessage" class="text-lg mb-4"></p>
+            <div class="modal-buttons">
+                <button id="modalConfirmButton" class="px-6 py-3 bg-nba-yellow text-nba-blue font-bold rounded-lg hover:bg-nba-teal transition duration-200 ease-in-out">Proceed Anyway</button>
+                <button id="modalCancelButton" class="px-6 py-3 bg-gray-600 text-nba-white font-bold rounded-lg hover:bg-gray-700 transition duration-200 ease-in-out">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- Modal Functions (reused from your other tools) ---
+        let modalResolve; // To store the resolve function for the modal promise
+
+        function showModal(message, showConfirmButtons = false) {
+            const modal = document.getElementById('customModal');
+            const modalMessage = document.getElementById('modalMessage');
+            const modalButtons = modal.querySelector('.modal-buttons');
+            const modalOkButton = document.getElementById('modalOkButton'); // This is the single OK button
+
+            modalMessage.textContent = message;
+
+            if (showConfirmButtons) {
+                // Show the "Proceed Anyway" and "Cancel" buttons
+                modalButtons.style.display = 'flex';
+                if (modalOkButton) modalOkButton.style.display = 'none'; // Hide the single OK button
+                return new Promise(resolve => {
+                    modalResolve = resolve;
+                    modal.style.display = 'flex';
+                });
+            } else {
+                // Show only the "OK" button
+                if (modalButtons) modalButtons.style.display = 'none'; // Hide confirm buttons
+                if (modalOkButton) modalOkButton.style.display = 'inline-block'; // Show single OK button
+                modal.style.display = 'flex';
+            }
+        }
+
+        function hideModal() {
+            document.getElementById('customModal').style.display = 'none';
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const modal = document.getElementById('customModal');
+            const closeButton = modal.querySelector('.close-button');
+            const modalOkButton = document.getElementById('modalOkButton');
+            const modalConfirmButton = document.getElementById('modalConfirmButton');
+            const modalCancelButton = document.getElementById('modalCancelButton');
+
+            if (closeButton) closeButton.addEventListener('click', () => { hideModal(); if (modalResolve) modalResolve(false); });
+            if (modalOkButton) modalOkButton.addEventListener('click', () => { hideModal(); if (modalResolve) modalResolve(true); }); // For simple OK, resolve true
+            if (modalConfirmButton) modalConfirmButton.addEventListener('click', () => { hideModal(); if (modalResolve) modalResolve(true); });
+            if (modalCancelButton) modalCancelButton.addEventListener('click', () => { hideModal(); if (modalResolve) modalResolve(false); });
+
+            // Close modal if clicking outside content
+            if (modal) modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    hideModal();
+                    if (modalResolve) modalResolve(false); // Treat outside click as cancel
+                }
+            });
         });
-      }
 
-      document.getElementById('dataTable').style.display = 'table';
-      document.getElementById('summary').innerHTML = summaryData.map(s =>
-        `<p><a href="#streak${s.id}">On ${s.date}, ${mainUser} had a ${s.length}-game win streak in ${s.game}.</a></p>`
-      ).join('');
-    }
-  </script>
+        // --- Win Streak Validator Logic ---
+        function parseGameData(raw) {
+            return raw.split('\n').map(line => line.trim().split('\t')).filter(cols => cols.length >= 10);
+        }
+
+        function checkForTeamEntries() {
+            const rawLines = parseGameData(document.getElementById('rawData').value);
+            const showTeamFields = rawLines.some(cols => parseInt(cols[6]) === 6); // Check if 'Num Users' column (index 6) is 6
+            
+            // Toggle visibility using Tailwind's 'hidden' class
+            document.getElementById('teamFields').classList.toggle('hidden', !showTeamFields);
+            document.getElementById('teamFields2').classList.toggle('hidden', !showTeamFields);
+        }
+
+        function resetForm() {
+            ['mainUser', 'rawData', 'user1', 'user2', 'teamData1', 'teamData2', 'gameModeFilter', 'minStreak'].forEach(id => {
+                const element = document.getElementById(id);
+                if (element) element.value = '';
+            });
+            document.getElementById('summary').innerHTML = '<summary class="text-xl font-bold text-nba-red cursor-pointer">Streak Summary</summary>';
+            document.getElementById('dataTable').classList.add('hidden'); // Hide table
+            document.querySelector('#dataTable tbody').innerHTML = '';
+            // Remove dynamically added streak headers (if any)
+            document.querySelectorAll('h3[id^="streak"]').forEach(el => el.remove());
+            
+            // Ensure team fields are hidden on reset
+            document.getElementById('teamFields').classList.add('hidden');
+            document.getElementById('teamFields2').classList.add('hidden');
+        }
+
+        async function analyzeData() { // Made async to await modal response
+            const rawDataValue = document.getElementById('rawData').value.trim();
+            if (!rawDataValue) {
+                showModal("Please paste Game History Data for the main player.");
+                return;
+            }
+
+            const rawLines = parseGameData(rawDataValue);
+            const teamLines1 = parseGameData(document.getElementById('teamData1').value);
+            const teamLines2 = parseGameData(document.getElementById('teamData2').value);
+            const user1 = document.getElementById('user1').value.trim();
+            const user2 = document.getElementById('user2').value.trim();
+            const gameFilter = document.getElementById('gameModeFilter').value.toLowerCase().trim();
+            const minStreak = parseInt(document.getElementById('minStreak').value) || 2;
+            const mainUser = document.getElementById('mainUser').value.trim() || 'Player';
+
+            // --- Pre-validation for missing teammate data ---
+            const teamGamesDetected = rawLines.some(cols => parseInt(cols[6]) === 6);
+            const teamDataMissing = teamGamesDetected && (teamLines1.length === 0 || teamLines2.length === 0);
+
+            if (teamDataMissing) {
+                const proceed = await showModal(
+                    "Team games (Num Users = 6) were detected, but teammate game history data is missing. Proceeding without this data may result in incomplete teammate validation for streaks. Do you want to proceed anyway?",
+                    true // Show confirm/cancel buttons
+                );
+                if (!proceed) {
+                    return; // User chose to cancel
+                }
+            }
+            // --- End pre-validation ---
+
+            const tbody = document.querySelector('#dataTable tbody');
+            tbody.innerHTML = '';
+            let winStreak = [];
+            let streakCount = 0;
+            const summaryData = [];
+
+            const filteredLines = rawLines.filter(cols => gameFilter === '' || cols[3].toLowerCase().includes(gameFilter));
+
+            filteredLines.forEach((cols) => {
+                const won = parseInt(cols[9]);
+                const endTime = cols[7];
+                const game = cols[3];
+
+                const row = document.createElement('tr');
+                cols.forEach(c => {
+                    const td = document.createElement('td');
+                    td.textContent = c;
+                    td.className = 'px-4 py-2 text-sm';
+                    row.appendChild(td);
+                });
+                
+                const labelTd = document.createElement('td');
+                labelTd.className = 'px-4 py-2 text-sm';
+                row.appendChild(labelTd);
+
+                if (won === 1 && (winStreak.length === 0 || game === winStreak[0].game)) {
+                    winStreak.push({ row, endTime, game });
+                } else {
+                    if (winStreak.length >= minStreak) {
+                        streakCount++;
+                        const date = winStreak[0].row.children[2].textContent.split(' ')[0];
+                        
+                        // Collect unique teammates for this streak
+                        const allTeammatesInCurrentStreak = new Set();
+                        winStreak.forEach(entry => {
+                            if (parseInt(entry.row.children[6].textContent) === 6) {
+                                const match1 = teamLines1.find(t => t[7] === entry.endTime && parseInt(t[9]) === 1);
+                                const match2 = teamLines2.find(t => t[7] === entry.endTime && parseInt(t[9]) === 1);
+                                if (match1 && user1) allTeammatesInCurrentStreak.add(user1);
+                                if (match2 && user2) allTeammatesInCurrentStreak.add(user2);
+                            }
+                        });
+
+                        summaryData.push({
+                            id: streakCount,
+                            date,
+                            game,
+                            length: winStreak.length,
+                            sharedUsers: Array.from(allTeammatesInCurrentStreak)
+                        });
+                        
+                        winStreak.forEach(entry => {
+                            entry.row.classList.add('streak');
+                            let label = `Streak ${streakCount} (${winStreak.length} Wins)`;
+                            
+                            if (parseInt(entry.row.children[6].textContent) === 6) {
+                                const teammatesForThisGame = [];
+                                const match1 = teamLines1.find(t => t[7] === entry.endTime && parseInt(t[9]) === 1);
+                                const match2 = teamLines2.find(t => t[7] === entry.endTime && parseInt(t[9]) === 1);
+                                
+                                if (match1 && user1) teammatesForThisGame.push(user1);
+                                if (match2 && user2) teammatesForThisGame.push(user2);
+                                
+                                if (teammatesForThisGame.length > 0) {
+                                    entry.row.classList.add('team-match');
+                                    label += ` Shared with ${teammatesForThisGame.join(' & ')}`;
+                                }
+                            }
+                            entry.row.id = `streak${streakCount}-${game.replace(/\s+/g, '-')}-${date.replace(/\//g, '-')}`;
+                            entry.row.children[10].textContent = label;
+                            entry.row.children[10].classList.add('label-cell');
+                            tbody.appendChild(entry.row);
+                        });
+                    } else {
+                        winStreak.forEach(entry => tbody.appendChild(entry.row));
+                    }
+                    tbody.appendChild(row);
+                    winStreak = [];
+                }
+            });
+
+            // Handle the last streak if loop ends on a streak
+            if (winStreak.length >= minStreak) {
+                streakCount++;
+                const date = winStreak[0].row.children[2].textContent.split(' ')[0];
+                
+                // Collect unique teammates for this final streak
+                const allTeammatesInCurrentStreak = new Set();
+                winStreak.forEach(entry => {
+                    if (parseInt(entry.row.children[6].textContent) === 6) {
+                        const match1 = teamLines1.find(t => t[7] === entry.endTime && parseInt(t[9]) === 1);
+                        const match2 = teamLines2.find(t => t[7] === entry.endTime && parseInt(t[9]) === 1);
+                        if (match1 && user1) allTeammatesInCurrentStreak.add(user1);
+                        if (match2 && user2) allTeammatesInCurrentStreak.add(user2);
+                    }
+                });
+
+                summaryData.push({
+                    id: streakCount,
+                    date,
+                    game: winStreak[0].game,
+                    length: winStreak.length,
+                    sharedUsers: Array.from(allTeammatesInCurrentStreak)
+                });
+                
+                winStreak.forEach(entry => {
+                    entry.row.classList.add('streak');
+                    let label = `Streak ${streakCount} (${winStreak.length} Wins)`;
+
+                    if (parseInt(entry.row.children[6].textContent) === 6) {
+                        const teammatesForThisGame = [];
+                        const match1 = teamLines1.find(t => t[7] === entry.endTime && parseInt(t[9]) === 1);
+                        const match2 = teamLines2.find(t => t[7] === entry.endTime && parseInt(t[9]) === 1);
+                        
+                        if (match1 && user1) teammatesForThisGame.push(user1);
+                        if (match2 && user2) teammatesForThisGame.push(user2);
+                        
+                        if (teammatesForThisGame.length > 0) {
+                            entry.row.classList.add('team-match');
+                            label += ` Shared with ${teammatesForThisGame.join(' & ')}`;
+                        }
+                    }
+                    entry.row.id = `streak${streakCount}-${game.replace(/\s+/g, '-')}-${date.replace(/\//g, '-')}`;
+                    entry.row.children[10].textContent = label;
+                    entry.row.children[10].classList.add('label-cell');
+                    tbody.appendChild(entry.row);
+                });
+            } else {
+                winStreak.forEach(entry => tbody.appendChild(entry.row));
+            }
+
+            document.getElementById('dataTable').classList.remove('hidden');
+
+            const summaryDetails = document.getElementById('summary');
+            summaryDetails.innerHTML = '<summary class="text-xl font-bold text-nba-red cursor-pointer">Streak Summary</summary>';
+            
+            if (summaryData.length === 0) {
+                summaryDetails.innerHTML += '<p class="text-nba-blue mt-2">No streaks found matching the criteria.</p>';
+            } else {
+                summaryData.forEach(s => {
+                    const p = document.createElement('p');
+                    // Apply conditional class for shared streak summary
+                    if (s.sharedUsers && s.sharedUsers.length > 0) {
+                        p.className = 'text-nba-blue mt-2 shared-streak-summary'; // Add the new class
+                    } else {
+                        p.className = 'text-nba-blue mt-2';
+                    }
+                    
+                    const link = document.createElement('a');
+                    link.href = `#streak${s.id}-${s.game.replace(/\s+/g, '-')}-${s.date.replace(/\//g, '-')}`;
+                    link.className = 'text-nba-blue hover:underline'; // Changed to nba-blue
+
+                    let summaryText = `On ${s.date}, ${mainUser}`;
+                    if (s.sharedUsers && s.sharedUsers.length > 0) {
+                        const allPlayers = [mainUser, ...s.sharedUsers];
+                        const lastPlayer = allPlayers.pop(); // Get the last player
+                        const playersList = allPlayers.length > 0 ? `${allPlayers.join(', ')} and ${lastPlayer}` : lastPlayer;
+                        summaryText = `On ${s.date}, ${playersList} had a shared ${s.length}-game win streak in ${s.game}.`;
+                    } else {
+                        summaryText += ` had a ${s.length}-game win streak in ${s.game}.`;
+                    }
+                    link.textContent = summaryText;
+                    p.appendChild(link);
+                    summaryDetails.appendChild(p);
+                });
+            }
+        }
+    </script>
 </body>
 </html>
