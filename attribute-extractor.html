@@ -230,14 +230,12 @@
             const playerInfoDiv = document.getElementById('playerInfo');
             const detectedVersionTextSpan = document.getElementById('detectedVersionText');
             
-            // Clear previous results
             tbody.innerHTML = '';
             playerInfoDiv.classList.add('hidden');
             document.getElementById('resultTable').classList.add('hidden');
             document.getElementById('copyBtn').style.display = 'none';
-
-            // Reset status indicators
-            detectedVersionTextSpan.textContent = 'Unknown';
+            
+            let detectedVersion = 'Unknown'; // Initialize detectedVersion for this extraction pass
 
             const infoSpans = {
                 Position: document.getElementById('info-position'),
@@ -249,54 +247,89 @@
             };
 
             const extra = { Position: 'N/A', OVR: 'N/A', Archetype: 'N/A', Height: 'N/A', Wingspan: 'N/A', Weight: 'N/A' };
-            let detectedVersion = 'Unknown';
             const categoriesToStyleForCopy = ["Finishing", "Shooting", "Playmaking", "Defense", "Physicals"];
+            let verticalAttributeProcessed = false; 
+            let staminaAddedFor2K24AfterVertical = false;
+
+            // First pass to determine the version more reliably
+            for (const line of lines) {
+                const parts = line.trim().split(/\t+/);
+                const name = parts[0].trim();
+                const numbersInLine = parts.filter(p => /^\d+(\.\d+)?$/.test(p.trim()));
+                if (!['Position', 'Archetype', 'Height', 'Wingspan', 'Weight'].includes(name)) {
+                    if (numbersInLine.length === 3) {
+                        detectedVersion = 'NBA 2K25';
+                        break; // Found 2K25, no need to check further for version
+                    } else if (numbersInLine.length === 2) {
+                        detectedVersion = 'NBA 2K24'; // Tentatively 2K24, could be overridden by a 2K25 line
+                    }
+                }
+            }
+             if (detectedVersion === 'Unknown' && lines.some(line => line.trim().split(/\t+/).filter(p => /^\d+(\.\d+)?$/.test(p.trim())).length > 0)) {
+                // If still unknown but there are numeric attributes, default to 2K24 if no 3-number lines were found.
+                // This handles cases where only 2K24-like data (or simpler data) is present.
+                if (!lines.some(line => line.trim().split(/\t+/).filter(p => /^\d+(\.\d+)?$/.test(p.trim())).length === 3 && !['Position', 'Archetype', 'Height', 'Wingspan', 'Weight'].includes(line.trim().split(/\t+/)[0].trim()))) {
+                     detectedVersion = 'NBA 2K24';
+                }
+            }
+
 
             lines.forEach(line => {
                 const parts = line.trim().split(/\t+/);
-                const name = parts[0].trim(); // Trim the name
+                const name = parts[0].trim();
                 let value = '';
 
-                // Handle category rows
-                if (parts.length === 1 && name.length > 0 && !/\d/.test(name) && isNaN(parseFloat(name))) { // Check if it's a likely category header
+                // Always extract player info for the "Build Details" section
+                if (parts.length >= 2) {
+                    const extractedValue = parts[1].trim();
+                    if (name === 'Position') extra.Position = extractedValue;
+                    else if (name === 'Overall' || name === 'OVR') extra.OVR = extractedValue;
+                    else if (name === 'Potential Description') extra.Archetype = extractedValue;
+                    else if (['Height', 'Wingspan', 'Weight'].includes(name)) extra[name] = extractedValue;
+                }
+                
+                // Handle category rows for the table
+                if (parts.length === 1 && name.length > 0 && !/\d/.test(name) && isNaN(parseFloat(name))) {
+                    if (verticalAttributeProcessed && 
+                        !(detectedVersion === 'NBA 2K24' && name.toLowerCase() === 'physicals' && !staminaAddedFor2K24AfterVertical)) {
+                        return; 
+                    }
                     const tr = document.createElement('tr');
-                    tr.className = 'category-header-row'; // Use specific class for styling if needed, or rely on font-bold
+                    tr.className = 'category-header-row';
                     const td = document.createElement('td');
                     td.setAttribute('colspan', '2');
-                    
-                    // MODIFIED: Style specific category headers for display and copy
                     if (categoriesToStyleForCopy.includes(name)) {
                         td.innerHTML = `<strong>${name.toUpperCase()}</strong>`;
                     } else {
                         td.textContent = name;
                     }
-                    td.className = 'px-4 py-2 font-bold'; // Ensure category headers are bold in the table
+                    td.className = 'px-4 py-2 font-bold';
                     tr.appendChild(td);
                     tbody.appendChild(tr);
                     return;
                 }
-
-                // Determine version and extract value
-                const numbersInParts = parts.filter(p => /^\d+(\.\d+)?$/.test(p.trim()));
-
-                if (numbersInParts.length >= 2) {
-                    value = numbersInParts[1];
-                    if (numbersInParts.length === 2) {
-                        detectedVersion = 'NBA 2K24';
-                    } else if (numbersInParts.length === 3) {
-                        detectedVersion = 'NBA 2K25';
-                    }
-                } else if (parts.length > 1 && /^\d+(\.\d+)?$/.test(parts[1].trim()) && !['Position', 'Archetype', 'Height', 'Wingspan', 'Weight'].includes(name)) {
-                    // Handle simple "Attribute Value" lines if Value is numeric and not an extra field
+                
+                // Extract attribute value for the table
+                const attributeNumbers = parts.filter(p => /^\d+(\.\d+)?$/.test(p.trim()));
+                if (detectedVersion === 'NBA 2K25' && attributeNumbers.length >= 1) { // For 2K25, take the first number as the current value
+                    value = attributeNumbers[0];
+                } else if (detectedVersion === 'NBA 2K24' && attributeNumbers.length >= 2) { // For 2K24, take the second number
+                    value = attributeNumbers[1];
+                } else if (detectedVersion === 'NBA 2K24' && attributeNumbers.length === 1 && parts.length > 1 && !['Position', 'Archetype', 'Height', 'Wingspan', 'Weight'].includes(name)) {
+                    // Fallback for 2K24 if only one number is present in the line but it's clearly an attribute value
+                    value = attributeNumbers[0];
+                } else if (parts.length > 1 && /^\d+(\.\d+)?$/.test(parts[1].trim()) && !['Position', 'Archetype', 'Height', 'Wingspan', 'Weight'].includes(name) && detectedVersion === 'Unknown') {
+                    // If version is still unknown, but we have a clear attribute-value pair.
                     value = parts[1].trim();
-                     // If only one number found overall in parts and it is the value, version might be 2k24 like
-                    if (numbersInParts.length === 1 && numbersInParts[0] === value) {
-                         detectedVersion = 'NBA 2K24'; // Or based on other cues if needed
-                    }
                 }
 
 
-                if (value !== '' && !isNaN(parseFloat(value))) {
+                if (value !== '' && !isNaN(parseFloat(value))) { // This is an attribute-value pair
+                    if (verticalAttributeProcessed && 
+                        !(detectedVersion === 'NBA 2K24' && name.toLowerCase() === 'stamina' && !staminaAddedFor2K24AfterVertical)) {
+                        return; 
+                    }
+
                     const tr = document.createElement('tr');
                     tr.className = 'hover:bg-nba-gray-light';
                     const tdName = document.createElement('td');
@@ -308,21 +341,18 @@
                     tr.appendChild(tdName);
                     tr.appendChild(tdValue);
                     tbody.appendChild(tr);
-                }
 
-                // Extract player info
-                if (parts.length >= 2) {
-                    const extractedValue = parts[1].trim();
-                    if (name === 'Position') extra.Position = extractedValue;
-                    else if (name === 'Overall' || name === 'OVR') extra.OVR = extractedValue;
-                    else if (name === 'Potential Description') extra.Archetype = extractedValue;
-                    else if (['Height', 'Wingspan', 'Weight'].includes(name)) extra[name] = extractedValue;
+                    if (name.toLowerCase() === "vertical") {
+                        verticalAttributeProcessed = true;
+                    }
+                    if (detectedVersion === 'NBA 2K24' && name.toLowerCase() === "stamina" && verticalAttributeProcessed) {
+                        staminaAddedFor2K24AfterVertical = true; 
+                    }
                 }
             });
 
-            detectedVersionTextSpan.textContent = detectedVersion;
+            detectedVersionTextSpan.textContent = detectedVersion; 
 
-            // Populate player info spans
             infoSpans.Position.textContent = extra.Position;
             infoSpans.OVR.textContent = extra.OVR;
             infoSpans.Archetype.textContent = extra.Archetype;
@@ -330,7 +360,7 @@
             infoSpans.Wingspan.textContent = extra.Wingspan;
             infoSpans.Weight.textContent = extra.Weight;
 
-            if (tbody.children.length > 0 || extra.Position !== 'N/A') { // Show if any attributes or player info extracted
+            if (tbody.children.length > 0 || extra.Position !== 'N/A') { 
                 playerInfoDiv.classList.remove('hidden');
                 document.getElementById('resultTable').classList.remove('hidden');
                 document.getElementById('copyBtn').style.display = 'inline-block';
@@ -346,7 +376,6 @@
             document.getElementById('resultTable').classList.add('hidden');
             document.getElementById('copyBtn').style.display = 'none';
 
-            // Reset player info spans to N/A
             document.getElementById('info-position').textContent = 'N/A';
             document.getElementById('info-ovr').textContent = 'N/A';
             document.getElementById('info-archetype').textContent = 'N/A';
@@ -355,7 +384,6 @@
             document.getElementById('info-weight').textContent = 'N/A';
         }
 
-        // Function to copy HTML content to clipboard
         function copyHTMLContent() {
             let contentToCopy = '';
 
@@ -366,7 +394,7 @@
                 playerInfoDiv.querySelectorAll('ul li').forEach(item => {
                     const label = item.querySelector('strong').textContent;
                     const value = item.querySelector('span').textContent.trim();
-                    if (value !== 'N/A' && value !== '') { // Only include if value is not N/A or empty
+                    if (value !== 'N/A' && value !== '') { 
                         bulletedListHtml += `<li>${label.replace(':', ': ')} ${value}</li>`;
                     }
                 });
@@ -379,85 +407,54 @@
                 if (contentToCopy) {
                     contentToCopy += '<br><br>'; 
                 }
-                // The table's outerHTML will already have the styled category headers
                 contentToCopy += resultTable.outerHTML;
             }
-
-            fallbackCopy(contentToCopy, true); // Pass true to indicate HTML content
+            executeLegacyCopy(contentToCopy, true);
         }
-
-        function fallbackCopy(text, isHtml = false) {
+        
+        function executeLegacyCopy(text, isHtml = false) {
             const textarea = document.createElement('textarea');
-            textarea.value = text; // For HTML, this sets the raw HTML string
+            textarea.value = text; 
             textarea.style.position = 'fixed'; 
             textarea.style.opacity = '0'; 
             document.body.appendChild(textarea);
             
-            let success = false;
             try {
-                if (isHtml && navigator.clipboard && navigator.clipboard.write) {
-                    // Modern way to copy HTML (if supported)
-                    const blob = new Blob([text], { type: 'text/html' });
-                    const richTextInput = new ClipboardItem({ 'text/html': blob });
-                    navigator.clipboard.write([richTextInput]).then(() => {
+                if (isHtml) {
+                    const tempDiv = document.createElement('div');
+                    tempDiv.innerHTML = text; 
+                    tempDiv.style.position = 'fixed';
+                    tempDiv.style.opacity = '0';
+                    document.body.appendChild(tempDiv);
+                    const range = document.createRange();
+                    range.selectNodeContents(tempDiv);
+                    const selection = window.getSelection();
+                    selection.removeAllRanges();
+                    selection.addRange(range);
+                    try {
+                        document.execCommand('copy');
                         showModal('Data copied to clipboard!');
-                    }).catch(err => {
-                        console.error('Async HTML copy failed, trying fallback:', err);
-                        // Fallback to execCommand for HTML if modern API fails
-                        executeLegacyCopy(textarea, isHtml, text);
-                    });
-                    success = true; // Assume success if promise path is taken initially
+                    } catch(e) {
+                        console.error('Legacy HTML copy using div failed:', e);
+                        textarea.focus();
+                        textarea.select();
+                        document.execCommand('copy');
+                        showModal('Data copied as plain text (HTML copy failed).');
+                    } finally {
+                        selection.removeAllRanges();
+                        document.body.removeChild(tempDiv);
+                    }
                 } else {
-                     // Fallback for plain text or if modern HTML copy not available/failed
-                    executeLegacyCopy(textarea, isHtml, text);
-                }
-            } catch (err) {
-                console.error('Copy failed:', err);
-                showModal('Copy failed. Your browser might not support this feature.');
-            } finally {
-                if (!success || !(isHtml && navigator.clipboard && navigator.clipboard.write)) {
-                    // Only remove textarea if not handled by async clipboard API's success path
-                    // or if it's not the modern HTML path (which might finish later)
-                    // This is tricky; legacy always removes. Modern might not need it.
-                    // For simplicity, we can always remove it after attempting.
-                }
-                 document.body.removeChild(textarea); 
-            }
-        }
-
-        function executeLegacyCopy(textareaElement, isHtml, originalText) {
-            if (isHtml) {
-                // For HTML with execCommand, it often needs the content to be in a contentEditable div or selected from DOM
-                const tempDiv = document.createElement('div');
-                tempDiv.innerHTML = originalText; // The HTML string
-                tempDiv.style.position = 'fixed';
-                tempDiv.style.opacity = '0';
-                document.body.appendChild(tempDiv);
-                const range = document.createRange();
-                range.selectNodeContents(tempDiv);
-                const selection = window.getSelection();
-                selection.removeAllRanges();
-                selection.addRange(range);
-                try {
+                    textarea.focus();
+                    textarea.select();
                     document.execCommand('copy');
                     showModal('Data copied to clipboard!');
-                } catch(e) {
-                    console.error('Legacy HTML copy using div failed:', e);
-                    // Final fallback: copy as plain text if HTML copy fails
-                    textareaElement.focus();
-                    textareaElement.select();
-                    document.execCommand('copy');
-                    showModal('Data copied as plain text (HTML copy failed).');
-                } finally {
-                    selection.removeAllRanges();
-                    document.body.removeChild(tempDiv);
                 }
-            } else {
-                // Plain text copy
-                textareaElement.focus();
-                textareaElement.select();
-                document.execCommand('copy');
-                showModal('Data copied to clipboard!');
+            } catch (err) {
+                 console.error('Copy failed:', err);
+                 showModal('Copy failed. Your browser might not support this feature.');
+            } finally {
+                 document.body.removeChild(textarea); 
             }
         }
 
