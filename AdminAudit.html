@@ -30,19 +30,16 @@
         }
     </script>
     <style>
-        /* Base styles, primarily for font and modal, rest handled by Tailwind */
         body {
             font-family: 'Montserrat', sans-serif;
             margin: 0;
-            background-color: var(--tw-colors-nba-blue); /* Use NBA dark blue as background */
-            color: var(--tw-colors-nba-white); /* White text on dark background */
+            background-color: var(--tw-colors-nba-blue);
+            color: var(--tw-colors-nba-white);
         }
-        /* Ensure all form elements also use the Montserrat font */
         textarea, button, select, input[type="text"], input[type="number"], input[type="date"], input[type="datetime-local"] {
             font-family: 'Montserrat', sans-serif;
         }
 
-        /* Table specific styles for consistency */
         table {
             border-collapse: collapse;
             width: 100%;
@@ -53,8 +50,8 @@
             text-align: left;
         }
         th {
-            background-color: #EA1F27; /* Explicitly set NBA Red background */
-            color: #FFFFFF; /* Explicitly set White text */
+            background-color: #EA1F27;
+            color: #FFFFFF;
             font-weight: 600;
         }
         tbody tr {
@@ -62,14 +59,13 @@
             color: var(--tw-colors-nba-blue);
         }
         tbody tr:nth-child(even) {
-            background-color: var(--tw-colors-nba-gray-light); /* Slight stripe for readability */
+            background-color: var(--tw-colors-nba-gray-light);
         }
         tbody tr:hover {
-            background-color: var(--tw-colors-nba-teal); /* Hover effect for rows */
+            background-color: var(--tw-colors-nba-teal);
             color: var(--tw-colors-nba-white);
         }
 
-        /* Custom Modal Styles (reused from your other tools) */
         .modal {
             display: none;
             position: fixed;
@@ -174,7 +170,6 @@
     </div>
 
     <script>
-        // --- Modal Functions (reused from your other tools) ---
         function showModal(message) {
             const modal = document.getElementById('customModal');
             const modalMessage = document.getElementById('modalMessage');
@@ -222,9 +217,9 @@
             const locationOptions = ['', '5CA', 'Vegas Day', 'Vegas Swing', 'Vegas Weekend', 'Chengdu Day', 'Chengdu Weekend', 'Madrid', 'Player Advocacy'];
 
             // Define the desired order of leading columns for the main table
-            const mainTableLeadingColumns = ['CS Page', 'Validated', 'Discrepancy'];
+            const mainTableLeadingColumns = ['CX Page', 'Validated', 'Discrepancy']; // Changed 'CS Page' to 'CX Page'
             // Define the desired order of leading columns for the discrepancy table
-            const discrepancyTableLeadingColumns = ['CS Page', 'Type', 'Ticket #', 'Issue', 'Agent Location', 'Other Comments'];
+            const discrepancyTableLeadingColumns = ['CX Page', 'Type', 'Ticket #', 'Issue', 'Agent Location', 'Other Comments']; // Changed 'CS Page' to 'CX Page'
 
             // --- Utility Functions ---
 
@@ -236,7 +231,7 @@
             function formatDate(val) {
                 if (!val) return '';
                 const [y, m, d] = val.split('-');
-                return `${parseInt(m)}/${parseInt(d)}}/${y}`;
+                return `${parseInt(m)}/${parseInt(d)}/${y}`; // Corrected: Removed the extra '}'
             }
 
             /**
@@ -299,7 +294,7 @@
             function createSelectElement(options) {
                 const select = document.createElement('select');
                 // Updated class for discrepancy select to stand out more
-                select.className = 'block w-full rounded-md border-2 border-nba-yellow shadow-sm focus:border-nba-red focus:ring focus:ring-nba-red focus:ring-opacity-50 p-2 text-sm text-nba-blue';
+                select.className = 'block w-full rounded-md border-2 border-nba-yellow shadow-sm focus:border-nba-red focus:ring focus:ring-nba-red focus:ring-opacity50 p-2 text-sm text-nba-blue';
                 options.forEach(optionText => {
                     const option = document.createElement('option');
                     option.value = optionText;
@@ -397,32 +392,29 @@
                     // Render cells based on the new display order
                     displayHeaders.forEach(header => {
                         const td = document.createElement('td');
-                        td.className = 'px-6 py-4 whitespace-nowrap text-sm text-nba-blue';
+                        // Removed whitespace-nowrap to allow text wrapping
+                        td.className = 'px-6 py-4 text-sm text-nba-blue';
 
-                        if (header === 'CS Page') {
+                        if (header === 'CX Page') { // Changed 'CS Page' to 'CX Page'
                             const puid = originalRowData['Puid'];
                             const env = originalRowData['Environment']; // Still need original 'Environment' for URL construction
                             const title = originalRowData['Title & Year'];
-                            const csPageValue = originalRowData['CS Page'];
 
-                            if (csPageValue) {
-                                const url = `https://admin.nba2k.com/${encodeURIComponent(env)}/${encodeURIComponent(title)}/customer_service/user/edit/${encodeURIComponent(puid)}?titleid=61476&tab=notes`;
-                                const a = document.createElement('a');
-                                a.textContent = csPageValue;
-                                a.href = '#';
-                                a.className = 'text-nba-blue hover:underline font-medium'; // Changed to nba-blue
-                                a.addEventListener('click', (e) => {
-                                    e.preventDefault();
-                                    window.open(url, '_blank', 'noopener,noreferrer,width=800,height=600');
-                                });
-                                td.appendChild(a);
-                            } else {
-                                td.textContent = '';
-                            }
+                            const url = `https://admin.nba2k.com/${encodeURIComponent(env)}/${encodeURIComponent(title)}/customer_service/user/edit/${encodeURIComponent(puid)}?titleid=61476&tab=notes`;
+                            const atLinkButton = document.createElement('button');
+                            atLinkButton.innerHTML = 'AT Link'; // Display "AT Link"
+                            atLinkButton.className = 'px-3 py-1 bg-nba-blue text-nba-white rounded-md hover:bg-nba-teal transition duration-150 ease-in-out';
+                            atLinkButton.addEventListener('click', (e) => {
+                                e.preventDefault();
+                                window.open(url, '_blank', 'noopener,noreferrer,width=800,height=600');
+                            });
+                            td.appendChild(atLinkButton);
                         } else if (header === 'Validated') {
                             const validatedBtn = document.createElement('button');
-                            validatedBtn.textContent = 'Validated';
-                            validatedBtn.className = 'px-3 py-1 bg-green-500 text-nba-white rounded-md hover:bg-green-600 transition duration-150 ease-in-out';
+                            validatedBtn.innerHTML = '&#10003;'; // Checkmark HTML entity
+                            // Added text-center to the button itself for centering
+                            validatedBtn.className = 'px-3 py-1 bg-green-500 text-nba-white rounded-md hover:bg-green-600 transition duration-150 ease-in-out font-bold text-lg flex justify-center items-center mx-auto';
+                            td.classList.add('text-center'); // Also add text-center to the cell
                             validatedBtn.addEventListener('click', () => {
                                 tr.remove();
                                 updateCounts();
@@ -434,6 +426,26 @@
                             discrepancyBtn.className = 'px-3 py-1 bg-nba-red text-nba-white rounded-md hover:bg-nba-pink transition duration-150 ease-in-out';
                             discrepancyBtn.addEventListener('click', () => showDiscrepancyForm(tr, originalRowData, td)); // Pass originalRowData
                             td.appendChild(discrepancyBtn);
+                        } else if (header === 'Operation') {
+                            let operationText = originalRowData[header] || '';
+                            if (operationText.startsWith('Added ')) {
+                                if (operationText.includes('VC')) {
+                                    // If contains 'VC', trim after 'to user' (case-insensitive)
+                                    const searchPhrase = 'to user';
+                                    const indexOfToUser = operationText.toLowerCase().indexOf(searchPhrase);
+                                    if (indexOfToUser !== -1) {
+                                        operationText = operationText.substring(0, indexOfToUser + searchPhrase.length);
+                                    }
+                                } else {
+                                    // If no 'VC', trim everything after 'to player' (case-insensitive)
+                                    const searchPhrase = 'to player';
+                                    const indexOfToPlayer = operationText.toLowerCase().indexOf(searchPhrase);
+                                    if (indexOfToPlayer !== -1) {
+                                        operationText = operationText.substring(0, indexOfToPlayer).trim();
+                                    }
+                                }
+                            }
+                            td.textContent = operationText;
                         } else {
                             td.textContent = originalRowData[header];
                         }
@@ -490,8 +502,9 @@
                     const headerRow = document.createElement('tr');
 
                     // Construct headers for the discrepancy table
+                    // Exclude 'Environment' AND 'Puid' from other original headers for the discrepancy table
                     const otherOriginalHeaders = originalHeaders.filter(h =>
-                        h !== 'Environment' && !discrepancyTableLeadingColumns.includes(h)
+                        h !== 'Environment' && h !== 'Puid' && !discrepancyTableLeadingColumns.includes(h)
                     );
                     const displayHeadersForDiscrepancy = [...discrepancyTableLeadingColumns, ...otherOriginalHeaders];
 
@@ -516,32 +529,27 @@
                 tr.className = 'hover:bg-nba-gray-light';
 
                 // Get the headers currently displayed in the discrepancy table for correct cell order
-                const currentDiscrepancyHeaders = Array.from(table.querySelector('thead tr').children).map(th => th.textContent);
+                const currentDiscrepancyHeaders = Array.from(table.querySelector('thead tr').children).map(th => th.textContent.trim());
 
                 currentDiscrepancyHeaders.forEach(header => {
                     const td = document.createElement('td');
-                    td.className = 'px-6 py-4 whitespace-nowrap text-sm text-nba-blue';
+                    // Removed whitespace-nowrap to allow text wrapping
+                    td.className = 'px-6 py-4 text-sm text-nba-blue';
 
-                    if (header === 'CS Page') {
+                    if (header === 'CX Page') { // Changed 'CS Page' to 'CX Page'
                         const puid = originalRowData['Puid'];
                         const env = originalRowData['Environment'];
                         const title = originalRowData['Title & Year'];
-                        const csPageValue = originalRowData['CS Page'];
 
-                        if (csPageValue) {
-                            const url = `https://admin.nba2k.com/${encodeURIComponent(env)}/${encodeURIComponent(title)}/customer_service/user/edit/${encodeURIComponent(puid)}?titleid=61476&tab=notes`;
-                            const a = document.createElement('a');
-                            a.textContent = csPageValue;
-                            a.href = '#';
-                            a.className = 'text-nba-blue hover:underline font-medium'; // Changed to nba-blue
-                            a.addEventListener('click', (e) => {
-                                e.preventDefault();
-                                window.open(url, '_blank', 'noopener,noreferrer,width=800,height=600');
-                            });
-                            td.appendChild(a);
-                        } else {
-                            td.textContent = '';
-                        }
+                        const url = `https://admin.nba2k.com/${encodeURIComponent(env)}/${encodeURIComponent(title)}/customer_service/user/edit/${encodeURIComponent(puid)}?titleid=61476&tab=notes`;
+                        const atLinkButton = document.createElement('button');
+                        atLinkButton.innerHTML = 'AT Link'; // Display "AT Link"
+                        atLinkButton.className = 'px-3 py-1 bg-nba-blue text-nba-white rounded-md hover:bg-nba-teal transition duration-150 ease-in-out';
+                        atLinkButton.addEventListener('click', (e) => {
+                            e.preventDefault();
+                            window.open(url, '_blank', 'noopener,noreferrer,width=800,height=600');
+                        });
+                        td.appendChild(atLinkButton);
                     } else if (header === 'Type') {
                         td.textContent = typeText;
                     } else if (header === 'Ticket #') {
@@ -553,7 +561,7 @@
                     } else if (header === 'Other Comments') {
                         td.appendChild(createInputElement('Comments'));
                     } else {
-                        // For other original data columns
+                        // For other original data columns that remain (excluding Puid)
                         td.textContent = originalRowData[header] || '';
                     }
                     tr.appendChild(td);
@@ -590,10 +598,13 @@
                         if (cell) {
                             const input = cell.querySelector('input');
                             const select = cell.querySelector('select');
+                            const button = cell.querySelector('button'); // Check for button
                             if (input) {
                                 rowDataMap[header] = input.value.trim();
                             } else if (select) {
                                 rowDataMap[header] = select.value;
+                            } else if (button && header === 'CX Page') { // If it's the CX Page button, use its text
+                                rowDataMap[header] = button.textContent.trim();
                             } else {
                                 rowDataMap[header] = cell.textContent.trim();
                             }
@@ -606,12 +617,10 @@
                     const rowValues = exportHeaders.map(header => {
                         switch (header) {
                             case 'Date':
-                                // Get the Date from the original data (assuming it's passed through originalRowData to createDiscrepancyRow)
-                                // If 'Date' is not a header in the discrepancy table, we need to pull it from originalRowData
-                                // For robustness, let's assume 'Date' is in originalRowData and use that.
-                                // If originalRowData isn't directly available here, we'd need to store it with the discrepancy row.
-                                // For now, I'll use the current date as a fallback if 'Date' isn't in rowDataMap.
-                                return rowDataMap['Date'] || formatDate(currentDate);
+                                // This Date comes from the filter inputs, not from the original table data.
+                                // For CSV export, if the original data had a 'Date' column, it would be better to use that.
+                                // Currently, this uses the date selected in the filter controls, which is fine for the audit report's date.
+                                return elements.filterDate.value ? formatDate(elements.filterDate.value) : formatDate(currentDate);
                             case 'Your Name':
                                 return ''; // Left blank as requested
                             case 'Agent Name':
