@@ -4,73 +4,67 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NBA 2K Attribute Extractor</title>
-    <link rel="icon" href="https://upload.wikimedia.org/wikipedia/commons/7/7a/Basketball.png" type="image/png">
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800;900&display=swap" rel="stylesheet">
-    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="icon" href="[https://upload.wikimedia.org/wikipedia/commons/7/7a/Basketball.png](https://upload.wikimedia.org/wikipedia/commons/7/7a/Basketball.png)" type="image/png">
+    <link href="[https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800;900&display=swap](https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800;900&display=swap)" rel="stylesheet">
+    <script src="[https://cdn.tailwindcss.com](https://cdn.tailwindcss.com)"></script>
     <script>
-        // Tailwind CSS Configuration for NBA 2K Branding
         tailwind.config = {
             theme: {
                 extend: {
                     fontFamily: {
-                        montserrat: ['Montserrat', 'sans-serif'], // Keep Montserrat as primary font
+                        montserrat: ['Montserrat', 'sans-serif'],
                     },
                     colors: {
-                        'nba-blue': '#051A3A',    // Deep dark blue, primary background/text
-                        'nba-red': '#EA1F27',     // Vibrant red, accent/button
-                        'nba-pink': '#DD3894',    // Secondary accent pink
-                        'nba-yellow': '#FFA436',  // Gold/Orange accent
-                        'nba-teal': '#16F2D2',    // Teal accent
-                        'nba-white': '#FFFFFF',   // Pure white
-                        'nba-gray-light': '#f3f4f6', // Light background gray
-                        'nba-gray-medium': '#e5e7eb', // Border/divider gray
+                        'nba-blue': '#051A3A',
+                        'nba-red': '#EA1F27',
+                        'nba-pink': '#DD3894',
+                        'nba-yellow': '#FFA436',
+                        'nba-teal': '#16F2D2',
+                        'nba-white': '#FFFFFF',
+                        'nba-gray-light': '#f3f4f6',
+                        'nba-gray-medium': '#e5e7eb',
                     },
                 },
             },
         }
     </script>
     <style>
-        /* Base styles, primarily for font and modal, rest handled by Tailwind */
         body {
-            font-family: 'Montserrat', sans-serif; /* Ensure Montserrat is applied */
-            margin: 0; /* Reset default body margin */
-            background-color: var(--tw-colors-nba-blue); /* Use NBA dark blue as background */
-            color: var(--tw-colors-nba-white); /* White text on dark background */
+            font-family: 'Montserrat', sans-serif;
+            margin: 0;
+            background-color: var(--tw-colors-nba-blue);
+            color: var(--tw-colors-nba-white);
         }
-        /* Ensure all form elements also use the Montserrat font */
-        textarea, button, select, input[type="text"], input[type="number"] {
+        textarea, button, select, input {
             font-family: 'Montserrat', sans-serif;
         }
-
-        /* Custom Modal Styles (reused for consistency) */
         .modal {
-            display: none; /* Hidden by default */
-            position: fixed; /* Stay in place */
-            z-index: 1000; /* Sit on top */
+            display: none;
+            position: fixed;
+            z-index: 1000;
             left: 0;
             top: 0;
-            width: 100%; /* Full width */
-            height: 100%; /* Full height */
-            overflow: auto; /* Enable scroll if needed */
-            background-color: rgba(0,0,0,0.6); /* Darker overlay */
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.6);
             justify-content: center;
             align-items: center;
         }
         .modal-content {
-            background-color: #FFFFFF; /* Explicitly set white background */
-            color: #051A3A; /* Explicitly set NBA blue text color */
+            background-color: #FFFFFF;
+            color: #051A3A;
             margin: auto;
-            padding: 24px; /* p-6 */
-            border-radius: 1rem; /* rounded-xl */
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2), 0 10px 10px -5px rgba(0, 0, 0, 0.1); /* shadow-2xl */
+            padding: 24px;
+            border-radius: 1rem;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2), 0 10px 10px -5px rgba(0, 0, 0, 0.1);
             width: 90%;
-            max-width: 480px; /* max-w-sm */
+            max-width: 480px;
             text-align: center;
             position: relative;
         }
-        /* Explicitly set color for the message paragraph inside the modal */
         #modalMessage {
-            color: #051A3A; /* Explicitly set NBA blue text color */
+            color: #051A3A;
         }
         .close-button {
             position: absolute;
@@ -79,27 +73,51 @@
             font-size: 28px;
             font-weight: bold;
             cursor: pointer;
-            color: #9ca3af; /* gray-400 */
+            color: #9ca3af;
         }
         .close-button:hover,
         .close-button:focus {
-            color: #6b7280; /* gray-600 */
+            color: #6b7280;
             text-decoration: none;
             cursor: pointer;
+        }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+        th, td {
+            border: 1px solid var(--tw-colors-nba-gray-medium);
+            padding: 8px 12px;
+            text-align: left;
+        }
+        th {
+            background-color: #EA1F27;
+            color: #FFFFFF;
+            font-weight: 600;
+        }
+         tbody tr {
+            background-color: var(--tw-colors-nba-white);
+            color: var(--tw-colors-nba-blue);
+        }
+        tbody tr:nth-child(even) {
+            background-color: var(--tw-colors-nba-gray-light);
+        }
+        tbody tr.category-header-row {
+            background-color: var(--tw-colors-nba-gray-medium) !important;
+            color: var(--tw-colors-nba-blue) !important;
+        }
+        tbody tr.category-header-row td {
+            font-weight: bold;
         }
     </style>
 </head>
 <body class="p-4 sm:p-6 md:p-8">
-    <div class="max-w-6xl mx-auto bg-nba-blue shadow-2xl rounded-2xl p-6 sm:p-8 md:p-10 border-4 border-nba-red">
+    <div class="bg-nba-blue shadow-2xl rounded-2xl p-6 sm:p-8 md:p-10 border-4 border-nba-red">
         <div class="flex flex-col sm:flex-row justify-between items-center mb-6">
             <h1 class="text-3xl sm:text-4xl font-extrabold text-nba-white mb-4 sm:mb-0">NBA 2K Attribute Extractor</h1>
             <div id="version" class="version-info bg-nba-red text-nba-white px-4 py-2 rounded-full font-bold text-sm shadow-md flex flex-col items-start gap-1">
                 <div class="flex items-center gap-2">
                     Detected Version: <span id="detectedVersionText">Unknown</span>
-                </div>
-                <div class="flex items-center gap-4">
-                    <span id="notTemplateStatus"></span>
-                    <span id="notRebirthStatus"></span>
                 </div>
             </div>
         </div>
@@ -164,7 +182,6 @@
     </div>
 
     <script>
-        // --- Modal Functions ---
         function showModal(message) {
             const modal = document.getElementById('customModal');
             const modalMessage = document.getElementById('modalMessage');
@@ -186,7 +203,6 @@
             });
         });
 
-        // --- Attribute Extractor Logic ---
         function validateInput() {
             const input = document.getElementById('input').value.trim();
             document.getElementById('warning').classList.toggle('hidden', input.length >= 10);
@@ -204,23 +220,14 @@
             const tbody = document.querySelector('#resultTable tbody');
             const playerInfoDiv = document.getElementById('playerInfo');
             const detectedVersionTextSpan = document.getElementById('detectedVersionText');
-            const notTemplateStatusSpan = document.getElementById('notTemplateStatus');
-            const notRebirthStatusSpan = document.getElementById('notRebirthStatus');
 
-
-            // Clear previous results
             tbody.innerHTML = '';
             playerInfoDiv.classList.add('hidden');
             document.getElementById('resultTable').classList.add('hidden');
             document.getElementById('copyBtn').style.display = 'none';
 
-            // Reset status indicators
             detectedVersionTextSpan.textContent = 'Unknown';
-            notTemplateStatusSpan.innerHTML = '';
-            notRebirthStatusSpan.innerHTML = '';
 
-
-            // Cache player info spans
             const infoSpans = {
                 Position: document.getElementById('info-position'),
                 OVR: document.getElementById('info-ovr'),
@@ -232,56 +239,42 @@
 
             const extra = { Position: 'N/A', OVR: 'N/A', Archetype: 'N/A', Height: 'N/A', Wingspan: 'N/A', Weight: 'N/A' };
             let detectedVersion = 'Unknown';
-            let isNotTemplate = false;
-            let isNotRebirth = true;
-            let featuresUnlockedFound = false;
-
+            const categoriesToStyleForCopy = ["Finishing", "Shooting", "Playmaking", "Defense", "Physicals"];
 
             lines.forEach(line => {
                 const parts = line.trim().split(/\t+/);
-                const name = parts[0];
+                const name = parts.length > 0 ? parts[-0].trim() : '';
                 let value = '';
 
-                // --- Logic for Not Template ---
-                if (line.includes("Player Template Name")) {
-                    if (line.includes("No Template Used")) {
-                        isNotTemplate = true;
-                    } else {
-                        isNotTemplate = false;
-                    }
-                }
-
-                // --- Logic for Not Rebirth ---
-                if (line.includes("Features Unlocked")) {
-                    featuresUnlockedFound = true;
-                }
-                if (featuresUnlockedFound && line.includes("Rebirth")) {
-                    isNotRebirth = false;
-                }
-
-
-                // Handle category rows
-                if (parts.length === 1 && !/\d/.test(parts[0])) {
+                if (parts.length === 1 && name.length > 0 && !/\d/.test(name) && isNaN(parseFloat(name))) {
                     const tr = document.createElement('tr');
-                    tr.className = 'bg-nba-gray-light font-bold text-nba-blue';
+                    tr.className = 'category-header-row';
                     const td = document.createElement('td');
                     td.setAttribute('colspan', '2');
-                    td.textContent = name;
-                    td.className = 'px-4 py-2';
+                    if (categoriesToStyleForCopy.includes(name)) {
+                        td.innerHTML = `<strong>${name.toUpperCase()}</strong>`;
+                    } else {
+                        td.textContent = name;
+                    }
+                    td.className = 'px-4 py-2 font-bold';
                     tr.appendChild(td);
                     tbody.appendChild(tr);
                     return;
                 }
 
-                // Determine version and extract value
-                const numbersInParts = parts.filter(p => /^\d+(\.\d+)?$/.test(p));
+                const numbersInParts = parts.filter(p => /^\d+(\.\d+)?$/.test(p.trim()));
 
                 if (numbersInParts.length >= 2) {
-                    value = numbersInParts[1];
+                    value = numbersInParts[-1];
                     if (numbersInParts.length === 2) {
                         detectedVersion = 'NBA 2K24';
                     } else if (numbersInParts.length === 3) {
                         detectedVersion = 'NBA 2K25';
+                    }
+                } else if (parts.length > 1 && /^\d+(\.\d+)?$/.test(parts[-1].trim()) && !['Position', 'Archetype', 'Height', 'Wingspan', 'Weight'].includes(name)) {
+                    value = parts[-1].trim();
+                    if (numbersInParts.length === 1 && numbersInParts[-1] === value) {
+                         detectedVersion = 'NBA 2K24';
                     }
                 }
 
@@ -299,21 +292,17 @@
                     tbody.appendChild(tr);
                 }
 
-                // Extract player info
                 if (parts.length >= 2) {
-                    if (name === 'Position') extra.Position = parts[1];
-                    else if (name === 'Overall' || name === 'OVR') extra.OVR = parts[1];
-                    else if (name === 'Potential Description') extra.Archetype = parts[1];
-                    else if (['Height', 'Wingspan', 'Weight'].includes(name)) extra[name] = parts[1];
+                    const extractedValue = parts[-1].trim();
+                    if (name === 'Position') extra.Position = extractedValue;
+                    else if (name === 'Overall' || name === 'OVR') extra.OVR = extractedValue;
+                    else if (name === 'Potential Description') extra.Archetype = extractedValue;
+                    else if (['Height', 'Wingspan', 'Weight'].includes(name)) extra[-0] = extractedValue;
                 }
             });
 
             detectedVersionTextSpan.textContent = detectedVersion;
-            notTemplateStatusSpan.innerHTML = isNotTemplate ? 'Not Template: &#9989;' : 'Not Template: &#10060;';
-            notRebirthStatusSpan.innerHTML = isNotRebirth ? 'Not Rebirth: &#9989;' : 'Not Rebirth: &#10060;';
 
-
-            // Populate player info spans
             infoSpans.Position.textContent = extra.Position;
             infoSpans.OVR.textContent = extra.OVR;
             infoSpans.Archetype.textContent = extra.Archetype;
@@ -321,23 +310,22 @@
             infoSpans.Wingspan.textContent = extra.Wingspan;
             infoSpans.Weight.textContent = extra.Weight;
 
-            playerInfoDiv.classList.remove('hidden');
-            document.getElementById('resultTable').classList.remove('hidden');
-            document.getElementById('copyBtn').style.display = 'inline-block';
+            if (tbody.children.length > 0 || extra.Position !== 'N/A') {
+                playerInfoDiv.classList.remove('hidden');
+                document.getElementById('resultTable').classList.remove('hidden');
+                document.getElementById('copyBtn').style.display = 'inline-block';
+            }
         }
 
         function resetAll() {
             document.getElementById('input').value = '';
             document.getElementById('warning').classList.add('hidden');
             document.getElementById('detectedVersionText').textContent = 'Unknown';
-            document.getElementById('notTemplateStatus').innerHTML = '';
-            document.getElementById('notRebirthStatus').innerHTML = '';
             document.getElementById('playerInfo').classList.add('hidden');
             document.querySelector('#resultTable tbody').innerHTML = '';
             document.getElementById('resultTable').classList.add('hidden');
             document.getElementById('copyBtn').style.display = 'none';
 
-            // Reset player info spans to N/A
             document.getElementById('info-position').textContent = 'N/A';
             document.getElementById('info-ovr').textContent = 'N/A';
             document.getElementById('info-archetype').textContent = 'N/A';
@@ -346,20 +334,17 @@
             document.getElementById('info-weight').textContent = 'N/A';
         }
 
-        // Function to copy HTML content to clipboard
         function copyHTMLContent() {
             let contentToCopy = '';
 
             const playerInfoDiv = document.getElementById('playerInfo');
             if (playerInfoDiv && playerInfoDiv.classList.contains('hidden') === false) {
-                // Copy the Build Details header
                 contentToCopy += `<h3>${playerInfoDiv.querySelector('h3').textContent}</h3>`;
-                // Reconstruct the bulleted list with space after colon
                 let bulletedListHtml = '<ul>';
                 playerInfoDiv.querySelectorAll('ul li').forEach(item => {
                     const label = item.querySelector('strong').textContent;
                     const value = item.querySelector('span').textContent.trim();
-                    if (value !== 'N/A') {
+                    if (value !== 'N/A' && value !== '') {
                         bulletedListHtml += `<li>${label.replace(':', ': ')} ${value}</li>`;
                     }
                 });
@@ -369,56 +354,77 @@
 
             const resultTable = document.getElementById('resultTable');
             if (resultTable && resultTable.classList.contains('hidden') === false) {
-                // Add a line break for separation if both exist
                 if (contentToCopy) {
-                    contentToCopy += '<br><br>'; // Use <br> for HTML line breaks
+                    contentToCopy += '<br><br>';
                 }
-                // Copy the entire table's HTML content
                 contentToCopy += resultTable.outerHTML;
             }
 
-            // Use the fallback copy method for HTML content
-            fallbackCopy(contentToCopy, true); // Pass true to indicate HTML content
+            fallbackCopy(contentToCopy, true);
         }
 
         function fallbackCopy(text, isHtml = false) {
             const textarea = document.createElement('textarea');
             textarea.value = text;
-            textarea.style.position = 'fixed'; // Prevent scrolling to bottom of page
-            textarea.style.opacity = '0'; // Make it invisible
+            textarea.style.position = 'fixed';
+            textarea.style.opacity = '0';
             document.body.appendChild(textarea);
-            textarea.focus();
-            textarea.select();
 
+            let success = false;
             try {
-                if (isHtml) {
-                    // For HTML content, we need to use a different approach for rich text pasting
-                    // This creates a temporary div, puts the HTML in it, selects it, and copies
-                    const tempDiv = document.createElement('div');
-                    tempDiv.innerHTML = text;
-                    tempDiv.style.position = 'fixed';
-                    tempDiv.style.opacity = '0';
-                    document.body.appendChild(tempDiv);
-
-                    const range = document.createRange();
-                    range.selectNode(tempDiv);
-                    window.getSelection().removeAllRanges();
-                    window.getSelection().addRange(range);
-
-                    document.execCommand('copy');
-
-                    window.getSelection().removeAllRanges(); // Clear selection
-                    document.body.removeChild(tempDiv); // Clean up temp div
+                if (isHtml && navigator.clipboard && navigator.clipboard.write) {
+                    const blob = new Blob([text], { type: 'text/html' });
+                    const richTextInput = new ClipboardItem({ 'text/html': blob });
+                    navigator.clipboard.write([richTextInput]).then(() => {
+                        showModal('Data copied to clipboard!');
+                    }).catch(err => {
+                        console.error('Async HTML copy failed, trying fallback:', err);
+                        executeLegacyCopy(textarea, isHtml, text);
+                    });
+                    success = true;
                 } else {
-                    // For plain text, use the textarea method
-                    document.execCommand('copy');
+                    executeLegacyCopy(textarea, isHtml, text);
                 }
-                showModal('Data copied to clipboard!');
             } catch (err) {
                 console.error('Copy failed:', err);
-                showModal('Copy failed. Your browser might not support automatic copying of rich text.');
+                showModal('Copy failed. Your browser might not support this feature.');
             } finally {
-                document.body.removeChild(textarea); // Always remove the textarea
+                if (!success || !(isHtml && navigator.clipboard && navigator.clipboard.write)) {
+                }
+                 document.body.removeChild(textarea);
+            }
+        }
+
+        function executeLegacyCopy(textareaElement, isHtml, originalText) {
+            if (isHtml) {
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = originalText;
+                tempDiv.style.position = 'fixed';
+                tempDiv.style.opacity = '0';
+                document.body.appendChild(tempDiv);
+                const range = document.createRange();
+                range.selectNodeContents(tempDiv);
+                const selection = window.getSelection();
+                selection.removeAllRanges();
+                selection.addRange(range);
+                try {
+                    document.execCommand('copy');
+                    showModal('Data copied to clipboard!');
+                } catch(e) {
+                    console.error('Legacy HTML copy using div failed:', e);
+                    textareaElement.focus();
+                    textareaElement.select();
+                    document.execCommand('copy');
+                    showModal('Data copied as plain text (HTML copy failed).');
+                } finally {
+                    selection.removeAllRanges();
+                    document.body.removeChild(tempDiv);
+                }
+            } else {
+                textareaElement.focus();
+                textareaElement.select();
+                document.execCommand('copy');
+                showModal('Data copied to clipboard!');
             }
         }
     </script>
