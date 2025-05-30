@@ -147,7 +147,7 @@
     </style>
 </head>
 <body class="p-4 sm:p-6 md:p-8">
-    <div class="max-w-6xl mx-auto bg-nba-blue shadow-2xl rounded-2xl p-6 sm:p-8 md:p-10 border-4 border-nba-red">
+    <div class="bg-nba-blue shadow-2xl rounded-2xl p-6 sm:p-8 md:p-10 border-4 border-nba-red">
         <h1 class="text-3xl sm:text-4xl font-extrabold text-nba-white mb-6 text-center">NBA 2K VC Audit</h1>
 
         <div id="uploadContainer" class="mb-6 p-4 border-2 border-nba-yellow rounded-lg bg-nba-blue shadow-md flex items-center justify-center sm:justify-start gap-4 flex-wrap">
@@ -195,7 +195,7 @@
             <div class="filter-group flex items-center gap-2 p-2 border border-nba-gray-medium rounded-lg bg-nba-white shadow-sm">
                 <label for="searchInput" class="font-semibold text-nba-blue whitespace-nowrap text-sm">Search:</label>
                 <input type="text" id="searchInput" placeholder="Search..."
-                       class="flex-1 rounded-md border-gray-300 shadow-sm focus:border-nba-red focus:ring focus:ring-nba-red focus:ring-opacity-50 p-2 text-sm text-nba-blue"/>
+                           class="flex-1 rounded-md border-gray-300 shadow-sm focus:border-nba-red focus:ring focus:ring-nba-red focus:ring-opacity-50 p-2 text-sm text-nba-blue"/>
             </div>
             <div class="filter-group flex items-center gap-2 p-2 border border-nba-gray-medium rounded-lg bg-nba-white shadow-sm">
                 <label for="rowsPerPage" class="font-semibold text-nba-blue whitespace-nowrap text-sm">Rows per page:</label>
@@ -371,8 +371,8 @@
             return parsedData.filter(row => {
                 const rowDate = row.Date ? new Date(row.Date) : null;
                 const validDate = (!rowDate || isNaN(rowDate.getTime())) ? true : // If Date is invalid or missing, don't filter by date
-                                  (!fromVal || rowDate >= new Date(fromVal)) &&
-                                  (!toVal || rowDate <= new Date(toVal));
+                                    (!fromVal || rowDate >= new Date(fromVal)) &&
+                                    (!toVal || rowDate <= new Date(toVal));
 
                 const actionValue = (row.Action || '').toLowerCase();
                 const includesSearch = Object.values(row).some(v => v && String(v).toLowerCase().includes(sv));
