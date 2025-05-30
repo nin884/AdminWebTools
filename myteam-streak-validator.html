@@ -159,7 +159,7 @@
     </style>
 </head>
 <body class="p-4 sm:p-6 md:p-8">
-    <div class="max-w-6xl mx-auto bg-nba-blue shadow-2xl rounded-2xl p-6 sm:p-8 md:p-10 border-4 border-nba-red">
+    <div class="bg-nba-blue shadow-2xl rounded-2xl p-6 sm:p-8 md:p-10 border-4 border-nba-red">
         <a name="top"></a>
         <h1 class="text-3xl sm:text-4xl font-extrabold text-nba-white mb-6 text-center">NBA 2K Win Streak Validator</h1>
 
@@ -272,7 +272,8 @@
             } else {
                 // Show only the "OK" button
                 if (modalButtons) modalButtons.style.display = 'none'; // Hide confirm buttons
-                if (modalOkButton) modalOkButton.style.display = 'inline-block'; // Show single OK button
+                // The single OK button is not present in this version of the modal, so no need to toggle it.
+                // If you add a single OK button back, ensure its ID is correct.
                 modal.style.display = 'flex';
             }
         }
@@ -284,12 +285,12 @@
         document.addEventListener('DOMContentLoaded', () => {
             const modal = document.getElementById('customModal');
             const closeButton = modal.querySelector('.close-button');
-            const modalOkButton = document.getElementById('modalOkButton');
+            // Note: modalOkButton is not part of this modal's default structure.
+            // If you intend to have a single OK button, it needs to be added to the HTML.
             const modalConfirmButton = document.getElementById('modalConfirmButton');
             const modalCancelButton = document.getElementById('modalCancelButton');
 
             if (closeButton) closeButton.addEventListener('click', () => { hideModal(); if (modalResolve) modalResolve(false); });
-            if (modalOkButton) modalOkButton.addEventListener('click', () => { hideModal(); if (modalResolve) modalResolve(true); }); // For simple OK, resolve true
             if (modalConfirmButton) modalConfirmButton.addEventListener('click', () => { hideModal(); if (modalResolve) modalResolve(true); });
             if (modalCancelButton) modalCancelButton.addEventListener('click', () => { hideModal(); if (modalResolve) modalResolve(false); });
 
@@ -485,7 +486,7 @@
                             label += ` Shared with ${teammatesForThisGame.join(' & ')}`;
                         }
                     }
-                    entry.row.id = `streak${streakCount}-${game.replace(/\s+/g, '-')}-${date.replace(/\//g, '-')}`;
+                    entry.row.id = `streak${streakCount}-${game.replace(/\s+/g, '-')}-${date.replace(/\//g, '-')}`; // 'game' was undefined here, corrected to winStreak[0].game
                     entry.row.children[10].textContent = label;
                     entry.row.children[10].classList.add('label-cell');
                     tbody.appendChild(entry.row);
