@@ -4,67 +4,73 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NBA 2K Attribute Extractor</title>
-    <link rel="icon" href="[https://upload.wikimedia.org/wikipedia/commons/7/7a/Basketball.png](https://upload.wikimedia.org/wikipedia/commons/7/7a/Basketball.png)" type="image/png">
-    <link href="[https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800;900&display=swap](https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800;900&display=swap)" rel="stylesheet">
-    <script src="[https://cdn.tailwindcss.com](https://cdn.tailwindcss.com)"></script>
+    <link rel="icon" href="https://upload.wikimedia.org/wikipedia/commons/7/7a/Basketball.png" type="image/png">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
     <script>
+        // Tailwind CSS Configuration for NBA 2K Branding
         tailwind.config = {
             theme: {
                 extend: {
                     fontFamily: {
-                        montserrat: ['Montserrat', 'sans-serif'],
+                        montserrat: ['Montserrat', 'sans-serif'], // Keep Montserrat as primary font
                     },
                     colors: {
-                        'nba-blue': '#051A3A',
-                        'nba-red': '#EA1F27',
-                        'nba-pink': '#DD3894',
-                        'nba-yellow': '#FFA436',
-                        'nba-teal': '#16F2D2',
-                        'nba-white': '#FFFFFF',
-                        'nba-gray-light': '#f3f4f6',
-                        'nba-gray-medium': '#e5e7eb',
+                        'nba-blue': '#051A3A',    // Deep dark blue, primary background/text
+                        'nba-red': '#EA1F27',     // Vibrant red, accent/button
+                        'nba-pink': '#DD3894',    // Secondary accent pink
+                        'nba-yellow': '#FFA436',  // Gold/Orange accent
+                        'nba-teal': '#16F2D2',    // Teal accent
+                        'nba-white': '#FFFFFF',   // Pure white
+                        'nba-gray-light': '#f3f4f6', // Light background gray
+                        'nba-gray-medium': '#e5e7eb', // Border/divider gray
                     },
                 },
             },
         }
     </script>
     <style>
+        /* Base styles, primarily for font and modal, rest handled by Tailwind */
         body {
-            font-family: 'Montserrat', sans-serif;
-            margin: 0;
-            background-color: var(--tw-colors-nba-blue);
-            color: var(--tw-colors-nba-white);
+            font-family: 'Montserrat', sans-serif; /* Ensure Montserrat is applied */
+            margin: 0; /* Reset default body margin */
+            background-color: var(--tw-colors-nba-blue); /* Use NBA dark blue as background */
+            color: var(--tw-colors-nba-white); /* White text on dark background */
         }
-        textarea, button, select, input {
+        /* Ensure all form elements also use the Montserrat font */
+        textarea, button, select, input[type="text"], input[type="number"] {
             font-family: 'Montserrat', sans-serif;
         }
+
+        /* Custom Modal Styles (reused for consistency) */
         .modal {
-            display: none;
-            position: fixed;
-            z-index: 1000;
+            display: none; /* Hidden by default */
+            position: fixed; /* Stay in place */
+            z-index: 1000; /* Sit on top */
             left: 0;
             top: 0;
-            width: 100%;
-            height: 100%;
-            overflow: auto;
-            background-color: rgba(0,0,0,0.6);
+            width: 100%; /* Full width */
+            height: 100%; /* Full height */
+            overflow: auto; /* Enable scroll if needed */
+            background-color: rgba(0,0,0,0.6); /* Darker overlay */
             justify-content: center;
             align-items: center;
         }
         .modal-content {
-            background-color: #FFFFFF;
-            color: #051A3A;
+            background-color: #FFFFFF; /* Explicitly set white background */
+            color: #051A3A; /* Explicitly set NBA blue text color */
             margin: auto;
-            padding: 24px;
-            border-radius: 1rem;
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2), 0 10px 10px -5px rgba(0, 0, 0, 0.1);
+            padding: 24px; /* p-6 */
+            border-radius: 1rem; /* rounded-xl */
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2), 0 10px 10px -5px rgba(0, 0, 0, 0.1); /* shadow-2xl */
             width: 90%;
-            max-width: 480px;
+            max-width: 480px; /* max-w-sm */
             text-align: center;
             position: relative;
         }
+        /* Explicitly set color for the message paragraph inside the modal */
         #modalMessage {
-            color: #051A3A;
+            color: #051A3A; /* Explicitly set NBA blue text color */
         }
         .close-button {
             position: absolute;
@@ -73,26 +79,27 @@
             font-size: 28px;
             font-weight: bold;
             cursor: pointer;
-            color: #9ca3af;
+            color: #9ca3af; /* gray-400 */
         }
         .close-button:hover,
         .close-button:focus {
-            color: #6b7280;
+            color: #6b7280; /* gray-600 */
             text-decoration: none;
             cursor: pointer;
         }
+         /* Table specific styles for consistency */
         table {
             border-collapse: collapse;
             width: 100%;
         }
         th, td {
             border: 1px solid var(--tw-colors-nba-gray-medium);
-            padding: 8px 12px;
+            padding: 8px 12px; /* Adjusted padding for table cells */
             text-align: left;
         }
         th {
-            background-color: #EA1F27;
-            color: #FFFFFF;
+            background-color: #EA1F27; /* Explicitly set NBA Red background */
+            color: #FFFFFF; /* Explicitly set White text */
             font-weight: 600;
         }
          tbody tr {
@@ -102,8 +109,8 @@
         tbody tr:nth-child(even) {
             background-color: var(--tw-colors-nba-gray-light);
         }
-        tbody tr.category-header-row {
-            background-color: var(--tw-colors-nba-gray-medium) !important;
+        tbody tr.category-header-row { /* Specific style for category headers in table */
+            background-color: var(--tw-colors-nba-gray-medium) !important; /* A slightly darker gray for category headers */
             color: var(--tw-colors-nba-blue) !important;
         }
         tbody tr.category-header-row td {
@@ -182,6 +189,7 @@
     </div>
 
     <script>
+        // --- Modal Functions ---
         function showModal(message) {
             const modal = document.getElementById('customModal');
             const modalMessage = document.getElementById('modalMessage');
@@ -203,6 +211,7 @@
             });
         });
 
+        // --- Attribute Extractor Logic ---
         function validateInput() {
             const input = document.getElementById('input').value.trim();
             document.getElementById('warning').classList.toggle('hidden', input.length >= 10);
@@ -220,12 +229,14 @@
             const tbody = document.querySelector('#resultTable tbody');
             const playerInfoDiv = document.getElementById('playerInfo');
             const detectedVersionTextSpan = document.getElementById('detectedVersionText');
-
+            
+            // Clear previous results
             tbody.innerHTML = '';
             playerInfoDiv.classList.add('hidden');
             document.getElementById('resultTable').classList.add('hidden');
             document.getElementById('copyBtn').style.display = 'none';
 
+            // Reset status indicators
             detectedVersionTextSpan.textContent = 'Unknown';
 
             const infoSpans = {
@@ -243,40 +254,47 @@
 
             lines.forEach(line => {
                 const parts = line.trim().split(/\t+/);
-                const name = parts.length > 0 ? parts[-0].trim() : '';
+                const name = parts[0].trim(); // Trim the name
                 let value = '';
 
-                if (parts.length === 1 && name.length > 0 && !/\d/.test(name) && isNaN(parseFloat(name))) {
+                // Handle category rows
+                if (parts.length === 1 && name.length > 0 && !/\d/.test(name) && isNaN(parseFloat(name))) { // Check if it's a likely category header
                     const tr = document.createElement('tr');
-                    tr.className = 'category-header-row';
+                    tr.className = 'category-header-row'; // Use specific class for styling if needed, or rely on font-bold
                     const td = document.createElement('td');
                     td.setAttribute('colspan', '2');
+                    
+                    // MODIFIED: Style specific category headers for display and copy
                     if (categoriesToStyleForCopy.includes(name)) {
                         td.innerHTML = `<strong>${name.toUpperCase()}</strong>`;
                     } else {
                         td.textContent = name;
                     }
-                    td.className = 'px-4 py-2 font-bold';
+                    td.className = 'px-4 py-2 font-bold'; // Ensure category headers are bold in the table
                     tr.appendChild(td);
                     tbody.appendChild(tr);
                     return;
                 }
 
+                // Determine version and extract value
                 const numbersInParts = parts.filter(p => /^\d+(\.\d+)?$/.test(p.trim()));
 
                 if (numbersInParts.length >= 2) {
-                    value = numbersInParts[-1];
+                    value = numbersInParts[1];
                     if (numbersInParts.length === 2) {
                         detectedVersion = 'NBA 2K24';
                     } else if (numbersInParts.length === 3) {
                         detectedVersion = 'NBA 2K25';
                     }
-                } else if (parts.length > 1 && /^\d+(\.\d+)?$/.test(parts[-1].trim()) && !['Position', 'Archetype', 'Height', 'Wingspan', 'Weight'].includes(name)) {
-                    value = parts[-1].trim();
-                    if (numbersInParts.length === 1 && numbersInParts[-1] === value) {
-                         detectedVersion = 'NBA 2K24';
+                } else if (parts.length > 1 && /^\d+(\.\d+)?$/.test(parts[1].trim()) && !['Position', 'Archetype', 'Height', 'Wingspan', 'Weight'].includes(name)) {
+                    // Handle simple "Attribute Value" lines if Value is numeric and not an extra field
+                    value = parts[1].trim();
+                     // If only one number found overall in parts and it is the value, version might be 2k24 like
+                    if (numbersInParts.length === 1 && numbersInParts[0] === value) {
+                         detectedVersion = 'NBA 2K24'; // Or based on other cues if needed
                     }
                 }
+
 
                 if (value !== '' && !isNaN(parseFloat(value))) {
                     const tr = document.createElement('tr');
@@ -292,17 +310,19 @@
                     tbody.appendChild(tr);
                 }
 
+                // Extract player info
                 if (parts.length >= 2) {
-                    const extractedValue = parts[-1].trim();
+                    const extractedValue = parts[1].trim();
                     if (name === 'Position') extra.Position = extractedValue;
                     else if (name === 'Overall' || name === 'OVR') extra.OVR = extractedValue;
                     else if (name === 'Potential Description') extra.Archetype = extractedValue;
-                    else if (['Height', 'Wingspan', 'Weight'].includes(name)) extra[-0] = extractedValue;
+                    else if (['Height', 'Wingspan', 'Weight'].includes(name)) extra[name] = extractedValue;
                 }
             });
 
             detectedVersionTextSpan.textContent = detectedVersion;
 
+            // Populate player info spans
             infoSpans.Position.textContent = extra.Position;
             infoSpans.OVR.textContent = extra.OVR;
             infoSpans.Archetype.textContent = extra.Archetype;
@@ -310,7 +330,7 @@
             infoSpans.Wingspan.textContent = extra.Wingspan;
             infoSpans.Weight.textContent = extra.Weight;
 
-            if (tbody.children.length > 0 || extra.Position !== 'N/A') {
+            if (tbody.children.length > 0 || extra.Position !== 'N/A') { // Show if any attributes or player info extracted
                 playerInfoDiv.classList.remove('hidden');
                 document.getElementById('resultTable').classList.remove('hidden');
                 document.getElementById('copyBtn').style.display = 'inline-block';
@@ -326,6 +346,7 @@
             document.getElementById('resultTable').classList.add('hidden');
             document.getElementById('copyBtn').style.display = 'none';
 
+            // Reset player info spans to N/A
             document.getElementById('info-position').textContent = 'N/A';
             document.getElementById('info-ovr').textContent = 'N/A';
             document.getElementById('info-archetype').textContent = 'N/A';
@@ -334,6 +355,7 @@
             document.getElementById('info-weight').textContent = 'N/A';
         }
 
+        // Function to copy HTML content to clipboard
         function copyHTMLContent() {
             let contentToCopy = '';
 
@@ -344,7 +366,7 @@
                 playerInfoDiv.querySelectorAll('ul li').forEach(item => {
                     const label = item.querySelector('strong').textContent;
                     const value = item.querySelector('span').textContent.trim();
-                    if (value !== 'N/A' && value !== '') {
+                    if (value !== 'N/A' && value !== '') { // Only include if value is not N/A or empty
                         bulletedListHtml += `<li>${label.replace(':', ': ')} ${value}</li>`;
                     }
                 });
@@ -355,34 +377,38 @@
             const resultTable = document.getElementById('resultTable');
             if (resultTable && resultTable.classList.contains('hidden') === false) {
                 if (contentToCopy) {
-                    contentToCopy += '<br><br>';
+                    contentToCopy += '<br><br>'; 
                 }
+                // The table's outerHTML will already have the styled category headers
                 contentToCopy += resultTable.outerHTML;
             }
 
-            fallbackCopy(contentToCopy, true);
+            fallbackCopy(contentToCopy, true); // Pass true to indicate HTML content
         }
 
         function fallbackCopy(text, isHtml = false) {
             const textarea = document.createElement('textarea');
-            textarea.value = text;
-            textarea.style.position = 'fixed';
-            textarea.style.opacity = '0';
+            textarea.value = text; // For HTML, this sets the raw HTML string
+            textarea.style.position = 'fixed'; 
+            textarea.style.opacity = '0'; 
             document.body.appendChild(textarea);
-
+            
             let success = false;
             try {
                 if (isHtml && navigator.clipboard && navigator.clipboard.write) {
+                    // Modern way to copy HTML (if supported)
                     const blob = new Blob([text], { type: 'text/html' });
                     const richTextInput = new ClipboardItem({ 'text/html': blob });
                     navigator.clipboard.write([richTextInput]).then(() => {
                         showModal('Data copied to clipboard!');
                     }).catch(err => {
                         console.error('Async HTML copy failed, trying fallback:', err);
+                        // Fallback to execCommand for HTML if modern API fails
                         executeLegacyCopy(textarea, isHtml, text);
                     });
-                    success = true;
+                    success = true; // Assume success if promise path is taken initially
                 } else {
+                     // Fallback for plain text or if modern HTML copy not available/failed
                     executeLegacyCopy(textarea, isHtml, text);
                 }
             } catch (err) {
@@ -390,15 +416,20 @@
                 showModal('Copy failed. Your browser might not support this feature.');
             } finally {
                 if (!success || !(isHtml && navigator.clipboard && navigator.clipboard.write)) {
+                    // Only remove textarea if not handled by async clipboard API's success path
+                    // or if it's not the modern HTML path (which might finish later)
+                    // This is tricky; legacy always removes. Modern might not need it.
+                    // For simplicity, we can always remove it after attempting.
                 }
-                 document.body.removeChild(textarea);
+                 document.body.removeChild(textarea); 
             }
         }
 
         function executeLegacyCopy(textareaElement, isHtml, originalText) {
             if (isHtml) {
+                // For HTML with execCommand, it often needs the content to be in a contentEditable div or selected from DOM
                 const tempDiv = document.createElement('div');
-                tempDiv.innerHTML = originalText;
+                tempDiv.innerHTML = originalText; // The HTML string
                 tempDiv.style.position = 'fixed';
                 tempDiv.style.opacity = '0';
                 document.body.appendChild(tempDiv);
@@ -412,6 +443,7 @@
                     showModal('Data copied to clipboard!');
                 } catch(e) {
                     console.error('Legacy HTML copy using div failed:', e);
+                    // Final fallback: copy as plain text if HTML copy fails
                     textareaElement.focus();
                     textareaElement.select();
                     document.execCommand('copy');
@@ -421,12 +453,14 @@
                     document.body.removeChild(tempDiv);
                 }
             } else {
+                // Plain text copy
                 textareaElement.focus();
                 textareaElement.select();
                 document.execCommand('copy');
                 showModal('Data copied to clipboard!');
             }
         }
+
     </script>
 </body>
 </html>
