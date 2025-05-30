@@ -3,321 +3,671 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NBA 2K Tools Dashboard</title>
+    <title>NBA 2K Admin Web Audit</title>
     <link rel="icon" href="https://upload.wikimedia.org/wikipedia/commons/7/7a/Basketball.png" type="image/png">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800;900&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
-        // Tailwind CSS Configuration for NBA 2K Branding
+        // Tailwind CSS Configuration for NBA 2K Branding (matches your other tools)
         tailwind.config = {
             theme: {
                 extend: {
                     fontFamily: {
-                        montserrat: ['Montserrat', 'sans-serif'], // Keep Montserrat as primary font
+                        montserrat: ['Montserrat', 'sans-serif'],
                     },
                     colors: {
-                        'nba-blue': '#051A3A',    // Deep dark blue, primary background/text
-                        'nba-red': '#EA1F27',     // Vibrant red, accent/button
-                        'nba-pink': '#DD3894',    // Secondary accent pink
-                        'nba-yellow': '#FFA436',  // Gold/Orange accent
-                        'nba-teal': '#16F2D2',    // Teal accent
-                        'nba-white': '#FFFFFF',   // Pure white
-                        'nba-gray-light': '#f3f4f6', // Light background gray
-                        'nba-gray-medium': '#e5e7eb', // Border/divider gray
+                        'nba-blue': '#051A3A',
+                        'nba-red': '#EA1F27',
+                        'nba-pink': '#DD3894',
+                        'nba-yellow': '#FFA436',
+                        'nba-teal': '#16F2D2',
+                        'nba-white': '#FFFFFF',
+                        'nba-gray-light': '#f3f4f6',
+                        'nba-gray-medium': '#e5e7eb',
                     },
                 },
             },
         }
     </script>
     <style>
-        /* Base styles, primarily for font, rest handled by Tailwind */
         body {
-            font-family: 'Montserrat', sans-serif; /* Apply Montserrat font globally */
-            margin: 0; /* Reset default body margin */
-            background-color: #051A3A; /* Direct hex for NBA Blue body background */
-            color: #FFFFFF; /* Direct hex for White text */
+            font-family: 'Montserrat', sans-serif;
+            margin: 0;
+            background-color: var(--tw-colors-nba-blue);
+            color: var(--tw-colors-nba-white);
         }
-        /* Iframe styling for the embedded tools */
-        iframe {
+        textarea, button, select, input[type="text"], input[type="number"], input[type="date"], input[type="datetime-local"] {
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        table {
+            border-collapse: collapse;
             width: 100%;
-            height: calc(100vh - 180px); /* Adjust height to fill remaining viewport, considering header/tabs */
-            border: 1px solid #051A3A; /* Direct hex for NBA Blue border */
-            background-color: #FFFFFF; /* Direct hex for White background */
-            border-radius: 0.75rem; /* rounded-xl */
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); /* shadow-md */
+        }
+        th, td {
+            border: 1px solid var(--tw-colors-nba-gray-medium);
+            padding: 12px;
+            text-align: left;
+        }
+        th {
+            background-color: #EA1F27;
+            color: #FFFFFF;
+            font-weight: 600;
+        }
+        tbody tr {
+            background-color: var(--tw-colors-nba-white);
+            color: var(--tw-colors-nba-blue);
+        }
+        tbody tr:nth-child(even) {
+            background-color: var(--tw-colors-nba-gray-light);
+        }
+        tbody tr:hover {
+            background-color: var(--tw-colors-nba-teal);
+            color: var(--tw-colors-nba-white);
         }
 
-        /* --- Tab Button Styling (using direct hex values for robustness) --- */
-        /* Default Main Tab Button */
-        .tab-btn {
-            padding: 10px 20px; /* px-4 py-2 sm:px-6 sm:py-3 */
-            cursor: pointer;
-            border: none;
-            font-weight: bold;
-            border-radius: 0.5rem; /* rounded-lg */
-            font-size: 0.875rem; /* text-sm sm:text-base */
-            letter-spacing: 0.05em; /* tracking-wide */
-            text-transform: uppercase;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); /* shadow-md */
-            transition: background-color 200ms ease-in-out, box-shadow 200ms ease-in-out;
-            outline: none; /* focus:outline-none */
-            
-            background-color: #EA1F27; /* nba-red */
-            color: #FFFFFF; /* nba-white */
-        }
-
-        .tab-btn:hover {
-            background-color: #DD3894; /* nba-pink */
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); /* hover:shadow-lg */
-        }
-
-        /* Active Main Tab Button */
-        .tab-item.active > .tab-btn {
-            background-color: #051A3A; /* nba-blue */
-            color: #FFFFFF; /* nba-white */
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2), 0 10px 10px -5px rgba(0, 0, 0, 0.1); /* shadow-xl */
-        }
-        /* Active Main Tab Button Hover: Stays active color */
-        .tab-item.active > .tab-btn:hover {
-            background-color: #051A3A; /* Keep the same active color on hover */
-            color: #FFFFFF; /* Explicitly keep white text on hover */
-        }
-
-        /* Supervisor Tab Button (Default) */
-        #tab-supervisor .tab-btn {
-            background-color: #16F2D2; /* nba-teal */
-            color: #FFFFFF; /* nba-white */
-        }
-        #tab-supervisor .tab-btn:hover {
-            background-color: #FFA436; /* nba-yellow */
-            color: #051A3A; /* nba-blue for contrast */
-        }
-
-        /* Supervisor Tab Button (Active) */
-        #tab-supervisor.active > .tab-btn {
-            background-color: #FFA436; /* nba-yellow */
-            color: #051A3A; /* nba-blue for contrast */
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2), 0 10px 10px -5px rgba(0, 0, 0, 0.1); /* shadow-xl */
-        }
-        /* Supervisor Tab Button (Active Hover): Stays active color */
-        #tab-supervisor.active > .tab-btn:hover {
-            background-color: #FFA436; /* Keep the same active color on hover */
-            color: #051A3A; /* Explicitly keep blue text on hover */
-        }
-
-        /* --- Submenu Styling --- */
-        .submenu {
-            position: absolute;
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
             left: 0;
-            margin-top: 0; /* mt-0 */
-            padding-top: 0.5rem; /* py-2 */
-            padding-bottom: 0.5rem; /* py-2 */
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem; /* gap-2 */
-            background-color: #FFFFFF; /* nba-white */
-            padding: 0.75rem; /* p-3 */
-            border-radius: 0.5rem; /* rounded-lg */
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); /* shadow-xl */
-            z-index: 100;
-            visibility: hidden; /* Use visibility instead of display for smoother transitions if needed, but hidden for now */
-            opacity: 0;
-            transition: opacity 0.2s ease-in-out, visibility 0.2s ease-in-out;
-            min-width: max-content; /* Ensure submenu doesn't wrap text */
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.6);
+            justify-content: center;
+            align-items: center;
         }
-        .group:hover .submenu {
-            visibility: visible;
-            opacity: 1;
+        .modal-content {
+            background-color: #FFFFFF;
+            color: #051A3A;
+            margin: auto;
+            padding: 24px;
+            border-radius: 1rem;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2), 0 10px 10px -5px rgba(0, 0, 0, 0.1);
+            width: 90%;
+            max-width: 480px;
+            text-align: center;
+            position: relative;
         }
-        #tab-supervisor .submenu {
-            right: 0;
-            left: auto; /* Align supervisor submenu to the right */
+        #modalMessage {
+            color: #051A3A;
         }
-
-        /* Default Submenu Button */
-        .submenu-btn {
-            padding: 0.5rem 0.75rem; /* px-3 py-2 */
-            cursor: pointer;
-            border: none;
+        .close-button {
+            position: absolute;
+            top: 8px;
+            right: 12px;
+            font-size: 28px;
             font-weight: bold;
-            border-radius: 0.375rem; /* rounded-md */
-            font-size: 0.75rem; /* text-xs sm:text-sm */
-            text-transform: uppercase;
-            letter-spacing: 0.05em; /* tracking-wide */
-            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); /* shadow-sm */
-            transition: background-color 200ms ease-in-out, box-shadow 200ms ease-in-out;
-            outline: none; /* focus:outline-none */
-
-            background-color: #16F2D2; /* nba-teal */
-            color: #FFFFFF; /* nba-white */
+            cursor: pointer;
+            color: #9ca3af;
         }
-        .submenu-btn:hover {
-            background-color: #DD3894; /* nba-pink */
-            color: #FFFFFF; /* nba-white */
-        }
-
-        /* Active Submenu Button */
-        .submenu-btn.active {
-            background-color: #051A3A; /* nba-blue */
-            color: #FFFFFF; /* nba-white */
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); /* shadow-lg */
-        }
-        /* Active Submenu Button Hover: Stays active color */
-        .submenu-btn.active:hover {
-            background-color: #051A3A; /* Keep the same active color on hover */
-            color: #FFFFFF; /* Explicitly keep white text on hover */
-        }
-
-        /* Active Submenu Button within Supervisor Tab */
-        #tab-supervisor .submenu-btn.active {
-            background-color: #FFA436; /* nba-yellow */
-            color: #051A3A; /* nba-blue */
-        }
-        #tab-supervisor .submenu-btn.active:hover {
-            background-color: #FFA436; /* Keep the same active color on hover */
-            color: #051A3A; /* Explicitly keep blue text on hover */
+        .close-button:hover, .close-button:focus {
+            color: #6b7280;
+            text-decoration: none;
+            cursor: pointer;
         }
     </style>
 </head>
 <body class="p-4 sm:p-6 md:p-8">
-    <div class="max-w-7xl mx-auto bg-nba-blue shadow-2xl rounded-2xl p-6 sm:p-8 md:p-10 border-4 border-nba-red">
-        <header class="flex items-center gap-4 mb-8">
-            <img src="https://raw.githubusercontent.com/nin884/AdminWebTools/main/nba2k.png" alt="NBA 2K Logo" class="h-12 sm:h-16">
-            <h1 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-nba-white tracking-tight">NBA 2K Tools Dashboard</h1>
-        </header>
+    <div class="max-w-6xl mx-auto bg-nba-blue shadow-2xl rounded-2xl p-6 sm:p-8 md:p-10 border-4 border-nba-red">
+        <h1 class="text-3xl sm:text-4xl font-extrabold text-nba-white mb-6 text-center">NBA 2K Admin Web Audit</h1>
 
-        <nav class="flex flex-wrap gap-3 sm:gap-4 mb-6" id="main-tabs">
-            <div class="relative group" id="tab-restoration">
-                <button data-main-tab="restoration" class="tab-btn">
-                    Restoration Tools
-                </button>
-                <div class="submenu">
-                    <button data-tool="extractor" class="submenu-btn">Attribute Extractor</button>
-                    <button data-tool="placeholder" class="submenu-btn">Placeholder Validator</button>
-                    <button data-tool="savefilter" class="submenu-btn">Save File Filter</button>
-                </div>
+        <div class="mb-6">
+            <label for="logData" class="block text-lg font-semibold text-nba-white mb-2">Paste filtered Admin Web data here:</label>
+            <textarea id="logData" placeholder="Paste tab-separated data (e.g., from Excel/Google Sheets) here...."
+                      class="w-full h-48 p-4 border-2 border-nba-red rounded-lg focus:ring-4 focus:ring-nba-yellow focus:border-transparent text-nba-blue bg-nba-white resize-y shadow-inner"></textarea>
+            <button id="parseBtn" type="button"
+                    class="mt-4 w-full sm:w-auto px-6 py-3 bg-nba-red text-nba-white font-bold rounded-lg shadow-lg hover:bg-nba-pink focus:outline-none focus:ring-2 focus:ring-nba-red focus:ring-offset-2 focus:ring-offset-nba-blue transition ease-in-out duration-200 text-lg">
+                Submit Data
+            </button>
+        </div>
+
+        <div id="controls" class="mb-6 p-4 border-2 border-nba-yellow rounded-lg bg-nba-blue flex flex-wrap gap-4 items-center justify-between shadow-md">
+            <label class="block text-nba-white text-sm font-medium">Date:
+                <input type="date" id="filterDate" class="mt-1 block w-auto rounded-md border-gray-300 shadow-sm focus:border-nba-red focus:ring focus:ring-nba-red focus:ring-opacity-50 p-2 text-nba-blue">
+            </label>
+            <label class="block text-nba-white text-sm font-medium">Shift:
+                <select id="filterShift" class="mt-1 block w-auto rounded-md border-gray-300 shadow-sm focus:border-nba-red focus:ring focus:ring-nba-red focus:ring-opacity-50 p-2 text-nba-blue">
+                    <option value="Vegas AM Shift">Vegas AM Shift</option>
+                    <option value="Vegas PM Shift">Vegas PM Shift</option>
+                    <option value="Vegas Weekend Shift">Vegas Weekend Shift</option>
+                    <option value="Madrid">Madrid</option>
+                    <option value="Chengdu">Chengdu</option>
+                </select>
+            </label>
+            <label class="block text-nba-white text-sm font-medium">Report From:
+                <input type="datetime-local" id="reportFrom" step="1" class="mt-1 block w-auto rounded-md border-gray-300 shadow-sm focus:border-nba-red focus:ring focus:ring-nba-red focus:ring-opacity-50 p-2 text-nba-blue">
+            </label>
+            <label class="block text-nba-white text-sm font-medium">Report To:
+                <input type="datetime-local" id="reportTo" step="1" class="mt-1 block w-auto rounded-md border-gray-300 shadow-sm focus:border-nba-red focus:ring focus:ring-nba-red focus:ring-opacity-50 p-2 text-nba-blue">
+            </label>
+        </div>
+
+        <div id="tableContainer" class="overflow-x-auto shadow-md rounded-lg mb-8">
             </div>
 
-            <div class="relative group" id="tab-vc">
-                <button data-main-tab="vc" class="tab-btn">
-                    VC Tools
-                </button>
-                <div class="submenu">
-                    <button data-tool="tattoo" class="submenu-btn">Missing Tattoo Tracker</button>
-                </div>
-            </div>
+        <h2 class="text-2xl sm:text-3xl font-bold text-nba-white mb-4">Discrepancies</h2>
+        <div id="summary" class="text-lg font-semibold text-nba-yellow mb-2"></div>
+        <div id="counts" class="text-base text-nba-white mb-4">Major discrepancies: 0<br>Minor discrepancies: 0</div>
+        
+        <button id="exportBtn" type="button"
+                class="px-6 py-3 bg-nba-yellow text-nba-blue font-bold rounded-lg shadow-lg hover:bg-nba-teal focus:outline-none focus:ring-2 focus:ring-nba-yellow focus:ring-offset-2 focus:ring-offset-nba-blue transition ease-in-out duration-200 text-lg mb-6">
+            Export Discrepancies to CSV
+        </button>
 
-            <div class="relative group" id="tab-validation">
-                <button data-main-tab="validation" class="tab-btn">
-                    Validation Tools
-                </button>
-                <div class="submenu">
-                    <button data-tool="validator" class="submenu-btn">Win Streak Validator</button>
-                </div>
+        <div id="discrepancyContainer" class="overflow-x-auto shadow-md rounded-lg mb-8">
             </div>
+    </div>
 
-            <div class="relative group ml-auto" id="tab-supervisor">
-                <button data-main-tab="supervisor" class="tab-btn">
-                    Supervisor Tools
-                </button>
-                <div class="submenu">
-                    <button data-tool="adminAudit" class="submenu-btn">Admin Web Audit</button>
-                </div>
-            </div>
-        </nav>
-
-        <iframe id="toolFrame" src=""></iframe>
+    <div id="customModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button">&times;</span>
+            <p id="modalMessage" class="text-lg mb-4"></p>
+            <button id="modalOkButton" class="px-6 py-3 bg-nba-red text-nba-white font-bold rounded-lg hover:bg-nba-pink transition duration-200 ease-in-out">OK</button>
+        </div>
     </div>
 
     <script>
-        // Map tool names to their respective HTML file paths
-        const toolSrcMap = {
-            extractor: 'attribute-extractor.html', // Assuming this is the correct path
-            placeholder: 'PH_Compare.html',       // Assuming this is the correct path
-            savefilter: 'SaveFileFilter.html',    // Assuming this is the correct path
-            validator: 'myteam-streak-validator.html', // Assuming this is the correct path
-            tattoo: 'Missing_Tattoo.html',        // Assuming this is the correct path
-            adminAudit: 'AdminAudit.html'         // Assuming this is the correct path
-        };
-
-        const toolFrame = document.getElementById('toolFrame');
-        const mainTabsContainer = document.getElementById('main-tabs');
-
-        /**
-         * Activates a main tab and loads the first tool in its submenu.
-         * Uses event delegation on the mainTabsContainer.
-         * @param {string} mainTabId - The ID of the main tab (e.g., 'restoration').
-         */
-        function activateMainTab(mainTabId) {
-            // Remove 'active' class from all tab-item elements
-            document.querySelectorAll('.tab-item').forEach(item => {
-                item.classList.remove('active');
-            });
-
-            // Add 'active' class to the clicked tab-item
-            const currentTabItem = document.getElementById(`tab-${mainTabId}`);
-            if (currentTabItem) {
-                currentTabItem.classList.add('active');
-            }
-
-            // Deactivate all submenu buttons
-            document.querySelectorAll('.submenu-btn').forEach(btn => {
-                btn.classList.remove('active');
-            });
-
-            // Find the first tool button in the activated main tab's submenu and click it
-            const firstSubmenuBtn = currentTabItem ? currentTabItem.querySelector('.submenu-btn') : null;
-            if (firstSubmenuBtn) {
-                activateTool(firstSubmenuBtn.dataset.tool);
-            } else {
-                // If a main tab has no submenu tools, clear the iframe
-                toolFrame.src = '';
-            }
+        function showModal(message) {
+            const modal = document.getElementById('customModal');
+            const modalMessage = document.getElementById('modalMessage');
+            modalMessage.textContent = message;
+            modal.style.display = 'flex';
         }
 
-        /**
-         * Loads a specific tool into the iframe and activates its submenu button.
-         * @param {string} toolName - The data-tool attribute value (e.g., 'extractor').
-         */
-        function activateTool(toolName) {
-            // Set iframe source
-            toolFrame.src = toolSrcMap[toolName] || '';
-
-            // Deactivate all submenu buttons
-            document.querySelectorAll('.submenu-btn').forEach(btn => {
-                btn.classList.remove('active');
-            });
-
-            // Activate the clicked submenu button
-            const currentSubmenuBtn = document.querySelector(`[data-tool="${toolName}"]`);
-            if (currentSubmenuBtn) {
-                currentSubmenuBtn.classList.add('active');
-            }
+        function hideModal() {
+            document.getElementById('customModal').style.display = 'none';
         }
 
-        // --- Event Delegation for Tabs ---
-        mainTabsContainer.addEventListener('click', (event) => {
-            const target = event.target;
-
-            // Handle main tab button clicks
-            const mainTabBtn = target.closest('.tab-btn');
-            if (mainTabBtn) {
-                const mainTabId = mainTabBtn.dataset.mainTab;
-                activateMainTab(mainTabId);
-            }
-
-            // Handle submenu button clicks
-            const submenuBtn = target.closest('.submenu-btn');
-            if (submenuBtn) {
-                const toolName = submenuBtn.dataset.tool;
-                activateTool(toolName);
-            }
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelector('#customModal .close-button').addEventListener('click', hideModal);
+            document.getElementById('modalOkButton').addEventListener('click', hideModal);
+            document.getElementById('customModal').addEventListener('click', (e) => {
+                if (e.target === document.getElementById('customModal')) {
+                    hideModal();
+                }
+            });
         });
 
-        // --- Initialization ---
-        document.addEventListener('DOMContentLoaded', () => {
-            // Activate the first main tab ('restoration') and its first tool on load
-            activateMainTab('restoration');
+        // --- Admin Web Audit Logic ---
+        document.addEventListener('DOMContentLoaded', function() {
+            // Cache DOM elements
+            const elements = {
+                textarea: document.getElementById('logData'),
+                parseBtn: document.getElementById('parseBtn'),
+                exportBtn: document.getElementById('exportBtn'),
+                tableContainer: document.getElementById('tableContainer'),
+                discrepancyContainer: document.getElementById('discrepancyContainer'),
+                summaryEl: document.getElementById('summary'),
+                countsEl: document.getElementById('counts'),
+                filterDate: document.getElementById('filterDate'),
+                filterShift: document.getElementById('filterShift'),
+                reportFrom: document.getElementById('reportFrom'),
+                reportTo: document.getElementById('reportTo')
+            };
+
+            let originalHeaders = []; // Stores the raw parsed headers from the log data
+            // Options for discrepancy types, issues, and agent locations
+            const discrepancyOptions = ['', 'Minor', 'Major'];
+            const issueOptions = ['', 'Wrong Tier VC added', 'More than 50K VC added without approval',
+                'VC/MT/Items added without AT note', 'MyTeam cards/MyCareer items/Other No-Currency items added not noted with a ticket',
+                'Other actions in AT without note', 'Wrong MG provided', 'Kick off account without AT note', 'Cloned file without AT note', 'Agent missed PMVC 1st Party Escalation'];
+            const locationOptions = ['', '5CA', 'Vegas Day', 'Vegas Swing', 'Vegas Weekend', 'Chengdu Day', 'Chengdu Weekend', 'Madrid', 'Player Advocacy'];
+
+            // Define the desired order of leading columns for the main table
+            const mainTableLeadingColumns = ['CX Page', 'Validated', 'Discrepancy']; // Changed 'CS Page' to 'CX Page'
+            // Define the desired order of leading columns for the discrepancy table
+            const discrepancyTableLeadingColumns = ['CX Page', 'Type', 'Ticket #', 'Issue', 'Agent Location', 'Other Comments']; // Changed 'CS Page' to 'CX Page'
+
+            // --- Utility Functions ---
+
+            /**
+             * Formats a date string from 'YYYY-MM-DD' to 'M/D/YYYY'.
+             * @param {string} val - The date string in 'YYYY-MM-DD' format.
+             * @returns {string} Formatted date string.
+             */
+            function formatDate(val) {
+                if (!val) return '';
+                const [y, m, d] = val.split('-');
+                return `${parseInt(m)}/${parseInt(d)}/${y}`; // Corrected: Removed the extra '}'
+            }
+
+            /**
+             * Formats a datetime string to 'YYYY-MM-DD HH:MM:SS'.
+             * @param {string} val - The datetime string.
+             * @returns {string} Formatted datetime string.
+             */
+            function formatDateTime(val) {
+                if (!val) return 'YYYY-MM-DD 00:00:00';
+                const dt = new Date(val);
+                // Check for invalid date
+                if (isNaN(dt.getTime())) return 'Invalid Date';
+
+                const y = dt.getFullYear();
+                const mo = String(dt.getMonth() + 1).padStart(2, '0');
+                const da = String(dt.getDate()).padStart(2, '0');
+                const h = String(dt.getHours()).padStart(2, '0');
+                const mi = String(dt.getMinutes()).padStart(2, '0');
+                const s = String(dt.getSeconds()).padStart(2, '0');
+                return `${y}-${mo}-${da} ${h}:${mi}:${s}`;
+            }
+
+            /**
+             * Updates the major/minor discrepancy counts.
+             */
+            function updateCounts() {
+                let major = 0, minor = 0;
+                const tbl = elements.discrepancyContainer.querySelector('table');
+                if (tbl) {
+                    tbl.querySelectorAll('tbody tr').forEach(r => {
+                        // The 'Type' column is at index 1 in the discrepancy table
+                        const typeCell = r.cells[discrepancyTableLeadingColumns.indexOf('Type')];
+                        if (typeCell) { // Ensure cell exists
+                            const type = typeCell.textContent;
+                            if (type.includes('Major')) major++;
+                            else if (type.includes('Minor')) minor++;
+                        }
+                    });
+                }
+                elements.countsEl.innerHTML = `Major discrepancies: ${major}<br>Minor discrepancies: ${minor}`;
+                updateSummary(); // Also update summary when counts change
+            }
+
+            /**
+             * Updates the summary text based on filter inputs.
+             */
+            function updateSummary() {
+                const dateVal = elements.filterDate.value ? formatDate(elements.filterDate.value) : '[Date]';
+                const shiftVal = elements.filterShift.value;
+                const fromVal = formatDateTime(elements.reportFrom.value);
+                const toVal = formatDateTime(elements.reportTo.value);
+                elements.summaryEl.textContent = `${dateVal} | ${shiftVal} AT Audit: ${fromVal} / ${toVal}`;
+            }
+
+            /**
+             * Creates a <select> element with given options.
+             * @param {Array<string>} options - An array of strings for select options.
+             * @returns {HTMLSelectElement} The created select element.
+             */
+            function createSelectElement(options) {
+                const select = document.createElement('select');
+                // Updated class for discrepancy select to stand out more
+                select.className = 'block w-full rounded-md border-2 border-nba-yellow shadow-sm focus:border-nba-red focus:ring focus:ring-nba-red focus:ring-opacity50 p-2 text-sm text-nba-blue';
+                options.forEach(optionText => {
+                    const option = document.createElement('option');
+                    option.value = optionText;
+                    option.textContent = optionText;
+                    select.appendChild(option);
+                });
+                return select;
+            }
+
+            /**
+             * Creates an <input> element with given placeholder and class.
+             * @param {string} placeholder - The placeholder text.
+             * @returns {HTMLInputElement} The created input element.
+             */
+            function createInputElement(placeholder) {
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.placeholder = placeholder;
+                input.className = 'block w-full rounded-md border-gray-300 shadow-sm focus:border-nba-red focus:ring focus:ring-nba-red focus:ring-opacity-50 p-2 text-sm text-nba-blue';
+                return input;
+            }
+
+            // --- Main Logic Functions ---
+
+            /**
+             * Parses the log data and renders the main audit table.
+             */
+            elements.parseBtn.addEventListener('click', function() {
+                const raw = elements.textarea.value.trim();
+                if (!raw) {
+                    showModal('Please paste log data into the text area.');
+                    return;
+                }
+
+                elements.tableContainer.innerHTML = ''; // Clear previous table
+                elements.discrepancyContainer.innerHTML = ''; // Clear previous discrepancies
+                elements.countsEl.innerHTML = 'Major discrepancies: 0<br>Minor discrepancies: 0'; // Reset counts
+
+                const lines = raw.split('\n').filter(l => l.trim());
+                if (lines.length < 2) {
+                    showModal('Invalid data format: need at least a header and one row.');
+                    return;
+                }
+
+                originalHeaders = lines[0].split('\t').map(h => h.trim()); // Store original headers
+                const rows = lines.slice(1).map(l => l.split('\t'));
+
+                renderDataTable(originalHeaders, rows, elements.tableContainer);
+                updateCounts();
+            });
+
+            /**
+             * Renders the main data table with reordered columns.
+             * @param {Array<string>} originalHeaders - The headers from the raw input.
+             * @param {Array<Array<string>>} rows - The raw data rows.
+             * @param {HTMLElement} container - The container to render the table into.
+             */
+            function renderDataTable(originalHeaders, rows, container) {
+                const table = document.createElement('table');
+                table.className = 'min-w-full divide-y divide-gray-200';
+
+                const thead = document.createElement('thead');
+                thead.className = 'bg-nba-red';
+                const headerRow = document.createElement('tr');
+
+                // Construct the new display headers for the main table
+                // Start with leading columns, then add remaining original headers (excluding 'Environment' and those already in leadingColumns)
+                const otherOriginalHeaders = originalHeaders.filter(h =>
+                    h !== 'Environment' && !mainTableLeadingColumns.includes(h)
+                );
+                const displayHeaders = [...mainTableLeadingColumns, ...otherOriginalHeaders];
+
+                displayHeaders.forEach(h => {
+                    const th = document.createElement('th');
+                    th.textContent = h;
+                    th.className = 'px-6 py-3 text-left text-xs font-medium text-nba-white uppercase tracking-wider';
+                    headerRow.appendChild(th);
+                });
+                thead.appendChild(headerRow);
+                table.appendChild(thead);
+
+                const tbody = document.createElement('tbody');
+                tbody.className = 'bg-nba-white divide-y divide-nba-gray-medium';
+
+                rows.forEach(cells => {
+                    const tr = document.createElement('tr');
+                    tr.className = 'hover:bg-nba-gray-light';
+
+                    // Create a map from original header name to its cell value for easier lookup
+                    const originalRowData = {};
+                    originalHeaders.forEach((header, index) => {
+                        originalRowData[header] = cells[index] || '';
+                    });
+
+                    // Render cells based on the new display order
+                    displayHeaders.forEach(header => {
+                        const td = document.createElement('td');
+                        // Removed whitespace-nowrap to allow text wrapping
+                        td.className = 'px-6 py-4 text-sm text-nba-blue';
+
+                        if (header === 'CX Page') { // Changed 'CS Page' to 'CX Page'
+                            const puid = originalRowData['Puid'];
+                            const env = originalRowData['Environment']; // Still need original 'Environment' for URL construction
+                            const title = originalRowData['Title & Year'];
+
+                            const url = `https://admin.nba2k.com/${encodeURIComponent(env)}/${encodeURIComponent(title)}/customer_service/user/edit/${encodeURIComponent(puid)}?titleid=61476&tab=notes`;
+                            const atLinkButton = document.createElement('button');
+                            atLinkButton.innerHTML = 'AT Link'; // Display "AT Link"
+                            atLinkButton.className = 'px-3 py-1 bg-nba-blue text-nba-white rounded-md hover:bg-nba-teal transition duration-150 ease-in-out';
+                            atLinkButton.addEventListener('click', (e) => {
+                                e.preventDefault();
+                                window.open(url, '_blank', 'noopener,noreferrer,width=800,height=600');
+                            });
+                            td.appendChild(atLinkButton);
+                        } else if (header === 'Validated') {
+                            const validatedBtn = document.createElement('button');
+                            validatedBtn.innerHTML = '&#10003;'; // Checkmark HTML entity
+                            // Added text-center to the button itself for centering
+                            validatedBtn.className = 'px-3 py-1 bg-green-500 text-nba-white rounded-md hover:bg-green-600 transition duration-150 ease-in-out font-bold text-lg flex justify-center items-center mx-auto';
+                            td.classList.add('text-center'); // Also add text-center to the cell
+                            validatedBtn.addEventListener('click', () => {
+                                tr.remove();
+                                updateCounts();
+                            });
+                            td.appendChild(validatedBtn);
+                        } else if (header === 'Discrepancy') {
+                            const discrepancyBtn = document.createElement('button');
+                            discrepancyBtn.textContent = 'Discrepancy';
+                            discrepancyBtn.className = 'px-3 py-1 bg-nba-red text-nba-white rounded-md hover:bg-nba-pink transition duration-150 ease-in-out';
+                            discrepancyBtn.addEventListener('click', () => showDiscrepancyForm(tr, originalRowData, td)); // Pass originalRowData
+                            td.appendChild(discrepancyBtn);
+                        } else if (header === 'Operation') {
+                            let operationText = originalRowData[header] || '';
+                            if (operationText.startsWith('Added ')) {
+                                if (operationText.includes('VC')) {
+                                    // If contains 'VC', trim after 'to user' (case-insensitive)
+                                    const searchPhrase = 'to user';
+                                    const indexOfToUser = operationText.toLowerCase().indexOf(searchPhrase);
+                                    if (indexOfToUser !== -1) {
+                                        operationText = operationText.substring(0, indexOfToUser + searchPhrase.length);
+                                    }
+                                } else {
+                                    // If no 'VC', trim everything after 'to player' (case-insensitive)
+                                    const searchPhrase = 'to player';
+                                    const indexOfToPlayer = operationText.toLowerCase().indexOf(searchPhrase);
+                                    if (indexOfToPlayer !== -1) {
+                                        operationText = operationText.substring(0, indexOfToPlayer).trim();
+                                    }
+                                }
+                            }
+                            td.textContent = operationText;
+                        } else {
+                            td.textContent = originalRowData[header];
+                        }
+                        tr.appendChild(td);
+                    });
+                    tbody.appendChild(tr);
+                });
+                table.appendChild(tbody);
+                container.appendChild(table);
+            }
+
+            /**
+             * Shows the form for adding discrepancy details to a row.
+             * @param {HTMLTableRowElement} row - The table row element.
+             * @param {Object} originalRowData - The original row data as an object (header:value).
+             * @param {HTMLTableCellElement} targetCell - The cell where the form will be injected.
+             */
+            function showDiscrepancyForm(row, originalRowData, targetCell) {
+                if (targetCell.querySelector('select')) return;
+
+                targetCell.innerHTML = '';
+
+                const typeSelect = createSelectElement(discrepancyOptions);
+                const addButton = document.createElement('button');
+                addButton.textContent = 'Add';
+                addButton.className = 'ml-2 px-3 py-1 bg-nba-blue text-nba-white rounded-md hover:bg-nba-teal transition duration-150 ease-in-out';
+
+                targetCell.appendChild(typeSelect);
+                targetCell.appendChild(addButton);
+
+                addButton.addEventListener('click', () => {
+                    if (!typeSelect.value) {
+                        showModal('Please select a discrepancy type.');
+                        return;
+                    }
+                    createDiscrepancyRow(originalRowData, `${typeSelect.value} Discrepancy`);
+                    row.remove();
+                    updateCounts();
+                });
+            }
+
+            /**
+             * Creates and appends a new row to the discrepancy table.
+             * @param {Object} originalRowData - The original row data as an object (header:value).
+             * @param {string} typeText - The type of discrepancy (e.g., 'Major Discrepancy').
+             */
+            function createDiscrepancyRow(originalRowData, typeText) {
+                let table = elements.discrepancyContainer.querySelector('table');
+                if (!table) {
+                    table = document.createElement('table');
+                    table.className = 'min-w-full divide-y divide-gray-200';
+                    const thead = document.createElement('thead');
+                    thead.className = 'bg-nba-red';
+                    const headerRow = document.createElement('tr');
+
+                    // Construct headers for the discrepancy table
+                    // Exclude 'Environment' AND 'Puid' from other original headers for the discrepancy table
+                    const otherOriginalHeaders = originalHeaders.filter(h =>
+                        h !== 'Environment' && h !== 'Puid' && !discrepancyTableLeadingColumns.includes(h)
+                    );
+                    const displayHeadersForDiscrepancy = [...discrepancyTableLeadingColumns, ...otherOriginalHeaders];
+
+                    displayHeadersForDiscrepancy.forEach(h => {
+                        const th = document.createElement('th');
+                        th.textContent = h;
+                        th.className = 'px-6 py-3 text-left text-xs font-medium text-nba-white uppercase tracking-wider';
+                        headerRow.appendChild(th);
+                    });
+                    thead.appendChild(headerRow);
+                    table.appendChild(thead);
+
+                    const newTbody = document.createElement('tbody');
+                    newTbody.className = 'bg-nba-white divide-y divide-nba-gray-medium';
+                    table.appendChild(newTbody);
+
+                    elements.discrepancyContainer.appendChild(table);
+                }
+
+                const tbody = table.querySelector('tbody');
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-nba-gray-light';
+
+                // Get the headers currently displayed in the discrepancy table for correct cell order
+                const currentDiscrepancyHeaders = Array.from(table.querySelector('thead tr').children).map(th => th.textContent.trim());
+
+                currentDiscrepancyHeaders.forEach(header => {
+                    const td = document.createElement('td');
+                    // Removed whitespace-nowrap to allow text wrapping
+                    td.className = 'px-6 py-4 text-sm text-nba-blue';
+
+                    if (header === 'CX Page') { // Changed 'CS Page' to 'CX Page'
+                        const puid = originalRowData['Puid'];
+                        const env = originalRowData['Environment'];
+                        const title = originalRowData['Title & Year'];
+
+                        const url = `https://admin.nba2k.com/${encodeURIComponent(env)}/${encodeURIComponent(title)}/customer_service/user/edit/${encodeURIComponent(puid)}?titleid=61476&tab=notes`;
+                        const atLinkButton = document.createElement('button');
+                        atLinkButton.innerHTML = 'AT Link'; // Display "AT Link"
+                        atLinkButton.className = 'px-3 py-1 bg-nba-blue text-nba-white rounded-md hover:bg-nba-teal transition duration-150 ease-in-out';
+                        atLinkButton.addEventListener('click', (e) => {
+                            e.preventDefault();
+                            window.open(url, '_blank', 'noopener,noreferrer,width=800,height=600');
+                        });
+                        td.appendChild(atLinkButton);
+                    } else if (header === 'Type') {
+                        td.textContent = typeText;
+                    } else if (header === 'Ticket #') {
+                        td.appendChild(createInputElement('Ticket #'));
+                    } else if (header === 'Issue') {
+                        td.appendChild(createSelectElement(issueOptions));
+                    } else if (header === 'Agent Location') {
+                        td.appendChild(createSelectElement(locationOptions));
+                    } else if (header === 'Other Comments') {
+                        td.appendChild(createInputElement('Comments'));
+                    } else {
+                        // For other original data columns that remain (excluding Puid)
+                        td.textContent = originalRowData[header] || '';
+                    }
+                    tr.appendChild(td);
+                });
+                tbody.appendChild(tr);
+            }
+
+            /**
+             * Exports the discrepancy table data to a CSV file.
+             */
+            elements.exportBtn.addEventListener('click', () => {
+                const tbl = elements.discrepancyContainer.querySelector('table');
+                if (!tbl) {
+                    showModal('No discrepancies to export.');
+                    return;
+                }
+
+                const rows = Array.from(tbl.querySelectorAll('tbody tr'));
+                const csvRows = [];
+
+                // Define the specific CSV header order including 'Agent Name'
+                const exportHeaders = ['Date', 'Your Name', 'Agent Name', 'Agent Location', 'Major/Minor Discrepancy', 'Ticket #', 'Issue', 'Other Comments'];
+                csvRows.push(exportHeaders.join(','));
+
+                const currentDate = new Date().toISOString().split('T')[0];
+
+                rows.forEach(tr => {
+                    const cols = Array.from(tr.children);
+                    // Create a map from displayed table header to its cell value for easier lookup
+                    const displayedTableHeaders = Array.from(tbl.querySelectorAll('thead th')).map(th => th.textContent.trim());
+                    const rowDataMap = {};
+                    displayedTableHeaders.forEach((header, index) => {
+                        const cell = cols[index];
+                        if (cell) {
+                            const input = cell.querySelector('input');
+                            const select = cell.querySelector('select');
+                            const button = cell.querySelector('button'); // Check for button
+                            if (input) {
+                                rowDataMap[header] = input.value.trim();
+                            } else if (select) {
+                                rowDataMap[header] = select.value;
+                            } else if (button && header === 'CX Page') { // If it's the CX Page button, use its text
+                                rowDataMap[header] = button.textContent.trim();
+                            } else {
+                                rowDataMap[header] = cell.textContent.trim();
+                            }
+                        } else {
+                            rowDataMap[header] = '';
+                        }
+                    });
+
+                    // Construct the row values based on the desired exportHeaders order
+                    const rowValues = exportHeaders.map(header => {
+                        switch (header) {
+                            case 'Date':
+                                // This Date comes from the filter inputs, not from the original table data.
+                                // For CSV export, if the original data had a 'Date' column, it would be better to use that.
+                                // Currently, this uses the date selected in the filter controls, which is fine for the audit report's date.
+                                return elements.filterDate.value ? formatDate(elements.filterDate.value) : formatDate(currentDate);
+                            case 'Your Name':
+                                return ''; // Left blank as requested
+                            case 'Agent Name':
+                                // Assuming 'User' is the header for Agent Name in the original data
+                                return rowDataMap['User'] || '';
+                            case 'Agent Location':
+                                return rowDataMap['Agent Location'] || '';
+                            case 'Major/Minor Discrepancy':
+                                return rowDataMap['Type'] || ''; // 'Type' in table is 'Major/Minor Discrepancy' in CSV
+                            case 'Ticket #':
+                                return rowDataMap['Ticket #'] || '';
+                            case 'Issue':
+                                return rowDataMap['Issue'] || '';
+                            case 'Other Comments':
+                                return rowDataMap['Other Comments'] || '';
+                            default:
+                                return ''; // Should not happen with defined headers
+                        }
+                    });
+
+                    // Function to safely quote CSV fields
+                    const escapeCsv = (value) => {
+                        if (typeof value !== 'string') value = String(value);
+                        if (value.includes(',') || value.includes('"') || value.includes('\n') || value.includes('\r')) {
+                            return `"${value.replace(/"/g, '""')}"`;
+                        }
+                        return value;
+                    };
+
+                    csvRows.push(rowValues.map(escapeCsv).join(','));
+                });
+
+                const blob = new Blob([csvRows.join('\n')], { type: 'text/csv;charset=utf-8;' });
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = 'discrepancies.csv';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(link.href); // Clean up the URL object
+            });
+
+            // Add event listeners for filter controls to update summary dynamically
+            [elements.filterDate, elements.filterShift, elements.reportFrom, elements.reportTo].forEach(el => el.addEventListener('change', updateSummary));
+
+            // Initial summary update when the page loads
+            updateSummary();
         });
     </script>
 </body>
