@@ -38,82 +38,88 @@
         }
         iframe {
             width: 100%;
-            height: calc(100vh - 180px);
-            border: 1px solid #051A3A;
-            background-color: #FFFFFF;
-            border-radius: 0.75rem;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            height: calc(100vh - 180px); /* Adjust height to fill remaining viewport, considering header/tabs */
+            border: 1px solid #051A3A; /* NBA Blue border for the iframe itself */
+            background-color: #FFFFFF; /* White background for iframe content */
+            border-radius: 0.75rem; /* rounded-xl */
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); /* shadow-md */
         }
 
         .tab-btn {
             padding: 10px 20px;
             cursor: pointer;
-            border: none;
+            border: 2px solid transparent; /* Default transparent border to prevent layout shift */
             font-weight: bold;
             border-radius: 0.5rem;
             font-size: 0.875rem;
             letter-spacing: 0.05em;
             text-transform: uppercase;
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-            transition: background-color 200ms ease-in-out, box-shadow 200ms ease-in-out;
+            transition: background-color 200ms ease-in-out, box-shadow 200ms ease-in-out, border-color 200ms ease-in-out;
             outline: none;
             
-            background-color: #EA1F27;
-            color: #FFFFFF;
+            background-color: #EA1F27; /* nba-red */
+            color: #FFFFFF; /* nba-white */
         }
 
         .tab-btn:hover {
-            background-color: #DD3894;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            background-color: #DD3894; /* nba-pink */
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); /* hover:shadow-lg */
+            border-color: #DD3894; /* Optional: change border on hover too */
         }
 
         .group.active > .tab-btn {
-            background-color: #051A3A;
-            color: #FFFFFF;
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2), 0 10px 10px -5px rgba(0, 0, 0, 0.1);
+            background-color: #051A3A; /* nba-blue */
+            color: #FFFFFF; /* nba-white */
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2), 0 10px 10px -5px rgba(0, 0, 0, 0.1); /* shadow-xl */
+            border: 2px solid #EA1F27; /* ADDED: nba-red border for active main tabs */
         }
         .group.active > .tab-btn:hover {
-            background-color: #051A3A;
-            color: #FFFFFF;
+            background-color: #051A3A; /* Keep the same active color on hover */
+            color: #FFFFFF; /* Explicitly keep white text on hover */
+            border: 2px solid #EA1F27; /* Keep nba-red border on hover for active main tabs */
         }
 
         #tab-supervisor .tab-btn {
-            background-color: #16F2D2;
-            color: #FFFFFF;
+            background-color: #16F2D2; /* nba-teal */
+            color: #FFFFFF; /* nba-white */
         }
         #tab-supervisor .tab-btn:hover {
-            background-color: #FFA436;
-            color: #051A3A;
+            background-color: #FFA436; /* nba-yellow */
+            color: #051A3A; /* nba-blue for contrast */
+            border-color: #FFA436; /* Optional: change border on hover for supervisor tab */
         }
 
         #tab-supervisor.active > .tab-btn {
-            background-color: #FFA436;
-            color: #051A3A;
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2), 0 10px 10px -5px rgba(0, 0, 0, 0.1);
+            background-color: #FFA436; /* nba-yellow */
+            color: #051A3A; /* nba-blue for contrast */
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2), 0 10px 10px -5px rgba(0, 0, 0, 0.1); /* shadow-xl */
+            border: 2px solid #EA1F27; /* ADDED: nba-red border for active supervisor tab */
         }
         #tab-supervisor.active > .tab-btn:hover {
-            background-color: #FFA436;
-            color: #051A3A;
+            background-color: #FFA436; /* Keep the same active color on hover */
+            color: #051A3A; /* Explicitly keep blue text on hover */
+            border: 2px solid #EA1F27; /* Keep nba-red border on hover for active supervisor tab */
         }
 
         .submenu {
             position: absolute;
             left: 0;
-            margin-top: 0;
-            padding-top: 0.5rem;
+            margin-top: 0; 
+            padding-top: 0.5rem; 
             padding-bottom: 0.5rem;
             display: flex;
             flex-direction: column;
-            gap: 0.5rem;
-            background-color: #FFFFFF;
-            padding: 0.75rem;
-            border-radius: 0.5rem;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            gap: 0.5rem; 
+            background-color: #FFFFFF; 
+            padding: 0.75rem; 
+            border-radius: 0.5rem; 
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); 
             z-index: 100;
-            visibility: hidden;
+            visibility: hidden; 
             opacity: 0;
             transition: opacity 0.2s ease-in-out, visibility 0.2s ease-in-out;
-            min-width: max-content;
+            min-width: max-content; 
         }
         .group:hover .submenu {
             visibility: visible;
@@ -121,47 +127,52 @@
         }
         #tab-supervisor .submenu {
             right: 0;
-            left: auto;
+            left: auto; 
         }
 
         .submenu-btn {
-            padding: 0.5rem 0.75rem;
+            padding: 0.5rem 0.75rem; 
             cursor: pointer;
-            border: none;
+            border: 2px solid transparent; /* Default transparent border */
             font-weight: bold;
-            border-radius: 0.375rem;
-            font-size: 0.75rem;
+            border-radius: 0.375rem; 
+            font-size: 0.75rem; 
             text-transform: uppercase;
-            letter-spacing: 0.05em;
-            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-            transition: background-color 200ms ease-in-out, box-shadow 200ms ease-in-out;
-            outline: none;
+            letter-spacing: 0.05em; 
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); 
+            transition: background-color 200ms ease-in-out, box-shadow 200ms ease-in-out, border-color 200ms ease-in-out;
+            outline: none; 
 
-            background-color: #16F2D2;
-            color: #FFFFFF;
+            background-color: #16F2D2; /* nba-teal */
+            color: #FFFFFF; /* nba-white */
         }
         .submenu-btn:hover {
-            background-color: #DD3894;
-            color: #FFFFFF;
+            background-color: #DD3894; /* nba-pink */
+            color: #FFFFFF; /* nba-white */
+            border-color: #DD3894; /* Optional: change border on hover */
         }
 
         .submenu-btn.active {
-            background-color: #051A3A;
-            color: #FFFFFF;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            background-color: #051A3A; /* nba-blue */
+            color: #FFFFFF; /* nba-white */
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); /* shadow-lg */
+            border: 2px solid #EA1F27; /* ADDED: nba-red border for active submenu buttons */
         }
         .submenu-btn.active:hover {
-            background-color: #051A3A;
-            color: #FFFFFF;
+            background-color: #051A3A; /* Keep the same active color on hover */
+            color: #FFFFFF; /* Explicitly keep white text on hover */
+            border: 2px solid #EA1F27; /* Keep nba-red border on hover for active submenu buttons */
         }
 
         #tab-supervisor .submenu-btn.active {
-            background-color: #FFA436;
-            color: #051A3A;
+            background-color: #FFA436; /* nba-yellow */
+            color: #051A3A; /* nba-blue */
+            border: 2px solid #EA1F27; /* ADDED: nba-red border for active supervisor submenu buttons */
         }
         #tab-supervisor .submenu-btn.active:hover {
-            background-color: #FFA436;
-            color: #051A3A;
+            background-color: #FFA436; /* Keep the same active color on hover */
+            color: #051A3A; /* Explicitly keep blue text on hover */
+            border: 2px solid #EA1F27; /* Keep nba-red border for active supervisor submenu buttons on hover */
         }
     </style>
 </head>
@@ -213,7 +224,7 @@
         </nav>
 
         <iframe id="toolFrame" src="" title="Tool Content Area"></iframe>
-        </div>
+    </div>
 
     <script>
         // Map tool names to their respective HTML file paths
