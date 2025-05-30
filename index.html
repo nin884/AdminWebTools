@@ -13,117 +13,107 @@
             theme: {
                 extend: {
                     fontFamily: {
-                        montserrat: ['Montserrat', 'sans-serif'], // Keep Montserrat as primary font
+                        montserrat: ['Montserrat', 'sans-serif'],
                     },
                     colors: {
-                        'nba-blue': '#051A3A',    // Deep dark blue, primary background/text
-                        'nba-red': '#EA1F27',     // Vibrant red, accent/button
-                        'nba-pink': '#DD3894',    // Secondary accent pink
-                        'nba-yellow': '#FFA436',  // Gold/Orange accent
-                        'nba-teal': '#16F2D2',    // Teal accent
-                        'nba-white': '#FFFFFF',   // Pure white
-                        'nba-gray-light': '#f3f4f6', // Light background gray
-                        'nba-gray-medium': '#e5e7eb', // Border/divider gray
+                        'nba-blue': '#051A3A',
+                        'nba-red': '#EA1F27',
+                        'nba-pink': '#DD3894',
+                        'nba-yellow': '#FFA436',
+                        'nba-teal': '#16F2D2',
+                        'nba-white': '#FFFFFF',
+                        'nba-gray-light': '#f3f4f6',
+                        'nba-gray-medium': '#e5e7eb',
                     },
                 },
             },
         }
     </script>
     <style>
-        /* Base styles, primarily for font, rest handled by Tailwind */
         body {
-            font-family: 'Montserrat', sans-serif; /* Apply Montserrat font globally */
-            margin: 0; /* Reset default body margin */
-            background-color: #051A3A; /* Direct hex for NBA Blue body background */
-            color: #FFFFFF; /* Direct hex for White text */
+            font-family: 'Montserrat', sans-serif;
+            margin: 0;
+            background-color: #051A3A;
+            color: #FFFFFF;
         }
-        /* Iframe styling for the embedded tools */
         iframe {
             width: 100%;
-            height: calc(100vh - 180px); /* Adjust height to fill remaining viewport, considering header/tabs */
-            border: 1px solid #051A3A; /* Direct hex for NBA Blue border */
-            background-color: #FFFFFF; /* Direct hex for White background */
-            border-radius: 0.75rem; /* rounded-xl */
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); /* shadow-md */
+            height: calc(100vh - 180px);
+            border: 1px solid #051A3A;
+            background-color: #FFFFFF;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
         }
 
-        /* --- Tab Button Styling (using direct hex values for robustness) --- */
-        /* Default Main Tab Button */
         .tab-btn {
-            padding: 10px 20px; /* px-4 py-2 sm:px-6 sm:py-3 */
+            padding: 10px 20px;
             cursor: pointer;
             border: none;
             font-weight: bold;
-            border-radius: 0.5rem; /* rounded-lg */
-            font-size: 0.875rem; /* text-sm sm:text-base */
-            letter-spacing: 0.05em; /* tracking-wide */
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            letter-spacing: 0.05em;
             text-transform: uppercase;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); /* shadow-md */
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
             transition: background-color 200ms ease-in-out, box-shadow 200ms ease-in-out;
-            outline: none; /* focus:outline-none */
+            outline: none;
             
-            background-color: #EA1F27; /* nba-red */
-            color: #FFFFFF; /* nba-white */
+            background-color: #EA1F27;
+            color: #FFFFFF;
         }
 
         .tab-btn:hover {
-            background-color: #DD3894; /* nba-pink */
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); /* hover:shadow-lg */
+            background-color: #DD3894;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
         }
 
-        /* Active Main Tab Button */
-        .tab-item.active > .tab-btn {
-            background-color: #051A3A; /* nba-blue */
-            color: #FFFFFF; /* nba-white */
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2), 0 10px 10px -5px rgba(0, 0, 0, 0.1); /* shadow-xl */
+        .group.active > .tab-btn {
+            background-color: #051A3A;
+            color: #FFFFFF;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2), 0 10px 10px -5px rgba(0, 0, 0, 0.1);
         }
-        /* Active Main Tab Button Hover: Stays active color */
-        .tab-item.active > .tab-btn:hover {
-            background-color: #051A3A; /* Keep the same active color on hover */
-            color: #FFFFFF; /* Explicitly keep white text on hover */
+        .group.active > .tab-btn:hover {
+            background-color: #051A3A;
+            color: #FFFFFF;
         }
 
-        /* Supervisor Tab Button (Default) */
         #tab-supervisor .tab-btn {
-            background-color: #16F2D2; /* nba-teal */
-            color: #FFFFFF; /* nba-white */
+            background-color: #16F2D2;
+            color: #FFFFFF;
         }
         #tab-supervisor .tab-btn:hover {
-            background-color: #FFA436; /* nba-yellow */
-            color: #051A3A; /* nba-blue for contrast */
+            background-color: #FFA436;
+            color: #051A3A;
         }
 
-        /* Supervisor Tab Button (Active) */
         #tab-supervisor.active > .tab-btn {
-            background-color: #FFA436; /* nba-yellow */
-            color: #051A3A; /* nba-blue for contrast */
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2), 0 10px 10px -5px rgba(0, 0, 0, 0.1); /* shadow-xl */
+            background-color: #FFA436;
+            color: #051A3A;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2), 0 10px 10px -5px rgba(0, 0, 0, 0.1);
         }
-        /* Supervisor Tab Button (Active Hover): Stays active color */
         #tab-supervisor.active > .tab-btn:hover {
-            background-color: #FFA436; /* Keep the same active color on hover */
-            color: #051A3A; /* Explicitly keep blue text on hover */
+            background-color: #FFA436;
+            color: #051A3A;
         }
 
-        /* --- Submenu Styling --- */
         .submenu {
             position: absolute;
             left: 0;
-            margin-top: 0; /* mt-0 */
-            padding-top: 0.5rem; /* py-2 */
-            padding-bottom: 0.5rem; /* py-2 */
+            margin-top: 0;
+            padding-top: 0.5rem;
+            padding-bottom: 0.5rem;
             display: flex;
             flex-direction: column;
-            gap: 0.5rem; /* gap-2 */
-            background-color: #FFFFFF; /* nba-white */
-            padding: 0.75rem; /* p-3 */
-            border-radius: 0.5rem; /* rounded-lg */
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); /* shadow-xl */
+            gap: 0.5rem;
+            background-color: #FFFFFF;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
             z-index: 100;
-            visibility: hidden; /* Use visibility instead of display for smoother transitions if needed, but hidden for now */
+            visibility: hidden;
             opacity: 0;
             transition: opacity 0.2s ease-in-out, visibility 0.2s ease-in-out;
-            min-width: max-content; /* Ensure submenu doesn't wrap text */
+            min-width: max-content;
         }
         .group:hover .submenu {
             visibility: visible;
@@ -131,56 +121,52 @@
         }
         #tab-supervisor .submenu {
             right: 0;
-            left: auto; /* Align supervisor submenu to the right */
+            left: auto;
         }
 
-        /* Default Submenu Button */
         .submenu-btn {
-            padding: 0.5rem 0.75rem; /* px-3 py-2 */
+            padding: 0.5rem 0.75rem;
             cursor: pointer;
             border: none;
             font-weight: bold;
-            border-radius: 0.375rem; /* rounded-md */
-            font-size: 0.75rem; /* text-xs sm:text-sm */
+            border-radius: 0.375rem;
+            font-size: 0.75rem;
             text-transform: uppercase;
-            letter-spacing: 0.05em; /* tracking-wide */
-            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); /* shadow-sm */
+            letter-spacing: 0.05em;
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
             transition: background-color 200ms ease-in-out, box-shadow 200ms ease-in-out;
-            outline: none; /* focus:outline-none */
+            outline: none;
 
-            background-color: #16F2D2; /* nba-teal */
-            color: #FFFFFF; /* nba-white */
+            background-color: #16F2D2;
+            color: #FFFFFF;
         }
         .submenu-btn:hover {
-            background-color: #DD3894; /* nba-pink */
-            color: #FFFFFF; /* nba-white */
+            background-color: #DD3894;
+            color: #FFFFFF;
         }
 
-        /* Active Submenu Button */
         .submenu-btn.active {
-            background-color: #051A3A; /* nba-blue */
-            color: #FFFFFF; /* nba-white */
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); /* shadow-lg */
+            background-color: #051A3A;
+            color: #FFFFFF;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
         }
-        /* Active Submenu Button Hover: Stays active color */
         .submenu-btn.active:hover {
-            background-color: #051A3A; /* Keep the same active color on hover */
-            color: #FFFFFF; /* Explicitly keep white text on hover */
+            background-color: #051A3A;
+            color: #FFFFFF;
         }
 
-        /* Active Submenu Button within Supervisor Tab */
         #tab-supervisor .submenu-btn.active {
-            background-color: #FFA436; /* nba-yellow */
-            color: #051A3A; /* nba-blue */
+            background-color: #FFA436;
+            color: #051A3A;
         }
         #tab-supervisor .submenu-btn.active:hover {
-            background-color: #FFA436; /* Keep the same active color on hover */
-            color: #051A3A; /* Explicitly keep blue text on hover */
+            background-color: #FFA436;
+            color: #051A3A;
         }
     </style>
 </head>
 <body class="p-4 sm:p-6 md:p-8">
-    <div class="max-w-7xl mx-auto bg-nba-blue shadow-2xl rounded-2xl p-6 sm:p-8 md:p-10 border-4 border-nba-red">
+    <div class="bg-nba-blue shadow-2xl rounded-2xl p-6 sm:p-8 md:p-10 border-4 border-nba-red">
         <header class="flex items-center gap-4 mb-8">
             <img src="https://raw.githubusercontent.com/nin884/AdminWebTools/main/nba2k.png" alt="NBA 2K Logo" class="h-12 sm:h-16">
             <h1 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-nba-white tracking-tight">NBA 2K Tools Dashboard</h1>
@@ -226,18 +212,20 @@
             </div>
         </nav>
 
-        <iframe id="toolFrame" src=""></iframe>
-    </div>
+        <iframe id="toolFrame" src="" title="Tool Content Area"></iframe>
+        </div>
 
     <script>
         // Map tool names to their respective HTML file paths
+        // These paths should be relative to the location of THIS dashboard HTML file,
+        // or absolute paths if hosted elsewhere.
         const toolSrcMap = {
-            extractor: 'attribute-extractor.html', // Assuming this is the correct path
-            placeholder: 'PH_Compare.html',       // Assuming this is the correct path
-            savefilter: 'SaveFileFilter.html',    // Assuming this is the correct path
-            validator: 'myteam-streak-validator.html', // Assuming this is the correct path
-            tattoo: 'Missing_Tattoo.html',        // Assuming this is the correct path
-            adminAudit: 'AdminAudit.html'         // Assuming this is the correct path
+            extractor: 'attribute-extractor.html',
+            placeholder: 'PH_Compare.html',        
+            savefilter: 'SaveFileFilter.html',    
+            validator: 'myteam-streak-validator.html',
+            tattoo: 'Missing_Tattoo.html',        
+            adminAudit: 'AdminAudit.html'        
         };
 
         const toolFrame = document.getElementById('toolFrame');
@@ -245,33 +233,33 @@
 
         /**
          * Activates a main tab and loads the first tool in its submenu.
-         * Uses event delegation on the mainTabsContainer.
          * @param {string} mainTabId - The ID of the main tab (e.g., 'restoration').
          */
         function activateMainTab(mainTabId) {
-            // Remove 'active' class from all tab-item elements
-            document.querySelectorAll('.tab-item').forEach(item => {
-                item.classList.remove('active');
+            // Remove 'active' class from all main tab group divs
+            document.querySelectorAll('#main-tabs .group').forEach(group => {
+                group.classList.remove('active');
             });
 
-            // Add 'active' class to the clicked tab-item
-            const currentTabItem = document.getElementById(`tab-${mainTabId}`);
-            if (currentTabItem) {
-                currentTabItem.classList.add('active');
+            // Add 'active' class to the current main tab group div
+            const currentTabGroup = document.getElementById(`tab-${mainTabId}`);
+            if (currentTabGroup) {
+                currentTabGroup.classList.add('active');
             }
 
-            // Deactivate all submenu buttons
+            // Deactivate all submenu buttons first
             document.querySelectorAll('.submenu-btn').forEach(btn => {
                 btn.classList.remove('active');
             });
 
-            // Find the first tool button in the activated main tab's submenu and click it
-            const firstSubmenuBtn = currentTabItem ? currentTabItem.querySelector('.submenu-btn') : null;
+            // Find the first tool button in the activated main tab's submenu and load it
+            const firstSubmenuBtn = currentTabGroup ? currentTabGroup.querySelector('.submenu-btn') : null;
             if (firstSubmenuBtn) {
                 activateTool(firstSubmenuBtn.dataset.tool);
             } else {
                 // If a main tab has no submenu tools, clear the iframe
                 toolFrame.src = '';
+                console.log(`No tools found for main tab: ${mainTabId}. Iframe cleared.`);
             }
         }
 
@@ -280,18 +268,34 @@
          * @param {string} toolName - The data-tool attribute value (e.g., 'extractor').
          */
         function activateTool(toolName) {
-            // Set iframe source
-            toolFrame.src = toolSrcMap[toolName] || '';
-
+            const toolUrl = toolSrcMap[toolName];
+            if (toolUrl) {
+                toolFrame.src = toolUrl;
+                console.log(`Loading tool: ${toolName} from ${toolUrl}`);
+            } else {
+                toolFrame.src = ''; // Or a specific error page like 'tool-not-found.html'
+                console.error(`Tool URL not found for: ${toolName}. Iframe cleared.`);
+            }
+            
             // Deactivate all submenu buttons
             document.querySelectorAll('.submenu-btn').forEach(btn => {
                 btn.classList.remove('active');
             });
 
-            // Activate the clicked submenu button
-            const currentSubmenuBtn = document.querySelector(`[data-tool="${toolName}"]`);
+            // Activate the clicked/current submenu button
+            const currentSubmenuBtn = document.querySelector(`.submenu-btn[data-tool="${toolName}"]`);
             if (currentSubmenuBtn) {
                 currentSubmenuBtn.classList.add('active');
+
+                // Ensure the parent main tab also reflects as active
+                // This is important if a tool is loaded directly or if state needs to be re-asserted
+                const parentGroup = currentSubmenuBtn.closest('.group');
+                if (parentGroup && !parentGroup.classList.contains('active')) {
+                    document.querySelectorAll('#main-tabs .group').forEach(group => {
+                        group.classList.remove('active');
+                    });
+                    parentGroup.classList.add('active');
+                }
             }
         }
 
@@ -299,16 +303,18 @@
         mainTabsContainer.addEventListener('click', (event) => {
             const target = event.target;
 
-            // Handle main tab button clicks
-            const mainTabBtn = target.closest('.tab-btn');
-            if (mainTabBtn) {
-                const mainTabId = mainTabBtn.dataset.mainTab;
+            // Handle main tab button clicks (delegated to the button itself or its parent .group)
+            const mainTabButton = target.closest('.tab-btn');
+            if (mainTabButton && mainTabButton.dataset.mainTab) {
+                const mainTabId = mainTabButton.dataset.mainTab;
                 activateMainTab(mainTabId);
+                // Submenu will be handled by activateMainTab loading the first tool
+                return; // Prevent submenu click logic from also firing if clicking main tab
             }
 
             // Handle submenu button clicks
             const submenuBtn = target.closest('.submenu-btn');
-            if (submenuBtn) {
+            if (submenuBtn && submenuBtn.dataset.tool) {
                 const toolName = submenuBtn.dataset.tool;
                 activateTool(toolName);
             }
@@ -317,7 +323,24 @@
         // --- Initialization ---
         document.addEventListener('DOMContentLoaded', () => {
             // Activate the first main tab ('restoration') and its first tool on load
-            activateMainTab('restoration');
+            // Ensure 'restoration' is a valid mainTabId corresponding to an element `tab-restoration`
+            const initialMainTabId = 'restoration'; 
+            const initialTabElement = document.getElementById(`tab-${initialMainTabId}`);
+            
+            if (initialTabElement) {
+                activateMainTab(initialMainTabId);
+            } else {
+                console.error(`Initial main tab with ID 'tab-${initialMainTabId}' not found. Dashboard may not initialize correctly.`);
+                // Optionally, activate the very first tab found if 'restoration' is missing
+                const firstAvailableTab = mainTabsContainer.querySelector('.group');
+                if (firstAvailableTab && firstAvailableTab.id && firstAvailableTab.id.startsWith('tab-')) {
+                    activateMainTab(firstAvailableTab.id.substring(4)); // Remove 'tab-' prefix
+                } else if (firstAvailableTab && firstAvailableTab.querySelector('.tab-btn')?.dataset.mainTab) {
+                     activateMainTab(firstAvailableTab.querySelector('.tab-btn').dataset.mainTab);
+                } else {
+                     console.error("No tabs found to activate.");
+                }
+            }
         });
     </script>
 </body>
