@@ -95,10 +95,40 @@
         .mismatch-row td {
             border-color: #f8c8c4; /* lighter border for mismatch rows */
         }
+        /* Table specific styles for consistency */
+        table {
+            border-collapse: collapse;
+            width: 100%; /* Ensure tables take full width of their container */
+        }
+        th, td {
+            border: 1px solid var(--tw-colors-nba-gray-medium);
+            padding: 12px; /* p-3 */
+            text-align: left;
+        }
+        th {
+            background-color: #EA1F27; /* nba-red */
+            color: #FFFFFF; /* nba-white */
+            font-weight: 600; /* semibold */
+        }
+         tbody tr {
+            background-color: var(--tw-colors-nba-white);
+            color: var(--tw-colors-nba-blue);
+        }
+        tbody tr:nth-child(even) {
+            background-color: var(--tw-colors-nba-gray-light);
+        }
+        tbody tr:hover {
+            background-color: var(--tw-colors-nba-teal);
+            color: var(--tw-colors-nba-white);
+        }
+        /* Build Status Container Styling */
+        .build-status-container {
+            border: 2px solid var(--tw-colors-nba-yellow); /* Yellow border like other info boxes */
+        }
     </style>
 </head>
 <body class="p-4 sm:p-6 md:p-8">
-    <div class="max-w-6xl mx-auto bg-nba-blue shadow-2xl rounded-2xl p-6 sm:p-8 md:p-10 border-4 border-nba-red">
+    <div class="bg-nba-blue shadow-2xl rounded-2xl p-6 sm:p-8 md:p-10 border-4 border-nba-red">
         <h1 class="text-3xl sm:text-4xl font-extrabold text-nba-white mb-6 text-center">NBA 2K Placeholder Validator</h1>
 
         <div class="flex flex-col lg:flex-row gap-6 mb-6">
@@ -111,6 +141,13 @@
                 <h3 class="text-xl font-bold text-nba-white mb-3">Placeholder</h3>
                 <textarea id="dataInput2" placeholder="Paste placeholder build data here..."
                           class="w-full h-72 p-4 border-2 border-nba-red rounded-lg focus:ring-4 focus:ring-nba-yellow focus:border-transparent text-nba-blue bg-nba-white resize-y shadow-inner"></textarea>
+                <div id="placeholderBuildStatusContainer" class="build-status-container bg-nba-blue text-nba-white p-3 rounded-lg shadow-md mt-4 hidden">
+                    <h4 class="text-md font-bold text-center mb-2 text-nba-yellow">Placeholder Build Status</h4>
+                    <div class="flex flex-row justify-around items-center gap-2 text-sm">
+                        <span id="placeholderNotTemplateStatus" class="font-semibold"></span>
+                        <span id="placeholderNotRebirthStatus" class="font-semibold"></span>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -182,42 +219,106 @@
         document.getElementById('compareBtn').addEventListener('click', compareBuilds);
 
         function parseAttributes(data) {
-            const attributes = {};
-            // Fields that are typically single-value strings, not numeric attributes
+            const attributes = {}; // For comparison table
             const extraFields = ['Position', 'Archetype', 'Height', 'Weight', 'Wingspan'];
 
-            data.trim().split('\n').forEach(line => {
-                if (!line) return;
-                const parts = line.trim().split(/\t+/);
-                const key = parts[0] === 'Potential Description' ? 'Archetype' : parts[0]; // Standardize Archetype key
+            // Flags for Not Template/Rebirth
+            let isNotTemplate = false; 
+            let isNotRebirth = true;   
+            let playerTemplateNameLineProcessed = false; 
+            let featuresUnlockedLineEncountered = false; 
 
-                // If it's an extra field, grab the second part directly
-                if (extraFields.includes(key)) {
-                    attributes[key] = parts[1] || '';
+            const lines = data.trim().split('\n');
+
+            lines.forEach(line => {
+                if (!line.trim()) return; 
+                const originalLine = line.trim(); 
+                const parts = originalLine.split(/\t+/); 
+                const key = parts[0].trim(); 
+                const value = parts.length > 1 ? parts[1].trim() : ""; 
+
+                // --- Status Flag Logic ---
+                if (originalLine.includes("Player Template Name")) {
+                    playerTemplateNameLineProcessed = true;
+                    if (originalLine.includes("No Template Used")) {
+                        isNotTemplate = true;
+                    } else {
+                        isNotTemplate = false; 
+                    }
+                }
+
+                if (originalLine.includes("Features Unlocked")) {
+                    featuresUnlockedLineEncountered = true;
+                }
+                
+                if (featuresUnlockedLineEncountered && originalLine.includes("Rebirth")) {
+                    isNotRebirth = false; 
+                }
+
+                // --- Attribute Parsing for Comparison Table ---
+                const attributeKey = (key === 'Potential Description') ? 'Archetype' : key;
+
+                if (extraFields.includes(attributeKey)) {
+                    attributes[attributeKey] = value; 
                 } else {
-                    // For numeric attributes, filter for numbers and take the second one
-                    const numbers = parts.filter(p => /^\d+(\.\d+)?$/.test(p)); // Matches integers or floats
-                    if (numbers.length >= 2) {
-                        attributes[key] = numbers[1];
+                    const numbersInParts = parts.filter(p => /^\d+(\.\d+)?$/.test(p.trim()));
+                    if (numbersInParts.length >= 2) { 
+                        attributes[attributeKey] = numbersInParts[1];
+                    } else if (parts.length > 1 && /^\d+(\.\d+)?$/.test(value) && !extraFields.includes(attributeKey)) {
+                        attributes[attributeKey] = value;
                     }
                 }
             });
-            return attributes;
+
+            if (!playerTemplateNameLineProcessed) {
+                isNotTemplate = true;
+            }
+
+            return { attributes, isNotTemplate, isNotRebirth };
         }
+
 
         function compareBuilds() {
             const dataInput1 = document.getElementById('dataInput1').value.trim();
             const dataInput2 = document.getElementById('dataInput2').value.trim();
+            const matchStatusEl = document.getElementById('matchStatus');
+            const compBody = document.querySelector('#comparisonTable tbody');
+            const detailsBody = document.querySelector('#mismatchDetailsTable tbody');
+            const comparisonTableEl = document.getElementById('comparisonTable');
+            const mismatchDetailsTableEl = document.getElementById('mismatchDetailsTable');
+            
+            // Get placeholder status elements
+            const placeholderStatusContainer = document.getElementById('placeholderBuildStatusContainer');
+            const placeholderNotTemplateStatusEl = document.getElementById('placeholderNotTemplateStatus');
+            const placeholderNotRebirthStatusEl = document.getElementById('placeholderNotRebirthStatus');
+
+
+            // Clear previous results and statuses
+            matchStatusEl.innerHTML = '';
+            compBody.innerHTML = '';
+            detailsBody.innerHTML = '';
+            comparisonTableEl.classList.add('hidden');
+            mismatchDetailsTableEl.classList.add('hidden');
+            placeholderStatusContainer.classList.add('hidden'); // Hide placeholder status initially
+
 
             if (!dataInput1 || !dataInput2) {
                 showModal('Please paste data into both "Original Build" and "Placeholder" text areas.');
                 return;
             }
 
-            const attr1 = parseAttributes(dataInput1);
-            const attr2 = parseAttributes(dataInput2);
+            const build1Data = parseAttributes(dataInput1); // Original build data (flags not used for display)
+            const build2Data = parseAttributes(dataInput2); // Placeholder build data
 
-            // Define the order of appearance for extra fields and then sort the rest alphabetically
+            const attr1 = build1Data.attributes;
+            const attr2 = build2Data.attributes;
+
+            // Show and Update status indicators ONLY for Placeholder Build
+            placeholderNotTemplateStatusEl.innerHTML = `Not Template: ${build2Data.isNotTemplate ? '&#9989;' : '&#10060;'}`;
+            placeholderNotRebirthStatusEl.innerHTML = `Not Rebirth: ${build2Data.isNotRebirth ? '&#9989;' : '&#10060;'}`;
+            placeholderStatusContainer.classList.remove('hidden');
+
+
             const extraOrder = ['Position', 'Archetype', 'Height', 'Weight', 'Wingspan'];
             const allKeys = Array.from(new Set([...Object.keys(attr1), ...Object.keys(attr2)]));
             const orderedKeys = [
@@ -225,20 +326,20 @@
                 ...allKeys.filter(k => !extraOrder.includes(k)).sort()
             ];
 
-            // Populate comparison table
-            const compBody = document.querySelector('#comparisonTable tbody');
-            compBody.innerHTML = '';
             let allMatch = true;
             const compFrag = document.createDocumentFragment();
+            const detailsFrag = document.createDocumentFragment();
 
             orderedKeys.forEach(key => {
                 const val1 = attr1[key] || '';
                 const val2 = attr2[key] || '';
                 const row = document.createElement('tr');
+                let currentMismatch = false;
 
                 if (val1 !== val2) {
-                    row.classList.add('mismatch-row'); // Apply mismatch styling
+                    row.classList.add('mismatch-row');
                     allMatch = false;
+                    currentMismatch = true;
                 }
                 row.innerHTML = `
                     <td class="px-4 py-2 text-sm">${key}</td>
@@ -246,40 +347,31 @@
                     <td class="px-4 py-2 text-sm">${val2}</td>
                 `;
                 compFrag.appendChild(row);
+
+                if (currentMismatch) {
+                    const detailRow = document.createElement('tr');
+                     detailRow.innerHTML = `
+                        <td class="px-4 py-2 text-sm">${key}</td>
+                        <td class="px-4 py-2 text-sm">${val1}</td>
+                        <td class="px-4 py-2 text-sm">${val2}</td>
+                    `;
+                    detailsFrag.appendChild(detailRow);
+                }
             });
             compBody.appendChild(compFrag);
-            document.getElementById('comparisonTable').classList.remove('hidden'); // Show table
+            comparisonTableEl.classList.remove('hidden');
 
-            // Update match status
-            const matchStatusEl = document.getElementById('matchStatus');
             if (allMatch) {
                 matchStatusEl.innerHTML = '<span class="text-nba-teal">✔ ALL ATTRIBUTES MATCH</span>';
+                mismatchDetailsTableEl.classList.add('hidden');
             } else {
                 matchStatusEl.innerHTML = '<span class="text-nba-red">✘ ATTRIBUTES DO NOT MATCH</span>';
-            }
-
-            // Populate mismatch details table
-            const detailsBody = document.querySelector('#mismatchDetailsTable tbody');
-            detailsBody.innerHTML = '';
-            if (!allMatch) {
-                const detailsFrag = document.createDocumentFragment();
-                orderedKeys.forEach(key => {
-                    const val1 = attr1[key] || '';
-                    const val2 = attr2[key] || '';
-                    if (val1 !== val2) {
-                        const detailRow = document.createElement('tr');
-                        detailRow.innerHTML = `
-                            <td class="px-4 py-2 text-sm">${key}</td>
-                            <td class="px-4 py-2 text-sm">${val1}</td>
-                            <td class="px-4 py-2 text-sm">${val2}</td>
-                        `;
-                        detailsFrag.appendChild(detailRow);
-                    }
-                });
-                detailsBody.appendChild(detailsFrag);
-                document.getElementById('mismatchDetailsTable').classList.remove('hidden'); // Show table
-            } else {
-                document.getElementById('mismatchDetailsTable').classList.add('hidden'); // Hide if no mismatches
+                if (detailsFrag.hasChildNodes()) {
+                    detailsBody.appendChild(detailsFrag);
+                    mismatchDetailsTableEl.classList.remove('hidden');
+                } else {
+                     mismatchDetailsTableEl.classList.add('hidden');
+                }
             }
         }
     </script>
