@@ -55,6 +55,7 @@
             margin: 0;
             background-color: var(--nba-blue);
             color: var(--nba-white);
+            font-size: 0.875rem;
         }
         textarea, button, select, input[type="text"], input[type="number"], input[type="date"], input[type="datetime-local"] {
             font-family: 'Montserrat', sans-serif;
@@ -76,8 +77,8 @@
         }
         .step-number {
             flex-shrink: 0;
-            width: 2rem;
-            height: 2rem;
+            width: 1.65rem;
+            height: 1.65rem;
             border-radius: 9999px;
             background-color: var(--nba-red);
             color: var(--nba-white);
@@ -85,7 +86,7 @@
             align-items: center;
             justify-content: center;
             font-weight: 700;
-            font-size: 0.95rem;
+            font-size: 0.8rem;
         }
 
         table {
@@ -94,9 +95,10 @@
         }
         th, td {
             border: 1px solid var(--nba-gray-medium);
-            padding: 10px 14px;
+            padding: 7px 10px;
             text-align: left;
             vertical-align: middle;
+            font-size: 0.8rem;
         }
         th {
             background-color: var(--nba-red);
@@ -126,16 +128,17 @@
 
         /* Empty state shown before any data has been pasted/parsed */
         .empty-state {
-            padding: 2.5rem 1.5rem;
+            padding: 1.5rem 1rem;
             text-align: center;
             color: var(--nba-gray-dark);
             background-color: var(--nba-white);
+            font-size: 0.8rem;
         }
         .empty-state .empty-state-title {
             color: var(--nba-blue);
             font-weight: 700;
-            font-size: 1rem;
-            margin-bottom: 0.25rem;
+            font-size: 0.85rem;
+            margin-bottom: 0.2rem;
         }
 
         /* Severity badges for discrepancy type - color is the primary signal, but
@@ -143,11 +146,11 @@
         .badge {
             display: inline-flex;
             align-items: center;
-            gap: 0.35rem;
-            padding: 0.25rem 0.65rem;
+            gap: 0.3rem;
+            padding: 0.2rem 0.55rem;
             border-radius: 9999px;
             font-weight: 700;
-            font-size: 0.8rem;
+            font-size: 0.72rem;
             line-height: 1.2;
         }
         .badge-major {
@@ -178,13 +181,14 @@
             background-color: #FFFFFF;
             color: #051A3A;
             margin: auto;
-            padding: 24px;
-            border-radius: 1rem;
+            padding: 18px;
+            border-radius: 0.75rem;
             box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2), 0 10px 10px -5px rgba(0, 0, 0, 0.1);
             width: 90%;
-            max-width: 480px;
+            max-width: 400px;
             text-align: center;
             position: relative;
+            font-size: 0.85rem;
         }
         #modalMessage {
             color: #051A3A;
@@ -205,54 +209,54 @@
         }
     </style>
 </head>
-<body class="p-4 sm:p-6 md:p-8">
-    <div class="max-w-6xl mx-auto">
-        <header class="mb-6 text-center">
-            <h1 class="text-3xl sm:text-4xl font-extrabold text-nba-white">NBA 2K Admin Web Audit</h1>
-            <p class="text-sm text-gray-300 mt-1">Paste admin log data, label the report, review each row, and flag discrepancies.</p>
+<body class="p-3 sm:p-4 md:p-5">
+    <div class="max-w-5xl mx-auto">
+        <header class="mb-4 text-center">
+            <h1 class="text-2xl sm:text-3xl font-extrabold text-nba-white">NBA 2K Admin Web Audit</h1>
+            <p class="text-xs text-gray-300 mt-1">Paste admin log data, label the report, review each row, and flag discrepancies.</p>
         </header>
 
-        <div class="space-y-5">
+        <div class="space-y-3">
             <!-- Step 1: Paste data -->
-            <section class="workflow-step p-5 sm:p-6">
-                <div class="flex items-start gap-3 mb-4">
+            <section class="workflow-step p-3 sm:p-4">
+                <div class="flex items-start gap-2.5 mb-3">
                     <span class="step-number">1</span>
                     <div>
-                        <h2 class="text-lg font-bold text-nba-white leading-tight">Paste Admin Web data</h2>
-                        <p class="text-sm text-gray-300 mt-0.5">Tab-separated data copied directly from Excel or Google Sheets.</p>
+                        <h2 class="text-base font-bold text-nba-white leading-tight">Paste Admin Web data</h2>
+                        <p class="text-xs text-gray-300 mt-0.5">Tab-separated data copied directly from Excel or Google Sheets.</p>
                     </div>
                 </div>
                 <label for="logData" class="sr-only">Paste filtered Admin Web data here</label>
                 <textarea id="logData" placeholder="Paste tab-separated data (e.g., from Excel/Google Sheets) here...."
-                            class="w-full h-40 p-4 border-2 border-white/10 rounded-lg focus:ring-4 focus:ring-nba-yellow focus:border-transparent text-nba-blue bg-nba-white resize-y shadow-inner"></textarea>
-                <div class="mt-4 flex flex-wrap gap-3 items-center justify-between">
-                    <label class="flex items-center gap-2 text-gray-200 text-sm font-medium select-none">
-                        <input type="checkbox" id="appendMode" class="h-4 w-4 accent-nba-red">
+                            class="w-full h-32 p-3 text-sm border-2 border-white/10 rounded-lg focus:ring-4 focus:ring-nba-yellow focus:border-transparent text-nba-blue bg-nba-white resize-y shadow-inner"></textarea>
+                <div class="mt-3 flex flex-wrap gap-3 items-center justify-between">
+                    <label class="flex items-center gap-2 text-gray-200 text-xs font-medium select-none">
+                        <input type="checkbox" id="appendMode" class="h-3.5 w-3.5 accent-nba-red">
                         Append to existing table
                     </label>
                     <button id="parseBtn" type="button"
-                            class="px-6 py-3 bg-nba-red text-nba-white font-bold rounded-lg shadow-lg hover:bg-nba-pink transition ease-in-out duration-200">
+                            class="px-5 py-2 text-sm bg-nba-red text-nba-white font-bold rounded-lg shadow-lg hover:bg-nba-pink transition ease-in-out duration-200">
                         Submit Data
                     </button>
                 </div>
-                <p id="parseError" class="mt-3 text-sm text-nba-yellow font-semibold hidden"></p>
+                <p id="parseError" class="mt-2 text-xs text-nba-yellow font-semibold hidden"></p>
             </section>
 
             <!-- Step 2: Report details -->
-            <section class="workflow-step p-5 sm:p-6">
-                <div class="flex items-start gap-3 mb-4">
+            <section class="workflow-step p-3 sm:p-4">
+                <div class="flex items-start gap-2.5 mb-3">
                     <span class="step-number">2</span>
                     <div>
-                        <h2 class="text-lg font-bold text-nba-white leading-tight">Label this report</h2>
-                        <p class="text-sm text-gray-300 mt-0.5">Used in the summary line and CSV filename below — this does not filter the pasted rows.</p>
+                        <h2 class="text-base font-bold text-nba-white leading-tight">Label this report</h2>
+                        <p class="text-xs text-gray-300 mt-0.5">Used in the summary line and CSV filename below — this does not filter the pasted rows.</p>
                     </div>
                 </div>
-                <div id="controls" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                    <label class="block text-gray-200 text-sm font-medium">Date
-                        <input type="date" id="filterDate" class="mt-1 block w-full rounded-md border-0 shadow-sm p-2 text-nba-blue">
+                <div id="controls" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                    <label class="block text-gray-200 text-xs font-medium">Date
+                        <input type="date" id="filterDate" class="mt-1 block w-full text-sm rounded-md border-0 shadow-sm p-1.5 text-nba-blue">
                     </label>
-                    <label class="block text-gray-200 text-sm font-medium">Shift
-                        <select id="filterShift" class="mt-1 block w-full rounded-md border-0 shadow-sm p-2 text-nba-blue">
+                    <label class="block text-gray-200 text-xs font-medium">Shift
+                        <select id="filterShift" class="mt-1 block w-full text-sm rounded-md border-0 shadow-sm p-1.5 text-nba-blue">
                             <option value="Vegas AM Shift">Vegas AM Shift</option>
                             <option value="Vegas PM Shift">Vegas PM Shift</option>
                             <option value="Vegas Weekend Shift">Vegas Weekend Shift</option>
@@ -260,23 +264,23 @@
                             <option value="Chengdu">Chengdu</option>
                         </select>
                     </label>
-                    <label class="block text-gray-200 text-sm font-medium">Report from
-                        <input type="datetime-local" id="reportFrom" step="1" class="mt-1 block w-full rounded-md border-0 shadow-sm p-2 text-nba-blue">
+                    <label class="block text-gray-200 text-xs font-medium">Report from
+                        <input type="datetime-local" id="reportFrom" step="1" class="mt-1 block w-full text-sm rounded-md border-0 shadow-sm p-1.5 text-nba-blue">
                     </label>
-                    <label class="block text-gray-200 text-sm font-medium">Report to
-                        <input type="datetime-local" id="reportTo" step="1" class="mt-1 block w-full rounded-md border-0 shadow-sm p-2 text-nba-blue">
+                    <label class="block text-gray-200 text-xs font-medium">Report to
+                        <input type="datetime-local" id="reportTo" step="1" class="mt-1 block w-full text-sm rounded-md border-0 shadow-sm p-1.5 text-nba-blue">
                     </label>
                 </div>
-                <p id="summary" class="text-base font-semibold text-nba-yellow mt-4"></p>
+                <p id="summary" class="text-sm font-semibold text-nba-yellow mt-3"></p>
             </section>
 
             <!-- Step 3: Review rows -->
-            <section class="workflow-step p-5 sm:p-6">
-                <div class="flex items-start gap-3 mb-4">
+            <section class="workflow-step p-3 sm:p-4">
+                <div class="flex items-start gap-2.5 mb-3">
                     <span class="step-number">3</span>
                     <div>
-                        <h2 class="text-lg font-bold text-nba-white leading-tight">Review each row</h2>
-                        <p class="text-sm text-gray-300 mt-0.5">Mark a row Validated once it's checked out, or flag it as a Discrepancy.</p>
+                        <h2 class="text-base font-bold text-nba-white leading-tight">Review each row</h2>
+                        <p class="text-xs text-gray-300 mt-0.5">Mark a row Validated once it's checked out, or flag it as a Discrepancy.</p>
                     </div>
                 </div>
                 <div id="tableContainer" class="table-scroll rounded-lg overflow-auto shadow-md">
@@ -288,19 +292,19 @@
             </section>
 
             <!-- Step 4: Discrepancies -->
-            <section class="workflow-step p-5 sm:p-6">
-                <div class="flex items-start gap-3 mb-4">
+            <section class="workflow-step p-3 sm:p-4">
+                <div class="flex items-start gap-2.5 mb-3">
                     <span class="step-number">4</span>
                     <div>
-                        <h2 class="text-lg font-bold text-nba-white leading-tight">Discrepancies</h2>
-                        <p class="text-sm text-gray-300 mt-0.5">Rows flagged in Step 3 land here for detail and export.</p>
+                        <h2 class="text-base font-bold text-nba-white leading-tight">Discrepancies</h2>
+                        <p class="text-xs text-gray-300 mt-0.5">Rows flagged in Step 3 land here for detail and export.</p>
                     </div>
                 </div>
-                <div class="flex flex-wrap items-center gap-4 mb-4">
+                <div class="flex flex-wrap items-center gap-3 mb-3">
                     <span class="badge badge-major" id="majorCount">Major: 0</span>
                     <span class="badge badge-minor" id="minorCount">Minor: 0</span>
                     <button id="exportBtn" type="button"
-                            class="ml-auto px-5 py-2.5 bg-nba-yellow text-nba-blue font-bold rounded-lg shadow-md hover:bg-nba-teal transition ease-in-out duration-200">
+                            class="ml-auto px-4 py-2 text-sm bg-nba-yellow text-nba-blue font-bold rounded-lg shadow-md hover:bg-nba-teal transition ease-in-out duration-200">
                         Export to CSV
                     </button>
                 </div>
