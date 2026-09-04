@@ -92,6 +92,7 @@
         table {
             border-collapse: collapse;
             width: 100%;
+            table-layout: fixed;
         }
         th, td {
             border: 1px solid var(--nba-gray-medium);
@@ -99,6 +100,8 @@
             text-align: left;
             vertical-align: middle;
             font-size: 0.8rem;
+            word-break: break-word;
+            overflow-wrap: anywhere;
         }
         th {
             background-color: var(--nba-red);
@@ -120,10 +123,13 @@
         }
 
         /* Scrollable table body with a pinned header, so long audit sessions don't
-           require scrolling the whole page to see column headers. */
+           require scrolling the whole page to see column headers. Horizontal
+           scrolling is disabled - table-layout: fixed plus word-wrap keeps
+           columns within the container width instead. */
         .table-scroll {
             max-height: 65vh;
             overflow-y: auto;
+            overflow-x: hidden;
         }
 
         /* Empty state shown before any data has been pasted/parsed */
@@ -283,7 +289,7 @@
                         <p class="text-xs text-gray-300 mt-0.5">Mark a row Validated once it's checked out, or flag it as a Discrepancy.</p>
                     </div>
                 </div>
-                <div id="tableContainer" class="table-scroll rounded-lg overflow-auto shadow-md">
+                <div id="tableContainer" class="table-scroll rounded-lg shadow-md">
                     <div class="empty-state" data-role="table-empty-state">
                         <div class="empty-state-title">No rows yet</div>
                         <p>Paste data above and click Submit Data to start reviewing.</p>
@@ -308,7 +314,7 @@
                         Export to CSV
                     </button>
                 </div>
-                <div id="discrepancyContainer" class="rounded-lg overflow-auto shadow-md">
+                <div id="discrepancyContainer" class="rounded-lg shadow-md" style="overflow-x: hidden;">
                     <div class="empty-state" data-role="discrepancy-empty-state">
                         <div class="empty-state-title">No discrepancies flagged</div>
                         <p>Flagged rows from Step 3 will appear here.</p>
@@ -616,6 +622,9 @@
                         const th = document.createElement('th');
                         th.textContent = h;
                         th.className = 'px-6 py-3 text-left text-xs font-medium text-nba-white uppercase tracking-wider';
+                        if (h === 'CX Page') th.style.width = '70px';
+                        else if (h === 'Validated') th.style.width = '60px';
+                        else if (h === 'Discrepancy') th.style.width = '90px';
                         headerRow.appendChild(th);
                     });
                     thead.appendChild(headerRow);
@@ -742,6 +751,7 @@
                         const th = document.createElement('th');
                         th.textContent = h;
                         th.className = 'px-6 py-3 text-left text-xs font-medium text-nba-white uppercase tracking-wider';
+                        if (h === 'CX Page') th.style.width = '70px';
                         headerRow.appendChild(th);
                     });
                     thead.appendChild(headerRow);
