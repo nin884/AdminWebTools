@@ -100,13 +100,33 @@
             text-align: left;
             vertical-align: middle;
             font-size: 0.8rem;
+        }
+        /* Data cells can hold long values (URLs, ticket numbers) so they need
+           aggressive wrapping. Headers are short labels and should only ever
+           wrap at spaces - applying "anywhere" to them was breaking single
+           words like VALIDATED into arbitrary fragments (VAL/IDA/TE/D). */
+        td {
             word-break: break-word;
             overflow-wrap: anywhere;
+        }
+        th {
+            overflow-wrap: normal;
+            word-break: normal;
+            hyphens: none;
+        }
+        /* table-layout: fixed only holds if children can actually shrink to fit -
+           buttons/selects/inputs have their own intrinsic minimum width by default,
+           which was the actual cause of the residual horizontal overflow even with
+           fixed column widths set. */
+        td > button, td > select, td > input {
+            max-width: 100%;
+            box-sizing: border-box;
         }
         th {
             background-color: var(--nba-red);
             color: var(--nba-white);
             font-weight: 600;
+            font-size: 0.72rem;
             position: sticky;
             top: 0;
             z-index: 1;
@@ -216,7 +236,7 @@
     </style>
 </head>
 <body class="p-3 sm:p-4 md:p-5">
-    <div class="max-w-5xl mx-auto">
+    <div class="max-w-[1800px] mx-auto">
         <header class="mb-4 text-center">
             <h1 class="text-2xl sm:text-3xl font-extrabold text-nba-white">NBA 2K Admin Web Audit</h1>
             <p class="text-xs text-gray-300 mt-1">Paste admin log data, label the report, review each row, and flag discrepancies.</p>
@@ -267,7 +287,6 @@
                             <option value="Vegas PM Shift">Vegas PM Shift</option>
                             <option value="Vegas Weekend Shift">Vegas Weekend Shift</option>
                             <option value="Madrid">Madrid</option>
-                            <option value="Chengdu">Chengdu</option>
                         </select>
                     </label>
                     <label class="block text-gray-200 text-xs font-medium">Report from
@@ -332,6 +351,17 @@
         </div>
     </div>
 
+    <div id="discrepancyTypeModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" id="discrepancyTypeClose">&times;</span>
+            <p class="text-base font-semibold mb-4">Flag this row as:</p>
+            <div class="flex gap-3 justify-center">
+                <button id="discTypeMajorBtn" type="button" class="px-5 py-2.5 rounded-lg font-bold" style="background-color:#FDE8E8;color:#9B1C1C;border:1px solid #F5B5B5;">Major</button>
+                <button id="discTypeMinorBtn" type="button" class="px-5 py-2.5 rounded-lg font-bold" style="background-color:#FFF1DB;color:#92510B;border:1px solid #FFD79A;">Minor</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         function showModal(message) {
             const modal = document.getElementById('customModal');
@@ -344,12 +374,49 @@
             document.getElementById('customModal').style.display = 'none';
         }
 
+        // Shows the Major/Minor picker and calls onSelect('Major'|'Minor') once the
+        // user chooses. Replaces the old inline <select> that was injected directly
+        // into the narrow Discrepancy column cell - there wasn't room for it there.
+        let _discrepancyTypeCleanup = null;
+        function showDiscrepancyTypeModal(onSelect) {
+            const modal = document.getElementById('discrepancyTypeModal');
+            const majorBtn = document.getElementById('discTypeMajorBtn');
+            const minorBtn = document.getElementById('discTypeMinorBtn');
+            if (_discrepancyTypeCleanup) _discrepancyTypeCleanup();
+
+            function cleanup() {
+                modal.style.display = 'none';
+                majorBtn.removeEventListener('click', onMajor);
+                minorBtn.removeEventListener('click', onMinor);
+                _discrepancyTypeCleanup = null;
+            }
+            function onMajor() { cleanup(); onSelect('Major'); }
+            function onMinor() { cleanup(); onSelect('Minor'); }
+
+            _discrepancyTypeCleanup = cleanup;
+            majorBtn.addEventListener('click', onMajor);
+            minorBtn.addEventListener('click', onMinor);
+            modal.style.display = 'flex';
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
             document.querySelector('#customModal .close-button').addEventListener('click', hideModal);
             document.getElementById('modalOkButton').addEventListener('click', hideModal);
             document.getElementById('customModal').addEventListener('click', (e) => {
                 if (e.target === document.getElementById('customModal')) {
                     hideModal();
+                }
+            });
+
+            const discModal = document.getElementById('discrepancyTypeModal');
+            document.getElementById('discrepancyTypeClose').addEventListener('click', () => {
+                if (_discrepancyTypeCleanup) _discrepancyTypeCleanup();
+                discModal.style.display = 'none';
+            });
+            discModal.addEventListener('click', (e) => {
+                if (e.target === discModal) {
+                    if (_discrepancyTypeCleanup) _discrepancyTypeCleanup();
+                    discModal.style.display = 'none';
                 }
             });
         });
@@ -375,12 +442,11 @@
             };
 
             let originalHeaders = []; // Stores the raw parsed headers from the log data
-            // Options for discrepancy types, issues, and agent locations
-            const discrepancyOptions = ['', 'Minor', 'Major'];
+            // Options for discrepancy issues and agent locations
             const issueOptions = ['', 'Wrong Tier VC added', 'More than 50K VC added without approval',
                 'VC/MT/Items added without AT note', 'MyTeam cards/MyCareer items/Other No-Currency items added not noted with a ticket',
                 'Other actions in AT without note', 'Wrong MG provided', 'Kick off account without AT note', 'Cloned file without AT note', 'Agent missed PMVC 1st Party Escalation'];
-            const locationOptions = ['', '5CA', 'Vegas Day', 'Vegas Swing', 'Vegas Weekend', 'Chengdu Day', 'Chengdu Weekend', 'Madrid', 'Player Advocacy'];
+            const locationOptions = ['', '5CA', 'iQOR', 'Madrid', 'Player Advocacy', 'Vegas'];
 
             // Define the desired order of leading columns for the main table
             const mainTableLeadingColumns = ['CX Page', 'Validated', 'Discrepancy']; // Changed 'CS Page' to 'CX Page'
@@ -530,8 +596,13 @@
             function createAtLinkButton(originalRowData) {
                 const url = buildAtLinkUrl(originalRowData);
                 const atLinkButton = document.createElement('button');
-                atLinkButton.innerHTML = 'AT Link';
-                atLinkButton.className = 'px-3 py-1 bg-nba-blue text-nba-white rounded-md hover:bg-nba-teal transition duration-150 ease-in-out';
+                // Icon-only button so this column can stay narrow without wrapping
+                // "AT Link" into single-letter lines. Accessible name comes from
+                // aria-label/title, not from visible text.
+                atLinkButton.innerHTML = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>';
+                atLinkButton.title = 'Open AT Link';
+                atLinkButton.setAttribute('aria-label', 'Open AT Link');
+                atLinkButton.className = 'flex items-center justify-center w-full p-1.5 bg-nba-blue text-nba-white rounded-md hover:bg-nba-teal transition duration-150 ease-in-out';
                 atLinkButton.addEventListener('click', (e) => {
                     e.preventDefault();
                     window.open(url, '_blank', 'noopener,noreferrer,width=800,height=600');
@@ -618,13 +689,17 @@
                     const thead = document.createElement('thead');
                     thead.className = 'bg-nba-red';
                     const headerRow = document.createElement('tr');
+                    // Short display labels for the narrow action columns - the underlying
+                    // key ('Validated', 'Discrepancy') stays the same everywhere else in the
+                    // code, this only changes what's printed in the header cell.
+                    const headerShortLabels = { 'Validated': 'Valid', 'Discrepancy': 'Flag' };
                     displayHeaders.forEach(h => {
                         const th = document.createElement('th');
-                        th.textContent = h;
-                        th.className = 'px-6 py-3 text-left text-xs font-medium text-nba-white uppercase tracking-wider';
-                        if (h === 'CX Page') th.style.width = '70px';
-                        else if (h === 'Validated') th.style.width = '60px';
-                        else if (h === 'Discrepancy') th.style.width = '90px';
+                        th.textContent = headerShortLabels[h] || h;
+                        th.className = 'px-2 py-2 text-left font-semibold text-nba-white';
+                        if (h === 'CX Page') th.style.width = '56px';
+                        else if (h === 'Validated') th.style.width = '52px';
+                        else if (h === 'Discrepancy') th.style.width = '56px';
                         headerRow.appendChild(th);
                     });
                     thead.appendChild(headerRow);
@@ -649,7 +724,7 @@
 
                     displayHeaders.forEach(header => {
                         const td = document.createElement('td');
-                        td.className = 'px-6 py-4 text-sm text-nba-blue';
+                        td.className = 'px-2 py-2 text-sm text-nba-blue';
 
                         if (header === 'CX Page') {
                             td.appendChild(createAtLinkButton(originalRowData));
@@ -658,7 +733,7 @@
                             validatedBtn.innerHTML = '&#10003;';
                             validatedBtn.title = 'Mark as validated (removes this row)';
                             validatedBtn.setAttribute('aria-label', 'Mark row as validated');
-                            validatedBtn.className = 'px-3 py-1 bg-green-500 text-nba-white rounded-md hover:bg-green-600 transition duration-150 ease-in-out font-bold text-lg flex justify-center items-center mx-auto';
+                            validatedBtn.className = 'flex items-center justify-center w-full p-1.5 bg-green-500 text-nba-white rounded-md hover:bg-green-600 transition duration-150 ease-in-out font-bold';
                             td.classList.add('text-center');
                             validatedBtn.addEventListener('click', () => {
                                 tr.remove();
@@ -667,9 +742,19 @@
                             td.appendChild(validatedBtn);
                         } else if (header === 'Discrepancy') {
                             const discrepancyBtn = document.createElement('button');
-                            discrepancyBtn.textContent = 'Discrepancy';
-                            discrepancyBtn.className = 'px-3 py-1 bg-nba-red text-nba-white rounded-md hover:bg-nba-pink transition duration-150 ease-in-out';
-                            discrepancyBtn.addEventListener('click', () => showDiscrepancyForm(tr, originalRowData, td));
+                            // Icon-only, same reasoning as the AT Link button above - "Discrepancy"
+                            // as visible text was wrapping into single letters in narrow columns.
+                            discrepancyBtn.innerHTML = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"></path><line x1="4" y1="22" x2="4" y2="15"></line></svg>';
+                            discrepancyBtn.title = 'Flag discrepancy';
+                            discrepancyBtn.setAttribute('aria-label', 'Flag discrepancy');
+                            discrepancyBtn.className = 'flex items-center justify-center w-full p-1.5 bg-nba-red text-nba-white rounded-md hover:bg-nba-pink transition duration-150 ease-in-out';
+                            discrepancyBtn.addEventListener('click', () => {
+                                showDiscrepancyTypeModal((type) => {
+                                    createDiscrepancyRow(originalRowData, `${type} Discrepancy`);
+                                    tr.remove();
+                                    updateCounts();
+                                });
+                            });
                             td.appendChild(discrepancyBtn);
                         } else if (header === 'Operation') {
                             let operationText = originalRowData[header] || '';
@@ -699,36 +784,6 @@
             }
 
             /**
-             * Shows the form for adding discrepancy details to a row.
-             * @param {HTMLTableRowElement} row - The table row element.
-             * @param {Object} originalRowData - The original row data as an object (header:value).
-             * @param {HTMLTableCellElement} targetCell - The cell where the form will be injected.
-             */
-            function showDiscrepancyForm(row, originalRowData, targetCell) {
-                if (targetCell.querySelector('select')) return;
-
-                targetCell.innerHTML = '';
-
-                const typeSelect = createSelectElement(discrepancyOptions);
-                const addButton = document.createElement('button');
-                addButton.textContent = 'Add';
-                addButton.className = 'ml-2 px-3 py-1 bg-nba-blue text-nba-white rounded-md hover:bg-nba-teal transition duration-150 ease-in-out';
-
-                targetCell.appendChild(typeSelect);
-                targetCell.appendChild(addButton);
-
-                addButton.addEventListener('click', () => {
-                    if (!typeSelect.value) {
-                        showModal('Please select a discrepancy type.');
-                        return;
-                    }
-                    createDiscrepancyRow(originalRowData, `${typeSelect.value} Discrepancy`);
-                    row.remove();
-                    updateCounts();
-                });
-            }
-
-            /**
              * Creates and appends a new row to the discrepancy table.
              * @param {Object} originalRowData - The original row data as an object (header:value).
              * @param {string} typeText - The type of discrepancy (e.g., 'Major Discrepancy').
@@ -750,8 +805,8 @@
                     displayHeadersForDiscrepancy.forEach(h => {
                         const th = document.createElement('th');
                         th.textContent = h;
-                        th.className = 'px-6 py-3 text-left text-xs font-medium text-nba-white uppercase tracking-wider';
-                        if (h === 'CX Page') th.style.width = '70px';
+                        th.className = 'px-2 py-2 text-left font-semibold text-nba-white';
+                        if (h === 'CX Page') th.style.width = '56px';
                         headerRow.appendChild(th);
                     });
                     thead.appendChild(headerRow);
@@ -772,7 +827,7 @@
 
                 currentDiscrepancyHeaders.forEach(header => {
                     const td = document.createElement('td');
-                    td.className = 'px-6 py-4 text-sm text-nba-blue';
+                    td.className = 'px-2 py-2 text-sm text-nba-blue';
 
                     if (header === 'CX Page') {
                         td.appendChild(createAtLinkButton(originalRowData));
